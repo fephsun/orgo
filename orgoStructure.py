@@ -7,6 +7,9 @@ class Molecule:
         if targetAtom not in self.atoms:
             print "Error in addAtom: target atom not already in molecule."
             raise StandardError
+        if newAtom in self.atoms:
+            print "Error in addAtom: new atom already in molecule.  Use addBond instead."
+            raise StandardError
         self.atoms.append(newAtom)
         self.addBond(newAtom, targetAtom, bondOrder)
         
@@ -38,7 +41,9 @@ class Atom:
         self.neighbors = dict()
 
 
-#Makes HO-C=C-N
+#Makes     C-C-C-C
+#          |   |
+#       HO-C=C-N
 c1 = Atom("C")
 mol = Molecule(c1)
 c2 = Atom("C")
@@ -49,3 +54,12 @@ o1 = Atom("O")
 h1 = Atom("H")
 mol.addAtom(o1, c1, 1)
 mol.addAtom(h1, o1, 1)
+c3 = Atom("C")
+mol.addAtom(c3, n1, 1)
+c4 = Atom("C")
+c5 = Atom("C")
+mol.addAtom(c4, c3, 1)
+mol.addAtom(c5, c3, 1)
+c6 = Atom("C")
+mol.addAtom(c6, c5, 1)
+mol.addBond(c6, c1, 1)

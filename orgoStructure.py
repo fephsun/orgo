@@ -19,3 +19,17 @@ class Atom:
     def __init__(self, element):
         self.element = element
         self.neighbors = dict()
+        self.flag = 0
+        self.rflag = 1
+
+
+def smiles(molecule):
+    #Traverse once to hunt down and flag rings.
+    ringsfound = 0
+    
+    
+    #Traverse twice to generate the SMILES.
+
+
+def subsmiles(molecule)
+    #Creates and returns a SMILES string for unflagged (!atom.flag==1) atoms within a molecule, starting with the given atom.

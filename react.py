@@ -15,3 +15,5 @@ def hydrogenate(molecule):
                 neighbor.eliminateCT()
     return molecule
 
+mol2 = hydrogenate(mol)
+smiles(mol2)

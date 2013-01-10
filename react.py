@@ -1,7 +1,10 @@
 from orgoStructure import *
 import os
+import copy
+import itertools
 
 def hydrogenate(molecule):
+    #H2/PdC catalyst reaction for double bonds only, for now.  Syn addition.
     for carbon in molecule.atoms:
         if carbon.element != 'C':
             continue
@@ -40,23 +43,81 @@ def synAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2
                         (None, ct1, ct2))
         thisTarget.eliminateCT()
 
-def moleculeCompare(a, b):
+def moleculeCompare(a, b, compareDict = None, expanded = []):
     #Determines whether two molecules are isomorphic.  In the worst case
     #(two molecules with the same atoms), this procedure does not run in
     #polynomial time, so be careful.
     for ele in ['C','N','O']:
         if a.countElement(ele) != b.countElement(ele):
             return False
-    sa = smiles(a)
-    sb = smiles(b)
-    #Call the SMSD program, which does molecular comparison
-    os.system('java -Xms500M -Xmx512M -cp SMSD20120718.jar cmd.SMSDcmd -Q SMI -q "'
-              +sa+'" -T SMI -t "'+sb+'" -O SMI -o temp.txt')
-    similarSMI = open("temp.txt", "r")
-    if noOfAtoms(sa) == noOfAtoms(similarSMI.read()) and noOfAtoms(sa) == noOfAtoms(sb):
+    #sa = smiles(a)
+    #sb = smiles(b)
+
+    #compareDict maps atoms in a to their hypothesized counterparts in b.
+
+    if compareDict != None and len(compareDict) == len(a.atoms):
+        #We've reached every atom.  Call it equal.
         return True
-    else:
+
+    if compareDict == None:
+        for atom in b.atoms:
+            if atom.element == a.atoms[0].element:
+                newCompareDicts = neighborCompare(a.atoms[0], atom, dict())
+                if newCompareDicts == None:
+                    continue
+                for newCompareDict in newCompareDicts:
+                    if moleculeCompare(a, b, newCompareDict, [a.atoms[0]]):
+                        return True
         return False
+
+    for aAtom in compareDict:
+        if aAtom in expanded:
+            #Already expanded this atom.  Don't do it again.
+            continue
+        newDictSectors = neighborCompare(aAtom, compareDict[aAtom], compareDict)
+        if newDictSectors == None:
+            return False
+        for newDictSector in newDictSectors:
+            if moleculeCompare(a, b, dict(compareDict.items() + newDictSector.items()),
+                               expanded + [aAtom]):
+                return True
+        return False
+            
+def neighborCompare(a,b, compareDict):
+    #Helper function.  Given 2 atoms, returns all pairings of neighbors of a
+    #with neighbors of b such that each pair has the same element.
+    aN = []
+    bN = []
+    for aNeighbor in a.neighbors:
+        aN.append(aNeighbor.element)
+    for bNeighbor in b.neighbors:
+        bN.append(bNeighbor.element)
+    #If the elements don't match, obviously there are no pairings.
+    if sorted(aN) != sorted(bN):
+        return None
+    #Generate all n! pairings, and prune as we go.
+    out = []
+    for aNeighborSet in itertools.permutations(a.neighbors):
+        temp = dict()
+        OKFlag = True
+        for i in xrange(len(aNeighborSet)):
+            if aNeighborSet[i].element != b.neighbors.keys()[i].element:
+                #Oops, the elements don't actually match.  Skip.
+                OKFlag = False
+                break
+            if a.neighbors[aNeighborSet[i]] != b.neighbors[b.neighbors.keys()[i]]:
+                #Oops, the bond orders are different.  Skip.
+                OKFlag = False
+                break
+            if aNeighborSet[i] in compareDict and \
+               b.neighbors.keys()[i] != compareDict[aNeighborSet[i]]:
+                #This pairing goes against what's already in compareDict.  Skip.
+                OKFlag = False
+                break
+            temp[aNeighborSet[i]] = b.neighbors.keys()[i]
+        if (temp not in out) and OKFlag:
+            out.append(temp)
+    return out
 
 def noOfAtoms(string):
     #Helper function.  Given a SMILES string, return the number of atoms.
@@ -66,5 +127,5 @@ def noOfAtoms(string):
             out += 1
     return out
         
-mol2 = hydrogenate(mol)
-print smiles(mol2)
+#mol2 = hydrogenate(mol)
+#print smiles(mol2)

@@ -200,6 +200,9 @@ def subsmiles(molecule, startAtom, parentAtom):
 
     outp = startAtom.element
 
+    
+    if (startAtom.rflag != 0) and (startAtom.rAtom.flag != 1):
+        outp += str(startAtom.rflag)
 
     #Add charge if relevant.
     #UNIMPLEMENTED
@@ -249,21 +252,21 @@ def subsmiles(molecule, startAtom, parentAtom):
     #Prepare to add new groups for all neighbor atoms which are not the parent atom and not the rAtom.
     else:
         print 555
-        toAdd = [atom for atom in list(startAtom.nonHNeighbors) if not (atom==startAtom.rAtom or atom==parentAtom or atom==None)]
+        toAdd = [atom for atom in list(startAtom.nonHNeighbors) if not (atom==parentAtom or atom==None)]
         print toAdd
 
 
-	#Check if the atom is a cis-trans center.
-	#UNIMPLEMENTED
+    #Check if the atom is a cis-trans center.
+    #UNIMPLEMENTED
 
     #If the molecule has an rflag, find the neighbor it bonds with.
     #If that neighbor has already been traversed, add the rflag while specifying the bond.
     #If not, just add the rflag.
 	#Worry about cis-trans centers if the rflag relates to a double bond.
-    if startAtom.rflag != 0:
-        if startAtom.rAtom.flag == 1:
-            outp += bondSymbols[startAtom.nonHNeighbors[startAtom.rAtom]]
-        outp += str(startAtom.rflag)
+    #if startAtom.rflag != 0:
+    #    if startAtom.rAtom.flag == 1:
+    #        outp += bondSymbols[startAtom.nonHNeighbors[startAtom.rAtom]]
+    #    outp += str(startAtom.rflag)
 
     
     #Flag the current atom.
@@ -273,15 +276,16 @@ def subsmiles(molecule, startAtom, parentAtom):
     #Recursion is your friend.
     #Be sure to specify the base case (when zero non-parent non-ring atoms are available to bond to)
     #In the base case, this loop won't even be entered.
-    print "blah"
-    print toAdd
     for atom in toAdd:
-        print atom
-    print "endblah"
-    for atom in toAdd:
-        print atom
-        print atom.element
-        outp += "(" +bondSymbols[startAtom.nonHNeighbors[atom]] + subsmiles(molecule, atom, startAtom) + ")" 
+        if (startAtom.rflag != 0) and (atom == startAtom.rAtom):
+            print atom
+            if startAtom.rAtom.flag == 1:
+                add = str(startAtom.rflag)
+        else:
+            add = subsmiles(molecule, atom, startAtom)
+                
+        outp += "(" +bondSymbols[startAtom.nonHNeighbors[atom]] + add + ")"
+    
     return outp
 
 

@@ -33,14 +33,37 @@ class Molecule:
             atom1.neighbors[atom2] = newBondOrder
             atom2.neighbors[atom1] = newBondOrder
 
+    
+
 
 class Atom:
+
+    def __str__(self):
+        return self.element
     
     def __init__(self, element):
         self.element = element
         self.neighbors = dict()
         self.flag = 0
         self.rflag = 1
+
+    def newChiralCenter(self, reference, clockwiseList):
+        #Set up this atom as a chiral center.
+        #reference is an Atom; clockwiseList is a list of 3 Atoms
+        self.chiralA = reference
+        self.chiralB, self.chiralC, self.chiralD = clockwiseList
+
+    def chiralCWlist(self, reference):
+        #Returns a list of the other 3 Atoms bonded to this Atom,
+        #in clockwise order when looking down reference.
+        if reference == self.chiralA:
+            return (self.chiralB, self.chiralC, self.chiralD)
+        elif reference == self.chiralB:
+            return (self.chiralA, self.chiralD, self.chiralC)
+        elif reference == self.chiralC:
+            return (self.chiralA, self.chiralB, self.chiralD)
+        elif reference == self.chiralD:
+            return (self.chiralA, self.chiralC, self.chiralB)
 
 
 def smiles(molecule):
@@ -51,9 +74,9 @@ def smiles(molecule):
     #Traverse twice to generate the SMILES.
 
 
-def subsmiles(molecule)
+def subsmiles(molecule):
     #Creates and returns a SMILES string for unflagged (!atom.flag==1) atoms within a molecule, starting with the given atom
-
+    pass
 
 #Makes     C-C-C-C
 #          |   |

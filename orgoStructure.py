@@ -180,6 +180,11 @@ def smiles(molecule):
             
             
     #Traverse twice to generate the SMILES.
+    print "!!!!"
+    for atom in molecule.atoms:
+        print atom.element + ", "+str(atom.flag)
+    print "iiii"
+            
     outp = subsmiles(molecule, molecule.atoms[0], 0)
 
     #Reset all old flags.    
@@ -189,7 +194,7 @@ def smiles(molecule):
         atom.nRead = 0
         atom.parentAtom = 0
         atom.rAtom = 0
-        self.nonHNeighbors = []
+        atom.nonHNeighbors = []
 
     return outp
 
@@ -200,7 +205,8 @@ bondSymbols = ['0', '-', '=', '#', '4', '5', '6', '7', '8', '9']
 def subsmiles(molecule, startAtom, parentAtom):
     
     #Flag the current atom.
-    startAtom.flag = 1
+    startAtom.flag = 2
+    print "Flagged: "+startAtom.element
 
     outp = startAtom.element
 
@@ -213,21 +219,28 @@ def subsmiles(molecule, startAtom, parentAtom):
     #Remember to worry about whether or not an atom has a parent atom.
     #Adds ring labels.
     if hasattr(startAtom, 'CTotherC'):
+        print "Was here!"
         atomsToLink = [startAtom.CTotherC, startAtom.CTa, startAtom.CTb]
         begin = ["","/","\\"]
         for ind in range(3):
             atom = atomsToLink[ind]
-            if (atom != parentAtom):
+            if (atom != None) and (atom != parentAtom):
+                print "Atom "+str(ind)+": "+atom.element
                 if atom == startAtom.rAtom:
-                    outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + startAtom.rflag + ")"
-                elif atom.flag == 0:
+                    outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + str(startAtom.rflag) + ")"
+                elif atom.flag == 1:
                     outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + subsmiles(molecule, atom, startAtom) + ")"
+                else:
+                    print "Neither such case worked."
+                    print atom.flag
+            else:
+                print "Equal to parent atom."
         return outp
     
    
 
     #Put a ring marker on the atom, if its ring partner is not flagged yet.
-    if (startAtom.rflag != 0) and (startAtom.rAtom.flag != 1):
+    if (startAtom.rflag != 0) and (startAtom.rAtom.flag != 2):
         outp += str(startAtom.rflag)
 
     #Check if the atom is a chiral center. If so:
@@ -278,7 +291,7 @@ def subsmiles(molecule, startAtom, parentAtom):
     #In the base case, this loop won't even be entered.
     for atom in toAdd:
         if (startAtom.rflag != 0) and (atom == startAtom.rAtom):
-            if startAtom.rAtom.flag == 1:
+            if startAtom.rAtom.flag == 2:
                 add = str(startAtom.rflag)
         else:
             add = subsmiles(molecule, atom, startAtom)

@@ -9,8 +9,10 @@ def hydrogenate(molecule):
                 #Set bond orders
                 carbon.neighbors[neighbor] = 1
                 neighbor.neighbors[carbon] = 1
-                carbon.newChiralCenter(neighbor, (None, carbon.CTb, carbon.CTa))
-                neighbor.newChiralCenter(carbon, (None, neighbor.CTa, neighbor.CTb))
+                if carbon.CTb != None and carbon.CTa != None:
+                    carbon.newChiralCenter(neighbor, (None, carbon.CTb, carbon.CTa))
+                if neighbor.CTb != None and neighbor.CTa != None:
+                    neighbor.newChiralCenter(carbon, (None, neighbor.CTa, neighbor.CTb))
                 carbon.eliminateCT()
                 neighbor.eliminateCT()
     return molecule

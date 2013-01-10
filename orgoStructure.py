@@ -288,6 +288,16 @@ def subsmiles(molecule, startAtom, parentAtom):
     return outp
 
 
+def moleculeCompare(a, b):
+    #Determines whether two molecules are isomorphic.  In the worst case
+    #(two molecules with the same atoms), this procedure does not run in
+    #polynomial time, so be careful.
+    for ele in ['C','N','O']:
+        if a.countElement(ele) != b.countElement(ele):
+            return False
+    for bAtom in b.atoms:
+        if bAtom.element == a.atoms[0].element:
+            pass
     
 
 
@@ -315,19 +325,10 @@ mol.addBond(c6, c1, 1)
 c3.newChiralCenter(n1, (c4, None, c5))
 c1.newCTCenter(c2, o1, c6)
 c2.newCTCenter(c1, n1, None)
+#print smiles(mol)
 
-#Makes C\   /Cl
-#        C=C
-#     C1/
-c10 = Atom("C")
-CTmol = Molecule(c10)
-c11 = Atom("C")
-CTmol.addAtom(c11, c10, 2)
-c12 = Atom("C")
-CTmol.addAtom(c12, c10, 1)
-cl1 = Atom("Cl")
-CTmol.addAtom(cl1, c10, 1)
-cl2 = Atom("Cl")
-CTmol.addAtom(cl2, c11, 1)
-c10.newCTCenter(c11, cl1, c12)
-c11.newCTCenter(c10, cl2, None)
+#blah
+
+
+
+

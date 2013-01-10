@@ -90,13 +90,13 @@ class Atom:
         #Returns a list of the other 3 Atoms bonded to this Atom,
         #in clockwise order when looking down reference.
         if reference == self.chiralA:
-            return (self.chiralB, self.chiralC, self.chiralD)
+            return [self.chiralB, self.chiralC, self.chiralD]
         elif reference == self.chiralB:
-            return (self.chiralA, self.chiralD, self.chiralC)
+            return [self.chiralA, self.chiralD, self.chiralC]
         elif reference == self.chiralC:
-            return (self.chiralA, self.chiralB, self.chiralD)
+            return [self.chiralA, self.chiralB, self.chiralD]
         elif reference == self.chiralD:
-            return (self.chiralA, self.chiralC, self.chiralB)
+            return [self.chiralA, self.chiralC, self.chiralB]
         
     def newCTCenter(self, otherC, a, b):
         #CTCenters (cis-trans centers) must come in pairs.  Both of the
@@ -116,7 +116,7 @@ def smiles(molecule):
 
     #Create the dictionary nonHNeighbors for each atom.
     for atom in molecule.atoms:
-        atom.nonHNeighbors = dict((a, b) for (a, b)in atom.neighbors.items() if a.element.lower() != "h"
+        atom.nonHNeighbors = dict((a, b) for (a, b)in atom.neighbors.items() if a.element.lower() != "h")
     
 
     #Traverse the molecule once, to hunt down and flag rings.
@@ -188,26 +188,72 @@ def subsmiles(molecule, startAtom, parentAtom):
 
     outp = startAtom.element
 
-    #Check if the molecule is a chiral center.
+	
+    #Add charge if relevant.
+    #UNIMPLEMENTED
+	
 
+	
+    
+    
+   
+	
+    #Check if the atom is a chiral center. If so:
+    if hasattr(startAtom, 'chiralA'):
+        hasH = (True in [a.element.lower()=="h" for a in list(startAtom.neighbors)]) or (None in [startAtom.chiralA, startAtom.chiralB, startAtom.chiralC, startAtom.chiralD])
+        hasP = (parentAtom != 0)
+        #If the atom has a hydrogen:
+        #Add [ and @@H] to the current output. (e.g. [C@@H]
+        #If the atom does not have a hydrogen:
+        #Add [ and @@] to the current output. (e.g. [C@@]
+        #Then, add the remaining neighbors in the proper order.
+        #Implement this by smart rearrangement of toAdd.
+        #Be mindful of: whether or not there is a parent atom; whether or not there is a hydrogen.
+        if hasH:
+            outp = "[" + outp + "@@H]"
+            if hasP:
+                #toAdd should have two elements
+                l = startAtom.chiralCWlist(parentAtom) #list of three atoms
+                x = l.index(None) #index of hydrogen atom in list
+                toAdd = [l[(x+1) %3], l[(x+2) %3]] #correct permutation
+            else:
+                #toAdd should have three elements
+                toAdd = startAtom.chiralCWlist(None) #list of three atoms
+        else:
+            outp = "[" + outp + "@@]"
+            if hasP:
+                #toAdd should have three elements
+                toAdd = startAtom.chiralCWlist(parentAtom)
+            else:
+                #toAdd should have four elements
+                arbitraryRef = list(startAtom.neighbors)[0]
+                l = startAtom.chiralCWlist(arbitraryRef)
+                toAdd = [arbitraryRef] + l
+                
+    #Prepare to add new groups for all neighbor atoms which are not the parent atom and not the rAtom.
+    else:
+        toAdd = [atom for atom in list(startAtom.nonHNeighbors) if not (atom==startAtom.rAtom or atom==parentAtom or atom==None)]
+		
+
+	#Check if the atom is a cis-trans center.
+	#UNIMPLEMENTED
+		
     #If the molecule has an rflag, find the neighbor it bonds with.
     #If that neighbor has already been traversed, add the rflag while specifying the bond.
     #If not, just add the rflag.
+	#Worry about cis-trans centers if the rflag relates to a double bond.
     if startAtom.rflag != 0:
         if startAtom.rAtom.flag == 1:
             outp += bondSymbols[startAtom.nonHNeighbors[startAtom.rAtom]]
         outp += str(startAtom.rflag)
 
     
-    
     #Flag the current atom.
     startAtom.flag = 1
 
-    #Add new groups for all neighbor atoms which are not the parent atom and not the rAtom.
+    
     #Recursion is your friend.
     #Be sure to specify the base case (when zero non-parent non-ring atoms are available to bond to)
-    toAdd = [atom for atom in list(startAtom.nonHNeighbors) if not (atom==startAtom.rAtom or atom==parentAtom)]
-    
     #In the base case, this loop won't even be entered.
     for atom in toAdd:
         outp += "(" +bondSymbols[startAtom.nonHNeighbors[atom]] + subsmiles(molecule, atom, startAtom) + ")" 

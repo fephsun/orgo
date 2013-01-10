@@ -153,8 +153,8 @@ def subsmiles(molecule, startAtom, parentAtom):
     #If not, just add the rflag.
     if startAtom.rflag != 0:
         if startAtom.rAtom.flag == 1:
-            outp += bondSymbols[startAtom.neighbors[rAtom]]
-        outp += startAtom.rflag
+            outp += bondSymbols[startAtom.neighbors[startAtom.rAtom]]
+        outp += str(startAtom.rflag)
     
     #Flag the current atom.
     startAtom.flag = 1
@@ -183,10 +183,7 @@ o1 = Atom("O")
 h1 = Atom("H")
 mol.addAtom(o1, c1, 1)
 mol.addAtom(h1, o1, 1)
-<<<<<<< HEAD
 
-print smiles(mol)
-=======
 c3 = Atom("C")
 mol.addAtom(c3, n1, 1)
 c4 = Atom("C")
@@ -196,4 +193,5 @@ mol.addAtom(c5, c3, 1)
 c6 = Atom("C")
 mol.addAtom(c6, c5, 1)
 mol.addBond(c6, c1, 1)
->>>>>>> 8b896bcf4d480bf603200efc171eeee9d2ac293a
+
+print smiles(mol)

@@ -58,6 +58,13 @@ class Molecule:
                 H = Atom(hydrogen)
                 self.addAtom(H, atom, 1)
 
+    def countElement(self, element):
+        out = 0
+        for atom in self.atoms:
+            if atom.element == element:
+                out += 1
+        return out
+
 
 class Atom:
 
@@ -102,6 +109,11 @@ class Atom:
         self.CTotherC = otherC
         self.CTa = a
         self.CTb = b
+
+    def eliminateCT(self):
+        del(self.CTotherC)
+        del(self.CTa)
+        del(self.CTb)
 
 
 def smiles(molecule):
@@ -201,6 +213,19 @@ def subsmiles(molecule, startAtom, parentAtom):
     return outp
 
 
+def moleculeCompare(a, b):
+    #Determines whether two molecules are isomorphic.  In the worst case
+    #(two molecules with the same atoms), this procedure does not run in
+    #polynomial time, so be careful.
+    for ele in ['C','N','O']:
+        if a.countElement(ele) != b.countElement(ele):
+            return False
+    for bAtom in b.atoms:
+        if bAtom.element == a.atoms[0].element:
+                
+    
+
+
 #Makes     C-C-C-C
 #          |   |
 #       HO-C=C-N
@@ -223,6 +248,8 @@ c6 = Atom("C")
 mol.addAtom(c6, c5, 1)
 mol.addBond(c6, c1, 1)
 c3.newChiralCenter(n1, (c4, None, c5))
+c1.newCTCenter(c2, o1, c6)
+c2.newCTCenter(c1, n1, None)
 print smiles(mol)
 
 

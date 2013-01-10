@@ -18,4 +18,4 @@ def hydrogenate(molecule):
     return molecule
 
 mol2 = hydrogenate(mol)
-smiles(mol2)
+print smiles(mol2)

@@ -189,7 +189,7 @@ def subsmiles(molecule, startAtom, parentAtom):
     outp = startAtom.element
 
     
-    if startAtom.rAtom.flag != 1:
+    if (startAtom.rflag != 0) and (startAtom.rAtom.flag != 1):
         outp += str(startAtom.rflag)
 
 	

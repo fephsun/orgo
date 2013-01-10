@@ -224,19 +224,23 @@ def subsmiles(molecule, startAtom, parentAtom):
         if hasH:
             outp = "[" + outp + "@@H]"
             if hasP:
+                print 111
                 #toAdd should have two elements
                 l = startAtom.chiralCWlist(parentAtom) #list of three atoms
                 x = l.index(None) #index of hydrogen atom in list
                 toAdd = [l[(x+1) %3], l[(x+2) %3]] #correct permutation
             else:
+                print 222
                 #toAdd should have three elements
                 toAdd = startAtom.chiralCWlist(None) #list of three atoms
         else:
             outp = "[" + outp + "@@]"
             if hasP:
+                print 333
                 #toAdd should have three elements
                 toAdd = startAtom.chiralCWlist(parentAtom)
             else:
+                print 444
                 #toAdd should have four elements
                 arbitraryRef = list(startAtom.neighbors)[0]
                 l = startAtom.chiralCWlist(arbitraryRef)
@@ -244,7 +248,9 @@ def subsmiles(molecule, startAtom, parentAtom):
                 
     #Prepare to add new groups for all neighbor atoms which are not the parent atom and not the rAtom.
     else:
+        print 555
         toAdd = [atom for atom in list(startAtom.nonHNeighbors) if not (atom==startAtom.rAtom or atom==parentAtom or atom==None)]
+        print toAdd
 		
 
 	#Check if the atom is a cis-trans center.
@@ -267,7 +273,14 @@ def subsmiles(molecule, startAtom, parentAtom):
     #Recursion is your friend.
     #Be sure to specify the base case (when zero non-parent non-ring atoms are available to bond to)
     #In the base case, this loop won't even be entered.
+    print "blah"
+    print toAdd
     for atom in toAdd:
+        print atom
+    print "endblah"
+    for atom in toAdd:
+        print atom
+        print atom.element
         outp += "(" +bondSymbols[startAtom.nonHNeighbors[atom]] + subsmiles(molecule, atom, startAtom) + ")" 
     return outp
 
@@ -281,7 +294,7 @@ def moleculeCompare(a, b):
             return False
     for bAtom in b.atoms:
         if bAtom.element == a.atoms[0].element:
-                
+            pass
     
 
 

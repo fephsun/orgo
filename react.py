@@ -7,16 +7,38 @@ def hydrogenate(molecule):
             continue
         for neighbor in carbon.neighbors:
             if neighbor.element == 'C' and carbon.neighbors[neighbor] == 2:
-                #Set bond orders
-                carbon.neighbors[neighbor] = 1
-                neighbor.neighbors[carbon] = 1
-                if carbon.CTb != None and carbon.CTa != None:
-                    carbon.newChiralCenter(neighbor, (None, carbon.CTb, carbon.CTa))
-                if neighbor.CTb != None and neighbor.CTa != None:
-                    neighbor.newChiralCenter(carbon, (None, neighbor.CTa, neighbor.CTb))
-                carbon.eliminateCT()
-                neighbor.eliminateCT()
+                synAdd(molecule, carbon, neighbor, None, None)
     return molecule
+
+def synAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None):
+    #Destroys the double bond and CTstereochemistry between target1 and target2.
+    #Adds add1 and add2 to target1 and target2.  If add1 and/or add2 are molecules,
+    #addtargets are needed to specify where the bond should originate from add.
+
+    #Set bond orders to single.
+    target1.neighbors[target2] = 1
+    target2.neighbors[target1] = 1
+
+    for thisAdd, thisTarget, thisAddTarget, otherTarget, ct1, ct2\
+            in ((add1, target1, addtarget1, target2, target1.CTb, target1.CTa),
+                (add2, target2, addtarget2, target1, target2.CTa, target2.CTb)):
+        if isinstance(thisAdd, Atom):
+            molecule.addAtom(thisAdd, thisTarget, 1)
+            if ct1 != None or ct2 != None:
+                thisTarget.newChiralCenter(otherTarget,
+                        (thisAdd, ct1, ct2))
+        elif isinstance(thisAdd, Molecule):
+            #Untested.
+            molecule.addMolecule(thisAdd, thisAddTarget, thisTarget, 1)
+            if ct1 != None or ct2 != None:
+                thisTarget.newChiralCenter(otherTarget,
+                        (thisAddTarget, ct1, ct2))
+        else:
+            #Hydrogens.
+            if ct1 != None and ct2 != None:
+                thisTarget.newChiralCenter(otherTarget,
+                        (None, ct1, ct2))
+        thisTarget.eliminateCT()
 
 def moleculeCompare(a, b):
     #Determines whether two molecules are isomorphic.  In the worst case
@@ -44,5 +66,5 @@ def noOfAtoms(string):
             out += 1
     return out
         
-mol2 = hydrogenate(CTmol)
+mol2 = hydrogenate(mol)
 print smiles(mol2)

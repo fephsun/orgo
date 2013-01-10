@@ -1,3 +1,6 @@
+#Testing - replace "H" with "Br" to visualize all hydrogens
+hydrogen = "H"
+
 class Molecule:
     
     def __init__(self, firstAtom):
@@ -33,7 +36,27 @@ class Molecule:
             atom1.neighbors[atom2] = newBondOrder
             atom2.neighbors[atom1] = newBondOrder
 
-    
+    def addHydrogens(self):
+        #Adds a full complement of hydrogens to every atom.
+        #As a side-effect, also checks for over-valence.
+        for atom in self.atoms:
+            if atom.element == 'C':
+                maxval = 4
+            elif atom.element == 'N':
+                maxval = 3
+            elif atom.element == 'O':
+                maxval = 2
+            else:
+                continue
+            val = 0
+            for neighbor in atom.neighbors:
+                val += atom.neighbors[neighbor]
+            if val > maxval:
+                print str(atom) + " has too many bonds!"
+                raise StandardError
+            for i in xrange(maxval-val):
+                H = Atom(hydrogen)
+                self.addAtom(H, atom, 1)
 
 
 class Atom:
@@ -74,6 +97,14 @@ class Atom:
             return (self.chiralA, self.chiralB, self.chiralD)
         elif reference == self.chiralD:
             return (self.chiralA, self.chiralC, self.chiralB)
+        
+    def newCTCenter(self, otherC, a, b):
+        #CTCenters (cis-trans centers) must come in pairs.  Both of the
+        #carbons across the double bond must have a CTCenter.  Atom a is
+        #directly clockwise from otherC.  Atom b is directly counterclockwise.
+        self.CTotherC = otherC
+        self.CTa = a
+        self.CTb = b
 
 
 def smiles(molecule):
@@ -204,5 +235,11 @@ mol.addAtom(c5, c3, 1)
 c6 = Atom("C")
 mol.addAtom(c6, c5, 1)
 mol.addBond(c6, c1, 1)
-
+c3.newChiralCenter(n1, (c4, None, c5))
 print smiles(mol)
+
+
+
+
+
+

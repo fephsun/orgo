@@ -58,6 +58,13 @@ class Molecule:
                 H = Atom(hydrogen)
                 self.addAtom(H, atom, 1)
 
+    def countElement(self, element):
+        out = 0
+        for atom in self.atoms:
+            if atom.element == element:
+                out += 1
+        return out
+
 
 class Atom:
 
@@ -105,6 +112,11 @@ class Atom:
         self.CTotherC = otherC
         self.CTa = a
         self.CTb = b
+
+    def eliminateCT(self):
+        del(self.CTotherC)
+        del(self.CTa)
+        del(self.CTb)
 
 
 def smiles(molecule):
@@ -188,20 +200,16 @@ def subsmiles(molecule, startAtom, parentAtom):
 
     outp = startAtom.element
 
-    
-    if (startAtom.rflag != 0) and (startAtom.rAtom.flag != 1):
-        outp += str(startAtom.rflag)
 
-	
     #Add charge if relevant.
     #UNIMPLEMENTED
-	
 
-	
+
+
     
     
    
-	
+
     #Check if the atom is a chiral center. If so:
     if hasattr(startAtom, 'chiralA'):
         hasH = (True in [a.element.lower()=="h" for a in list(startAtom.neighbors)]) or (None in [startAtom.chiralA, startAtom.chiralB, startAtom.chiralC, startAtom.chiralD])
@@ -216,64 +224,78 @@ def subsmiles(molecule, startAtom, parentAtom):
         if hasH:
             outp = "[" + outp + "@@H]"
             if hasP:
+                print 111
                 #toAdd should have two elements
                 l = startAtom.chiralCWlist(parentAtom) #list of three atoms
                 x = l.index(None) #index of hydrogen atom in list
                 toAdd = [l[(x+1) %3], l[(x+2) %3]] #correct permutation
             else:
+                print 222
                 #toAdd should have three elements
                 toAdd = startAtom.chiralCWlist(None) #list of three atoms
         else:
             outp = "[" + outp + "@@]"
             if hasP:
+                print 333
                 #toAdd should have three elements
                 toAdd = startAtom.chiralCWlist(parentAtom)
             else:
+                print 444
                 #toAdd should have four elements
                 arbitraryRef = list(startAtom.neighbors)[0]
                 l = startAtom.chiralCWlist(arbitraryRef)
                 toAdd = [arbitraryRef] + l
-            
-            
+                
+    #Prepare to add new groups for all neighbor atoms which are not the parent atom and not the rAtom.
     else:
-        #Prepare to add new groups for all neighbor atoms which are not the parent atom and not the rAtom.
-        toAdd = [atom for atom in list(startAtom.nonHNeighbors) if not (atom==parentAtom or atom==None)]
-		
+        print 555
+        toAdd = [atom for atom in list(startAtom.nonHNeighbors) if not (atom==startAtom.rAtom or atom==parentAtom or atom==None)]
+        print toAdd
 
-    #Check if the atom is a cis-trans center.
-    #UNIMPLEMENTED
-		
+
+	#Check if the atom is a cis-trans center.
+	#UNIMPLEMENTED
+
     #If the molecule has an rflag, find the neighbor it bonds with.
     #If that neighbor has already been traversed, add the rflag while specifying the bond.
     #If not, just add the rflag.
-        #Worry about cis-trans centers if the rflag relates to a double bond.
-    #if startAtom.rflag != 0:
-    #    if startAtom.rAtom.flag == 1:
-    #        outp += bondSymbols[startAtom.nonHNeighbors[startAtom.rAtom]]
-    #    outp += str(startAtom.rflag)
+	#Worry about cis-trans centers if the rflag relates to a double bond.
+    if startAtom.rflag != 0:
+        if startAtom.rAtom.flag == 1:
+            outp += bondSymbols[startAtom.nonHNeighbors[startAtom.rAtom]]
+        outp += str(startAtom.rflag)
 
-
+    
     #Flag the current atom.
     startAtom.flag = 1
 
-
-
+    
     #Recursion is your friend.
     #Be sure to specify the base case (when zero non-parent non-ring atoms are available to bond to)
     #In the base case, this loop won't even be entered.
+    print "blah"
+    print toAdd
     for atom in toAdd:
-        if (startAtom.rflag != 0) and (atom == startAtom.rAtom):
-            print atom
-            if startAtom.rAtom.flag == 1:
-                add = str(startAtom.rflag)
-        else:
-            add = subsmiles(molecule, atom, startAtom)
-                
-        outp += "(" +bondSymbols[startAtom.nonHNeighbors[atom]] + add + ")"
-
-
-            
+        print atom
+    print "endblah"
+    for atom in toAdd:
+        print atom
+        print atom.element
+        outp += "(" +bondSymbols[startAtom.nonHNeighbors[atom]] + subsmiles(molecule, atom, startAtom) + ")" 
     return outp
+
+
+def moleculeCompare(a, b):
+    #Determines whether two molecules are isomorphic.  In the worst case
+    #(two molecules with the same atoms), this procedure does not run in
+    #polynomial time, so be careful.
+    for ele in ['C','N','O']:
+        if a.countElement(ele) != b.countElement(ele):
+            return False
+    for bAtom in b.atoms:
+        if bAtom.element == a.atoms[0].element:
+            pass
+    
 
 
 #Makes     C-C-C-C
@@ -298,7 +320,9 @@ c6 = Atom("C")
 mol.addAtom(c6, c5, 1)
 mol.addBond(c6, c1, 1)
 c3.newChiralCenter(n1, (c4, None, c5))
-print smiles(mol)
+c1.newCTCenter(c2, o1, c6)
+c2.newCTCenter(c1, n1, None)
+#print smiles(mol)
 
 #blah
 

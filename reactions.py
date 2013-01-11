@@ -33,8 +33,23 @@ def hydrohalogenate(molecules, halogen):
         for doublebond in findAlkenes(molecule):
             mkvCarbons = markovnikov(doublebond[0], doublebond[1])
             for pairing in mkvCarbons:
-                newMolecules += synAdd(molecule, pairing[0], pairing[1], Atom(halogen), None)
+                newMolecules += bothAdd(molecule, pairing[0], pairing[1], Atom(halogen), None)
     return newMolecules
+
+
+
+"""Halogenation
+Candidate reactants: alkenes, alkynes
+X2 in CH2Cl2, dark
+Anti addition of an X to each atom in the alkene.
+if 1eqv specified --> add once
+if 2eqv or if excess specified --> add twice
+if no quantity specified --> don't let it be a valid reaction? Some sort of feedback to make user specify _how much_ when reacting with alkynes (which is a good habit to have) would be nice."""
+def halogenate(molecules, halogen):
+    newMolecules = []
+    for molecule in molecules:
+        for doublebond in findAlkenes(molecule):
+            mewMolecules += antiAdd()
             
 
     

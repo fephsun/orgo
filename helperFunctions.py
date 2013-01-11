@@ -4,6 +4,53 @@ import itertools
 
 randThing = 0
 
+def bothAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None):
+
+def antiAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None):
+    #Destroys the double bond and CTstereochemistry between target1 and target2.
+    #Adds add1 and add2 to target1 and target2.  If add1 and/or add2 are molecules,
+    #addtargets are needed to specify where the bond should originate from add.
+
+    newMolecule1 = copy.deepcopy(molecule)
+    newMolecule2 = copy.deepcopy(molecule)
+    
+    #Add targets, creating new bonds
+    if addtarget1 == None:
+        
+    else:
+        for atom in add1.atoms:
+           newMolecule1.addAtom(atom) 
+    
+    #Apply tetrahedral stereochemistry
+
+    #Remove CT stereochemistry
+    
+    #Replace double bond with single bond
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def synAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None):
     #Destroys the double bond and CTstereochemistry between target1 and target2.
     #Adds add1 and add2 to target1 and target2.  If add1 and/or add2 are molecules,

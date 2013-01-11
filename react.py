@@ -323,3 +323,4 @@ mol4.addAtom(c43, c41, 1)
 c40.newCTCenter(c41, c42, None)
 c41.newCTCenter(c40, c43, None)
 
+hydrogenate(mol)

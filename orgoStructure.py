@@ -199,7 +199,7 @@ bondSymbols = ['0', '-', '=', '#', '4', '5', '6', '7', '8', '9']
 #Precondition: molecule has been flagged for ring positioning (some rflag values on atoms might != 0). This is done by smiles().
 #Creates and returns a SMILES string for unflagged (!atom.flag==2) atoms within a molecule, starting with the given atom.
 def subsmiles(molecule, startAtom, parentAtom):
-    
+
     #Flag the current atom.
     startAtom.flag = 2
 
@@ -219,7 +219,6 @@ def subsmiles(molecule, startAtom, parentAtom):
         for ind in range(3):
             atom = atomsToLink[ind]
             if (atom != None) and (atom != parentAtom):
-                print "Atom "+str(ind)+": "+atom.element
                 if atom == startAtom.rAtom:
                     outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + str(startAtom.rflag) + ")"
                 elif atom.flag == 1:
@@ -228,9 +227,9 @@ def subsmiles(molecule, startAtom, parentAtom):
     
    
 
-    #Put a ring marker on the atom, if its ring partner is not flagged yet.
-    if (startAtom.rflag != 0) and (startAtom.rAtom.flag != 2):
-        outp += str(startAtom.rflag)
+    ###Put a ring marker on the atom, if its ring partner is not flagged yet.
+    ##if (startAtom.rflag != 0) and (startAtom.rAtom.flag != 2):
+    ##    outp += str(startAtom.rflag)
 
     #Check if the atom is a chiral center. If so:
     if hasattr(startAtom, 'chiralA'):
@@ -280,25 +279,13 @@ def subsmiles(molecule, startAtom, parentAtom):
     #In the base case, this loop won't even be entered.
     for atom in toAdd:
         if (startAtom.rflag != 0) and (atom == startAtom.rAtom):
-            if startAtom.rAtom.flag == 2:
-                add = str(startAtom.rflag)
+            add = str(startAtom.rflag)
         else:
             add = subsmiles(molecule, atom, startAtom)
                 
         outp += "(" +bondSymbols[startAtom.nonHNeighbors[atom]] + add + ")"
-    
+
     return outp
 
 
-def moleculeCompare(a, b):
-    #Determines whether two molecules are isomorphic.  In the worst case
-    #(two molecules with the same atoms), this procedure does not run in
-    #polynomial time, so be careful.
-    for ele in ['C','N','O']:
-        if a.countElement(ele) != b.countElement(ele):
-            return False
-    for bAtom in b.atoms:
-        if bAtom.element == a.atoms[0].element:
-            pass
-    
 

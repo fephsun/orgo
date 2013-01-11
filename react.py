@@ -3,6 +3,8 @@ import os
 import copy
 import itertools
 
+randThing = 0
+
 def hydrogenate(molecule):
     #H2/PdC catalyst reaction for double bonds only, for now.  Syn addition.
     for carbon in molecule.atoms:
@@ -55,18 +57,19 @@ def moleculeCompare(a, b, compareDict = None, expanded = []):
 
     #compareDict maps atoms in a to their hypothesized counterparts in b.
 
-    if compareDict != None and len(compareDict) == len(a.atoms):
+    if len(expanded) == len(a.atoms):
         #We've reached every atom.  Call it equal.
         return True
+        pass
 
     if compareDict == None:
         for atom in b.atoms:
-            if atom.element == a.atoms[0].element:
-                newCompareDicts = neighborCompare(a.atoms[0], atom, dict())
+            if atom.element == a.atoms[randThing].element:
+                newCompareDicts = neighborCompare(a.atoms[randThing], atom, dict())
                 if newCompareDicts == None:
                     continue
                 for newCompareDict in newCompareDicts:
-                    if moleculeCompare(a, b, newCompareDict, [a.atoms[0]]):
+                    if moleculeCompare(a, b, newCompareDict, [a.atoms[randThing]]):
                         return True
         return False
 
@@ -95,6 +98,13 @@ def neighborCompare(a,b, compareDict):
     #If the elements don't match, obviously there are no pairings.
     if sorted(aN) != sorted(bN):
         return None
+    if hasattr(a, "chiralA") != hasattr(b, "chiralA"):
+        #One atom has chirality, where the other doesn't.  Obviously no pairings.
+        return None
+    if hasattr(a, "chiralA"):
+        chiralFlag = True
+    else:
+        chiralFlag = False
     #Generate all n! pairings, and prune as we go.
     out = []
     for aNeighborSet in itertools.permutations(a.neighbors):
@@ -115,9 +125,40 @@ def neighborCompare(a,b, compareDict):
                 OKFlag = False
                 break
             temp[aNeighborSet[i]] = b.neighbors.keys()[i]
+        if chiralFlag and OKFlag:
+            aCW = []
+            bCW = []
+            for neighbor in a.chiralCWlist(aNeighborSet[randThing]):
+                if neighbor == None:
+                    #Hydrogen.
+                    aCW.append("H")
+                else:
+                    aCW.append(neighbor.element)
+            for neighbor in b.chiralCWlist(b.neighbors.keys()[randThing]):
+                if neighbor == None:
+                    #Hydrogen.
+                    bCW.append("H")
+                else:
+                    bCW.append(neighbor.element)
+            OKFlag = False
+            for i in xrange(3):
+                if aCW == shift(bCW, i):
+                    OKFlag = True
+                    for j in xrange(3):
+                       if a.chiralCWlist(aNeighborSet[randThing])[j] == None:
+                            continue
+                        if temp[a.chiralCWlist(aNeighborSet[randThing])[j]] ==\
+                            b.chiralCWlist(b.neighbors.keys()[randThing])[(j+i)%3]:
+                            pass
+                        else:
+                            OKFlag = False
+
         if (temp not in out) and OKFlag:
             out.append(temp)
     return out
+
+def shift(l, n):
+    return l[n:] + l[:n]
 
 def noOfAtoms(string):
     #Helper function.  Given a SMILES string, return the number of atoms.
@@ -127,5 +168,5 @@ def noOfAtoms(string):
             out += 1
     return out
         
-#mol2 = hydrogenate(mol)
-#print smiles(mol2)
+mol2 = copy.deepcopy(mol)
+c3.newChiralCenter(n1, (None, c4, c5))

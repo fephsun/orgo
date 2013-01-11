@@ -68,8 +68,8 @@ class Molecule:
 
 class Atom:
 
-    def __str__(self):
-        return self.element
+##    def __str__(self):
+##        return self.element
     
     def __init__(self, element):
         self.element = element
@@ -291,7 +291,11 @@ def subsmiles(molecule, startAtom, parentAtom):
     
 
 
-#Makes     C-C-C-C
+#Makes     C-C-C<C
+#          |   |
+#        O-C=C-N
+
+#Makes     C-C-C>C
 #          |   |
 #        O-C=C-N
 c1 = Atom("C")
@@ -331,3 +335,33 @@ cl2 = Atom("Cl")
 CTmol.addAtom(cl2, c11, 1)
 c10.newCTCenter(c11, cl1, c12)
 c11.newCTCenter(c10, cl2, None)
+
+#Makes  C\ /C-C
+#         C
+#      Br/ \H
+c20 = Atom("C")
+chiralMol1 = Molecule(c20)
+c23 = Atom("C")
+chiralMol1.addAtom(c23, c20, 1)
+br20 = Atom("Br")
+chiralMol1.addAtom(br20, c20, 1)
+c21 = Atom("C")
+chiralMol1.addAtom(c21, c20, 1)
+c22 = Atom("C")
+chiralMol1.addAtom(c22, c21, 1)
+c20.newChiralCenter(c21, (None, br20, c23))
+
+c30 = Atom("C")
+chiralMol2 = Molecule(c30)
+c33 = Atom("C")
+chiralMol2.addAtom(c33, c30, 1)
+br30 = Atom("Br")
+chiralMol2.addAtom(br30, c30, 1)
+c31 = Atom("C")
+chiralMol2.addAtom(c31, c30, 1)
+c32 = Atom("C")
+chiralMol2.addAtom(c32, c31, 1)
+c30.newChiralCenter(c31, (None, c33, br30))
+
+
+

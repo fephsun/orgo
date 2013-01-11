@@ -180,10 +180,6 @@ def smiles(molecule):
             
             
     #Traverse twice to generate the SMILES.
-    print "!!!!"
-    for atom in molecule.atoms:
-        print atom.element + ", "+str(atom.flag)
-    print "iiii"
             
     outp = subsmiles(molecule, molecule.atoms[0], 0)
 
@@ -206,7 +202,6 @@ def subsmiles(molecule, startAtom, parentAtom):
     
     #Flag the current atom.
     startAtom.flag = 2
-    print "Flagged: "+startAtom.element
 
     outp = startAtom.element
 
@@ -219,7 +214,6 @@ def subsmiles(molecule, startAtom, parentAtom):
     #Remember to worry about whether or not an atom has a parent atom.
     #Adds ring labels.
     if hasattr(startAtom, 'CTotherC'):
-        print "Was here!"
         atomsToLink = [startAtom.CTotherC, startAtom.CTa, startAtom.CTb]
         begin = ["","/","\\"]
         for ind in range(3):
@@ -230,11 +224,6 @@ def subsmiles(molecule, startAtom, parentAtom):
                     outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + str(startAtom.rflag) + ")"
                 elif atom.flag == 1:
                     outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + subsmiles(molecule, atom, startAtom) + ")"
-                else:
-                    print "Neither such case worked."
-                    print atom.flag
-            else:
-                print "Equal to parent atom."
         return outp
     
    

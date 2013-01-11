@@ -5,15 +5,17 @@ import itertools
 
 randThing = 0
 
-def hydrogenate(molecule):
+def hydrogenate(molecules):
     #H2/PdC catalyst reaction for double bonds only, for now.  Syn addition.
-    for carbon in molecule.atoms:
-        if carbon.element != 'C':
-            continue
-        for neighbor in carbon.neighbors:
-            if neighbor.element == 'C' and carbon.neighbors[neighbor] == 2:
-                synAdd(molecule, carbon, neighbor, None, None)
-    return molecule
+    for molecule in molecules:
+        for carbon in molecule.atoms:
+            if carbon.element != 'C':
+                continue
+            for neighbor in carbon.neighbors:
+                if neighbor.element == 'C' and carbon.neighbors[neighbor] == 2:
+                    molecules.remove(molecule)
+                    molecules += synAdd(molecule, carbon, neighbor, None, None)
+    return molecules
 
 def synAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None):
     #Destroys the double bond and CTstereochemistry between target1 and target2.
@@ -100,7 +102,7 @@ def synAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2
     print smiles(Xmolecule)
     #If molecule and Xmolecule are the same, we only need to return one product.
     if moleculeCompare(molecule, Xmolecule):
-        return molecule
+        return [molecule]
     else:
         return [molecule, Xmolecule]
 
@@ -309,4 +311,15 @@ c32 = Atom("C")
 chiralMol2.addAtom(c32, c31, 1)
 c30.newChiralCenter(c31, (None, c33, br30))
 
+#Makes C/C=C/C
+c40 = Atom("C")
+c41 = Atom("C")
+mol4 = Molecule(c40)
+mol4.addAtom(c41, c40, 2)
+c42 = Atom("C")
+c43 = Atom("C")
+mol4.addAtom(c42, c40, 1)
+mol4.addAtom(c43, c41, 1)
+c40.newCTCenter(c41, c42, None)
+c41.newCTCenter(c40, c43, None)
 

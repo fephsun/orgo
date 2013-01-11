@@ -170,6 +170,7 @@ def noOfAtoms(string):
 
 #Finds candidate alkenes within a molecule.
 #(define "alkenes" as "alkenes that are not Michael alpha-beta alkenes next to carbonyls, and are not in an aromatic ring")
+#NOT IMPLEMENTED: detecting whether a double bond is aromatic
 def findAlkenes(molecule):
 
 

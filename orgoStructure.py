@@ -180,6 +180,7 @@ def smiles(molecule):
             
             
     #Traverse twice to generate the SMILES.
+            
     outp = subsmiles(molecule, molecule.atoms[0], 0)
 
     #Reset all old flags.    
@@ -189,7 +190,7 @@ def smiles(molecule):
         atom.nRead = 0
         atom.parentAtom = 0
         atom.rAtom = 0
-        self.nonHNeighbors = []
+        atom.nonHNeighbors = []
 
     return outp
 
@@ -200,7 +201,7 @@ bondSymbols = ['0', '-', '=', '#', '4', '5', '6', '7', '8', '9']
 def subsmiles(molecule, startAtom, parentAtom):
     
     #Flag the current atom.
-    startAtom.flag = 1
+    startAtom.flag = 2
 
     outp = startAtom.element
 
@@ -217,17 +218,18 @@ def subsmiles(molecule, startAtom, parentAtom):
         begin = ["","/","\\"]
         for ind in range(3):
             atom = atomsToLink[ind]
-            if (atom != parentAtom):
+            if (atom != None) and (atom != parentAtom):
+                print "Atom "+str(ind)+": "+atom.element
                 if atom == startAtom.rAtom:
-                    outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + startAtom.rflag + ")"
-                elif atom.flag == 0:
+                    outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + str(startAtom.rflag) + ")"
+                elif atom.flag == 1:
                     outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + subsmiles(molecule, atom, startAtom) + ")"
         return outp
     
    
 
     #Put a ring marker on the atom, if its ring partner is not flagged yet.
-    if (startAtom.rflag != 0) and (startAtom.rAtom.flag != 1):
+    if (startAtom.rflag != 0) and (startAtom.rAtom.flag != 2):
         outp += str(startAtom.rflag)
 
     #Check if the atom is a chiral center. If so:
@@ -278,7 +280,7 @@ def subsmiles(molecule, startAtom, parentAtom):
     #In the base case, this loop won't even be entered.
     for atom in toAdd:
         if (startAtom.rflag != 0) and (atom == startAtom.rAtom):
-            if startAtom.rAtom.flag == 1:
+            if startAtom.rAtom.flag == 2:
                 add = str(startAtom.rflag)
         else:
             add = subsmiles(molecule, atom, startAtom)
@@ -288,6 +290,16 @@ def subsmiles(molecule, startAtom, parentAtom):
     return outp
 
 
+def moleculeCompare(a, b):
+    #Determines whether two molecules are isomorphic.  In the worst case
+    #(two molecules with the same atoms), this procedure does not run in
+    #polynomial time, so be careful.
+    for ele in ['C','N','O']:
+        if a.countElement(ele) != b.countElement(ele):
+            return False
+    for bAtom in b.atoms:
+        if bAtom.element == a.atoms[0].element:
+            pass
     
 
 
@@ -319,6 +331,8 @@ mol.addBond(c6, c1, 1)
 c3.newChiralCenter(n1, (c4, None, c5))
 c1.newCTCenter(c2, o1, c6)
 c2.newCTCenter(c1, n1, None)
+
+
 
 #Makes C\   /Cl
 #        C=C
@@ -362,6 +376,5 @@ chiralMol2.addAtom(c31, c30, 1)
 c32 = Atom("C")
 chiralMol2.addAtom(c32, c31, 1)
 c30.newChiralCenter(c31, (None, c33, br30))
-
 
 

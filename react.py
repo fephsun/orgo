@@ -225,6 +225,18 @@ def noOfAtoms(string):
         if char.isupper():
             out += 1
     return out
-        
+
+#Finds candidate alkenes within a molecule.
+#(define "alkenes" as "alkenes that are not Michael alpha-beta alkenes next to carbonyls, and are not in an aromatic ring")
+def findAlkenes(molecule):
+
+
+
+print smiles(mol)
+print "================"
+print smiles(CTmol)
+print "----------------"
+mol2 = hydrogenate(CTmol)
+print smiles(mol2)
 mol2 = copy.deepcopy(mol)
 c3.newChiralCenter(n1, (None, c4, c5))

@@ -288,15 +288,4 @@ def subsmiles(molecule, startAtom, parentAtom):
     return outp
 
 
-def moleculeCompare(a, b):
-    #Determines whether two molecules are isomorphic.  In the worst case
-    #(two molecules with the same atoms), this procedure does not run in
-    #polynomial time, so be careful.
-    for ele in ['C','N','O']:
-        if a.countElement(ele) != b.countElement(ele):
-            return False
-    for bAtom in b.atoms:
-        if bAtom.element == a.atoms[0].element:
-            pass
-    
 

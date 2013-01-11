@@ -10,6 +10,7 @@ def synAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2
     #addtargets are needed to specify where the bond should originate from add.
 
     #Set bond orders to single.
+    molecule = copy.deepcopy(molecule)
     target1.neighbors[target2] = 1
     target2.neighbors[target1] = 1
     #Insert flags onto atoms, so we can find them after deepcopy.
@@ -210,11 +211,30 @@ def shift(l, n):
 
 def noOfAtoms(string):
     #Helper function.  Given a SMILES string, return the number of atoms.
+    #Not used, as of Jan 11, 2013
     out = 0
     for char in string:
         if char.isupper():
             out += 1
     return out
+
+def markovnikov(a, b):
+    #a and b are two carbon atoms.  Function tuple of all possible markovnikov
+    #orderings of carbons
+    aTotal = 0
+    bTotal = 0
+    for atom in a.neighbors:
+        if atom.element == "C":
+            aTotal += 1
+    for atom in b.neighbors:
+        if atom.element == "C":
+            bTotal += 1
+    if aTotal == bTotal:
+        return ((a,b),(b,a))
+    elif aTotal > bTotal:
+        return ((a, b))
+    else:
+        return ((b, a))
 
 #Finds candidate alkenes within a molecule.
 #(define "alkenes" as "alkenes that are not Michael alpha-beta alkenes next to carbonyls, and are not in an aromatic ring")

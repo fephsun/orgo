@@ -25,7 +25,8 @@ if 2eqv or if excess specified --> add twice
 if no quantity specified --> don't let it be a valid reaction? Some sort of feedback to make user specify _how much_ when reacting with alkynes (which is a good habit 
 
 to have) would be nice."""
-    
+
+
 #Makes     C-C-C<C
 #          |   |
 #        O-C=C-N

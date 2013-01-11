@@ -23,7 +23,38 @@ def synAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2
     #Set bond orders to single.
     target1.neighbors[target2] = 1
     target2.neighbors[target1] = 1
+    #Insert flags onto atoms, so we can find them after deepcopy.
+    target1.targetFlag = 1
+    target2.targetFlag = 2
+    if addtarget1 != None:
+        addtarget1.atFlag = 1
+    if addtarget2 != None:
+        addtarget2.atFlag = 2
 
+    #deepcopy to make 2 cases: top addition or bottom addition
+    Xmolecule = copy.deepcopy(molecule)
+    for atom in Xmolecule.atoms:
+        if hasattr(atom, "targetFlag"):
+            if atom.targetFlag == 1:
+                Xtarget1 = atom
+            elif atom.targetFlag == 2:
+                Xtarget2 = atom
+    Xadd1 = copy.deepcopy(add1)
+    Xadd2 = copy.deepcopy(add2)
+    if addtarget1 != None:
+        for atom in Xadd1.atoms:
+            if hasattr(atom, "atFlag"):
+                Xaddtarget1 = atom
+    else:
+        Xaddtarget1 = None
+    if addtarget2 != None:
+        for atom in Xadd2.atoms:
+            if hasattr(atom, "atFlag"):
+                Xaddtarget2 = atom
+    else:
+        Xaddtarget2 = None
+
+    #Add the add's to both targets, following chirality.  Sorry for the copy-paste.
     for thisAdd, thisTarget, thisAddTarget, otherTarget, ct1, ct2\
             in ((add1, target1, addtarget1, target2, target1.CTb, target1.CTa),
                 (add2, target2, addtarget2, target1, target2.CTa, target2.CTb)):
@@ -44,6 +75,33 @@ def synAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2
                 thisTarget.newChiralCenter(otherTarget,
                         (None, ct1, ct2))
         thisTarget.eliminateCT()
+
+    for thisAdd, thisTarget, thisAddTarget, otherTarget, ct1, ct2\
+            in ((Xadd1, Xtarget1, Xaddtarget1, Xtarget2, Xtarget1.CTb, Xtarget1.CTa),
+                (Xadd2, Xtarget2, Xaddtarget2, Xtarget1, Xtarget2.CTa, Xtarget2.CTb)):
+        if isinstance(thisAdd, Atom):
+            Xmolecule.addAtom(thisAdd, thisTarget, 1)
+            if ct1 != None or ct2 != None:
+                thisTarget.newChiralCenter(otherTarget,
+                        (thisAdd, ct2, ct1))
+        elif isinstance(thisAdd, Molecule):
+            #Untested.
+            Xmolecule.addMolecule(thisAdd, thisAddTarget, thisTarget, 1)
+            if ct1 != None or ct2 != None:
+                thisTarget.newChiralCenter(otherTarget,
+                        (thisAddTarget, ct2, ct1))
+        else:
+            #Hydrogens.
+            if ct1 != None and ct2 != None:
+                thisTarget.newChiralCenter(otherTarget,
+                        (None, ct2, ct1))
+        thisTarget.eliminateCT()
+
+    #If molecule and Xmolecule are the same, we only need to return one product.
+    if moleculeCompare(molecule, Xmolecule):
+        return molecule
+    else:
+        return [molecule, Xmolecule]
 
 def moleculeCompare(a, b, compareDict = None, expanded = []):
     #Determines whether two molecules are isomorphic.  In the worst case
@@ -145,7 +203,7 @@ def neighborCompare(a,b, compareDict):
                 if aCW == shift(bCW, i):
                     OKFlag = True
                     for j in xrange(3):
-                       if a.chiralCWlist(aNeighborSet[randThing])[j] == None:
+                        if a.chiralCWlist(aNeighborSet[randThing])[j] == None:
                             continue
                         if temp[a.chiralCWlist(aNeighborSet[randThing])[j]] ==\
                             b.chiralCWlist(b.neighbors.keys()[randThing])[(j+i)%3]:

@@ -239,6 +239,8 @@ def markovnikov(a, b):
 #Finds candidate alkenes within a molecule.
 #(define "alkenes" as "alkenes that are not Michael alpha-beta alkenes next to carbonyls, and are not in an aromatic ring")
 #NOT IMPLEMENTED: detecting whether a double bond is aromatic
+#Returns a tuple of tuples of atoms. The lowest tuple is a pair of two atoms, which share a double bond.
+#Make sure not to include duplicates.
 def findAlkenes(molecule):
     pass
 

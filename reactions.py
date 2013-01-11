@@ -33,7 +33,8 @@ def hydrohalogenate(molecules, halogen):
         for doublebond in findAlkenes(molecule):
             mkvCarbons = markovnikov(doublebond[0], doublebond[1])
             for pairing in mkvCarbons:
-                newMolecules += synAdd(molecule, pairing[0], pairing[1], 
+                newMolecules += synAdd(molecule, pairing[0], pairing[1], Atom(halogen), None)
+    return newMolecules
             
 
     

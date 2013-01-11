@@ -43,6 +43,10 @@ def noOfAtoms(string):
         if char.isupper():
             out += 1
     return out
-        
+
+print smiles(mol)
+print "================"
+print smiles(CTmol)
+print "----------------"
 mol2 = hydrogenate(CTmol)
 print smiles(mol2)

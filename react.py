@@ -96,7 +96,8 @@ def synAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2
                 thisTarget.newChiralCenter(otherTarget,
                         (None, ct2, ct1))
         thisTarget.eliminateCT()
-
+    print smiles(molecule)
+    print smiles(Xmolecule)
     #If molecule and Xmolecule are the same, we only need to return one product.
     if moleculeCompare(molecule, Xmolecule):
         return molecule
@@ -229,14 +230,6 @@ def noOfAtoms(string):
 #Finds candidate alkenes within a molecule.
 #(define "alkenes" as "alkenes that are not Michael alpha-beta alkenes next to carbonyls, and are not in an aromatic ring")
 def findAlkenes(molecule):
+    pass
 
 
-
-print smiles(mol)
-print "================"
-print smiles(CTmol)
-print "----------------"
-mol2 = hydrogenate(CTmol)
-print smiles(mol2)
-mol2 = copy.deepcopy(mol)
-c3.newChiralCenter(n1, (None, c4, c5))

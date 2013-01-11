@@ -237,11 +237,39 @@ def markovnikov(a, b):
         return ((b, a))
 
 #Finds candidate alkenes within a molecule.
-#(define "alkenes" as "alkenes that are not Michael alpha-beta alkenes next to carbonyls, and are not in an aromatic ring")
-#NOT IMPLEMENTED: detecting whether a double bond is aromatic
+#(define "alkenes" as "alkenes that are not in an aromatic ring")
 #Returns a tuple of tuples of atoms. The lowest tuple is a pair of two atoms, which share a double bond.
 #Make sure not to include duplicates.
 def findAlkenes(molecule):
-    pass
+    #To track which bonds we've counted, we use the atom.flag property.
+    #atom.flag starts at 0, and must be reset to 0 at the end.
+    doubleBonds = []
+    for atom in molecule.atoms:
+        if not(atom.element == 'C'):
+            continue
+        for neighbor in atom.neighbors:
+            if neighbor.element == 'C' and atom.neighbors[neighbor] == 2:
+                if atom.flag != 0 and neighbor.flag != 0 and atom in neighbor.flag\
+                   and neighbor in atom.flag:
+                    #We've already counted this bond.  Move on.
+                    continue
+                if atom.flag == 0:
+                    atom.flag = [neighbor]
+                else:
+                    atom.flag.append(neighbor)
+                if neighbor.flag == 0:
+                    neighbor.flag = [atom]
+                else:
+                    neighbor.flag.append(atom)
+                doubleBonds.append((atom, neighbor))
+    #Reset the flags - other functions like to use them, as well.
+    for atom in molecule.atoms:
+        atom.flag = 0
+    return doubleBonds
+
+
+
+
+    
 
 

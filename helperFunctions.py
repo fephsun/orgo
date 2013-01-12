@@ -4,111 +4,72 @@ import itertools
 
 randThing = 0
 
-def bothAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None):
+def antiAdd(molecule, target1, target2, add1, add2,
+            addtarget1 = None, addtarget2 = None):
+    #Just a wrapper function, to make antiAdd less confusing.
+    return synAdd(molecule, target1, target2, add1, add2,
+                  addtarget1, addtarget2, True)
 
-
-def singleAdd(molecule, target, add, addtarget):
-
-def antiAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None):
+def synAdd(molecule, target1, target2, add1, add2,
+           addtarget1 = None, addtarget2 = None, antiAdd = False):
     #Destroys the double bond and CTstereochemistry between target1 and target2.
     #Adds add1 and add2 to target1 and target2.  If add1 and/or add2 are molecules,
     #addtargets are needed to specify where the bond should originate from add.
 
-    newMolecule1 = copy.deepcopy(molecule)
-    newMolecule2 = copy.deepcopy(molecule)
-    
-    #Add targets, creating new bonds
-    if addtarget1 == None:
-        newMolecule1.addAtom(add1)
-        newMolecule1.addBond(target1, add1, 1)
-    else:
-        for atom in add1.atoms:
-           newMolecule1.addAtom(atom)
-           if atom == addtarget1:
-               newMolecule1.addBond(target1, atom, 1)
-    
-    #Apply tetrahedral stereochemistry
-    
-    if addtarget2 == None:
-        newMolecule2.addAtom(add2)
-    
+    #Also does anti-addition, if antiAdd is set to true.
 
-
-
-
-    
-
-    #Remove CT stereochemistry
-    
-    #Replace double bond with single bond
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def synAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None):
-    #Destroys the double bond and CTstereochemistry between target1 and target2.
-    #Adds add1 and add2 to target1 and target2.  If add1 and/or add2 are molecules,
-    #addtargets are needed to specify where the bond should originate from add.
-
-    #Set bond orders to single.
-    target1.neighbors[target2] = 1
-    target2.neighbors[target1] = 1
-    #Insert flags onto atoms, so we can find them after deepcopy.
-    target1.targetFlag = 1
-    target2.targetFlag = 2
+    #We need to remember where the targets are in the list of atoms, because
+    #we will be copying the molecules and destroying all references.
+    target1Pos = molecule.atoms.index(target1)
+    target2Pos = molecule.atoms.index(target2)
     if addtarget1 != None:
-        addtarget1.atFlag = 1
+        addtarget1Pos = add1.atoms.index(addtarget1)
     if addtarget2 != None:
-        addtarget2.atFlag = 2
+        addtarget2Pos = add2.atoms.index(addtarget2)
 
     #deepcopy to make 2 cases: top addition or bottom addition
+    molecule = copy.deepcopy(molecule)
     Xmolecule = copy.deepcopy(molecule)
-    for atom in Xmolecule.atoms:
-        if hasattr(atom, "targetFlag"):
-            if atom.targetFlag == 1:
-                Xtarget1 = atom
-            elif atom.targetFlag == 2:
-                Xtarget2 = atom
+    #Remake pointers to targets
+    target1 = molecule.atoms[target1Pos]
+    Xtarget1 = Xmolecule.atoms[target1Pos]
+    target2 = molecule.atoms[target2Pos]
+    Xtarget2 = Xmolecule.atoms[target2Pos]
+    add1 = copy.deepcopy(add1)
     Xadd1 = copy.deepcopy(add1)
+    add2 = copy.deepcopy(add2)
     Xadd2 = copy.deepcopy(add2)
     if addtarget1 != None:
-        for atom in Xadd1.atoms:
-            if hasattr(atom, "atFlag"):
-                Xaddtarget1 = atom
+        addtarget1 = add1.atoms[addtarget1Pos]
+        Xaddtarget1 = Xadd1.atoms[addtarget1Pos]
     else:
         Xaddtarget1 = None
     if addtarget2 != None:
-        for atom in Xadd2.atoms:
-            if hasattr(atom, "atFlag"):
-                Xaddtarget2 = atom
+        addtarget2 = add2.atoms[addtarget2Pos]
+        Xaddtarget2 = Xadd2.atoms[addtarget2Pos]
     else:
         Xaddtarget2 = None
+    #Set bond orders to single.
+    target1.neighbors[target2] = 1
+    target2.neighbors[target1] = 1
+    Xtarget1.neighbors[Xtarget2] = 1
+    Xtarget2.neighbors[Xtarget1] = 1
 
-    #Add the add's to both targets, following chirality.  Sorry for the copy-paste.
-    for thisAdd, thisTarget, thisAddTarget, otherTarget, ct1, ct2\
-            in ((add1, target1, addtarget1, target2, target1.CTb, target1.CTa),
-                (add2, target2, addtarget2, target1, target2.CTa, target2.CTb)):
+    if antiAdd:
+        bigListOfStuff =\
+        ((molecule, add1, target1, addtarget1, target2, target1.CTa, target1.CTb),
+        (molecule, add2, target2, addtarget2, target1, target2.CTa, target2.CTb),
+        (Xmolecule, Xadd1, Xtarget1, Xaddtarget1, Xtarget2, Xtarget1.CTb, Xtarget1.CTa),
+        (Xmolecule, Xadd2, Xtarget2, Xaddtarget2, Xtarget1, Xtarget2.CTb, Xtarget2.CTa))
+    else:
+        bigListOfStuff =\
+        ((molecule, add1, target1, addtarget1, target2, target1.CTb, target1.CTa),
+        (molecule, add2, target2, addtarget2, target1, target2.CTa, target2.CTb),
+        (Xmolecule, Xadd1, Xtarget1, Xaddtarget1, Xtarget2, Xtarget1.CTa, Xtarget1.CTb),
+        (Xmolecule, Xadd2, Xtarget2, Xaddtarget2, Xtarget1, Xtarget2.CTb, Xtarget2.CTa))
+
+    for thismolecule, thisAdd, thisTarget, thisAddTarget, otherTarget, ct1, ct2\
+            in bigListOfStuff:
         if isinstance(thisAdd, Atom):
             molecule.addAtom(thisAdd, thisTarget, 1)
             if ct1 != None or ct2 != None:
@@ -126,30 +87,6 @@ def synAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2
                 thisTarget.newChiralCenter(otherTarget,
                         (None, ct1, ct2))
         thisTarget.eliminateCT()
-
-    for thisAdd, thisTarget, thisAddTarget, otherTarget, ct1, ct2\
-            in ((Xadd1, Xtarget1, Xaddtarget1, Xtarget2, Xtarget1.CTb, Xtarget1.CTa),
-                (Xadd2, Xtarget2, Xaddtarget2, Xtarget1, Xtarget2.CTa, Xtarget2.CTb)):
-        if isinstance(thisAdd, Atom):
-            Xmolecule.addAtom(thisAdd, thisTarget, 1)
-            if ct1 != None or ct2 != None:
-                thisTarget.newChiralCenter(otherTarget,
-                        (thisAdd, ct2, ct1))
-        elif isinstance(thisAdd, Molecule):
-            #Untested.
-            Xmolecule.addMolecule(thisAdd, thisAddTarget, thisTarget, 1)
-            if ct1 != None or ct2 != None:
-                thisTarget.newChiralCenter(otherTarget,
-                        (thisAddTarget, ct2, ct1))
-        else:
-            #Hydrogens.
-            if ct1 != None and ct2 != None:
-                thisTarget.newChiralCenter(otherTarget,
-                        (None, ct2, ct1))
-        thisTarget.eliminateCT()
-    print smiles(molecule)
-    print smiles(Xmolecule)
-    #If molecule and Xmolecule are the same, we only need to return one product.
     if moleculeCompare(molecule, Xmolecule):
         return [molecule]
     else:
@@ -215,6 +152,13 @@ def neighborCompare(a,b, compareDict):
         chiralFlag = True
     else:
         chiralFlag = False
+    if hasattr(a, "CTotherC") != hasattr(b, "CTotherC"):
+        #One atom has a cis-trans center, where the other doesn't.  Obviously no pairings.
+        return None
+    if hasattr(a, "CTotherC"):
+        CTFlag = True
+    else:
+        CTFlag = False
     #Generate all n! pairings, and prune as we go.
     out = []
     for aNeighborSet in itertools.permutations(a.neighbors):
@@ -236,6 +180,8 @@ def neighborCompare(a,b, compareDict):
                 break
             temp[aNeighborSet[i]] = b.neighbors.keys()[i]
         if chiralFlag and OKFlag:
+            #The following bit of code is still quite messy.  It tests whether the
+            #hypothesized pairing follows the correct chirality.
             aCW = []
             bCW = []
             for neighbor in a.chiralCWlist(aNeighborSet[randThing]):
@@ -262,6 +208,14 @@ def neighborCompare(a,b, compareDict):
                             pass
                         else:
                             OKFlag = False
+        if CTFlag and OKFlag:
+            #Makes sure that the hypothesized pairing follows the correct
+            #cis-trans relationship
+            if (a.CTa == None and b.CTa != None) or\
+               (a.CTa != None and temp[a.CTa] != b.CTa) or\
+               (a.CTb == None and b.CTb != None) or\
+               (a.CTb != None and temp[a.CTb] != b.CTb):
+                OKFlag = False
 
         if (temp not in out) and OKFlag:
             out.append(temp)
@@ -272,18 +226,65 @@ def shift(l, n):
 
 def noOfAtoms(string):
     #Helper function.  Given a SMILES string, return the number of atoms.
+    #Not used, as of Jan 11, 2013
     out = 0
     for char in string:
         if char.isupper():
             out += 1
     return out
 
+def markovnikov(a, b):
+    #a and b are two carbon atoms.  Function tuple of all possible markovnikov
+    #orderings of carbons
+    aTotal = 0
+    bTotal = 0
+    for atom in a.neighbors:
+        if atom.element == "C":
+            aTotal += 1
+    for atom in b.neighbors:
+        if atom.element == "C":
+            bTotal += 1
+    if aTotal == bTotal:
+        return ((a,b),(b,a))
+    elif aTotal > bTotal:
+        return ((a, b))
+    else:
+        return ((b, a))
+
 #Finds candidate alkenes within a molecule.
-#(define "alkenes" as "alkenes that are not Michael alpha-beta alkenes next to carbonyls, and are not in an aromatic ring")
-#NOT IMPLEMENTED: detecting whether a double bond is aromatic
+#(define "alkenes" as "alkenes that are not in an aromatic ring")
 #Returns a tuple of tuples of atoms. The lowest tuple is a pair of two atoms, which share a double bond.
 #Make sure not to include duplicates.
 def findAlkenes(molecule):
-    pass
+    #To track which bonds we've counted, we use the atom.flag property.
+    #atom.flag starts at 0, and must be reset to 0 at the end.
+    doubleBonds = []
+    for atom in molecule.atoms:
+        if not(atom.element == 'C'):
+            continue
+        for neighbor in atom.neighbors:
+            if neighbor.element == 'C' and atom.neighbors[neighbor] == 2:
+                if atom.flag != 0 and neighbor.flag != 0 and atom in neighbor.flag\
+                   and neighbor in atom.flag:
+                    #We've already counted this bond.  Move on.
+                    continue
+                if atom.flag == 0:
+                    atom.flag = [neighbor]
+                else:
+                    atom.flag.append(neighbor)
+                if neighbor.flag == 0:
+                    neighbor.flag = [atom]
+                else:
+                    neighbor.flag.append(atom)
+                doubleBonds.append((atom, neighbor))
+    #Reset the flags - other functions like to use them, as well.
+    for atom in molecule.atoms:
+        atom.flag = 0
+    return doubleBonds
+
+
+
+
+    
 
 

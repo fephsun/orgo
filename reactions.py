@@ -2,14 +2,18 @@ from helperFunctions import *
 
 def hydrogenate(molecules):
     #H2/PdC catalyst reaction for double bonds only, for now.  Syn addition.
-    for molecule in molecules:
-        for carbon in molecule.atoms:
-            if carbon.element != 'C':
-                continue
-            for neighbor in carbon.neighbors:
-                if neighbor.element == 'C' and carbon.neighbors[neighbor] == 2:
-                    molecules.remove(molecule)
-                    molecules += synAdd(molecule, carbon, neighbor, None, None)
+    while True:
+        alkenes = [findAlkenes(molecule) for molecule in molecules]
+        #The line below flattens a nested list, I swear.  Just don't ask how
+        #it works.  -FS
+        flatAlkenes = [item for sublist in alkenes for item in sublist]
+        if len(flatAlkenes) == 0:
+            break
+        alkenes = [(molecule,findAlkenes(molecule)) for molecule in molecules]
+        for molecule, alkeneList in alkenes:
+            molecules.remove(molecule)
+            molecules += synAdd(molecule, alkeneList[0][0], alkeneList[0][1],
+                                None, None)
     return molecules
 
 
@@ -17,7 +21,7 @@ def hydrogenate(molecules):
 """Hydrohalogenation
 HX in CH2Cl2
 Candidate reactants: alkenes, alkynes
-Adds the X to the Markovnikov-most carbon, and the H to the other carbon. Neither syn nor anti (because carbocation intermediate).
+Adds the X to the Markovnikov-most carbon, and the H to the other carbon. ***Neither syn nor anti*** (because carbocation intermediate).
 **UNLESS the alkene is next to a carbonyl (i.e. Michael acceptor). In this case, the halogen is added anti-Markovnikov. We might want to allow users to use this 
 reaction, but not allow it to be used when we generate random synthesis problems.
 If reacting an alkyne:
@@ -49,10 +53,9 @@ def halogenate(molecules, halogen):
     newMolecules = []
     for molecule in molecules:
         for doublebond in findAlkenes(molecule):
-            mewMolecules += antiAdd()
-            
+                newMolecules += antiAdd(molecule, pairing[0], pairing[1], Atom(halogen), Atom(halogen))
+    return newMolecules
 
-    
 #Makes     C-C-C<C
 #          |   |
 #        O-C=C-N
@@ -86,7 +89,7 @@ c2.newCTCenter(c1, n1, None)
 
 #Makes C\   /Cl
 #        C=C
-#     C1/
+#     C1/   \Br
 c10 = Atom("C")
 CTmol = Molecule(c10)
 c11 = Atom("C")
@@ -97,8 +100,28 @@ cl1 = Atom("Cl")
 CTmol.addAtom(cl1, c10, 1)
 cl2 = Atom("Cl")
 CTmol.addAtom(cl2, c11, 1)
+br10 = Atom("Br")
+CTmol.addAtom(br10, c11, 1)
 c10.newCTCenter(c11, cl1, c12)
-c11.newCTCenter(c10, cl2, None)
+c11.newCTCenter(c10, cl2, br10)
+
+#Makes C\   /Cl
+#        C=C
+#     C1/   \Br
+c15 = Atom("C")
+CTmol2 = Molecule(c15)
+c16 = Atom("C")
+CTmol2.addAtom(c16, c15, 2)
+c17 = Atom("C")
+CTmol2.addAtom(c17, c15, 1)
+cl5 = Atom("Cl")
+CTmol2.addAtom(cl5, c15, 1)
+cl6 = Atom("Cl")
+CTmol2.addAtom(cl6, c16, 1)
+br15 = Atom("Br")
+CTmol2.addAtom(br15, c16, 1)
+c15.newCTCenter(c16, cl6, c17)
+c16.newCTCenter(c15, br15, cl5)
 
 #Makes  C\ /C-C
 #         C
@@ -138,5 +161,3 @@ mol4.addAtom(c42, c40, 1)
 mol4.addAtom(c43, c41, 1)
 c40.newCTCenter(c41, c42, None)
 c41.newCTCenter(c40, c43, None)
-
-hydrogenate([mol])

@@ -1,5 +1,6 @@
 #Testing - replace "H" with "Br" to visualize all hydrogens
 hydrogen = "H"
+import pybel
 
 class Molecule:
     
@@ -295,3 +296,23 @@ def subsmiles(molecule, startAtom, parentAtom):
 
 
 
+def smitosvg(smilesStringsList, outfilename):
+    molecules = [pybel.readstring("smi", smiles) for smiles in smilesStringsList]
+    for mol in molecules:
+        mol.write("svg",outfilename, overwrite = True)
+
+#Reads in our molecule format
+def moltosvg(moleculesList, outfilename):
+    smilesStrings = [smiles(molecule) for molecule in moleculesList]
+    return smitopng(smilesStrings, outfilename)
+
+c40 = Atom("C")
+c41 = Atom("C")
+mol4 = Molecule(c40)
+mol4.addAtom(c41, c40, 2)
+c42 = Atom("C")
+c43 = Atom("C")
+mol4.addAtom(c42, c40, 1)
+mol4.addAtom(c43, c41, 1)
+c40.newCTCenter(c41, c42, None)
+c41.newCTCenter(c40, c43, None)

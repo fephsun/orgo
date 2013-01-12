@@ -4,13 +4,7 @@ The reactions here are to be moved eventually into reactions.py
 
 
 
-Halogenation
-Candidate reactants: alkenes, alkynes
-X2 in CH2Cl2, dark
-Anti addition of an X to each atom in the alkene.
-if 1eqv specified --> add once
-if 2eqv or if excess specified --> add twice
-if no quantity specified --> don't let it be a valid reaction? Some sort of feedback to make user specify _how much_ when reacting with alkynes (which is a good habit to have) would be nice.
+
 
 
 Free-radical hydrohalogenation

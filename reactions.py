@@ -88,6 +88,24 @@ CTmol.addAtom(br10, c11, 1)
 c10.newCTCenter(c11, cl1, c12)
 c11.newCTCenter(c10, cl2, br10)
 
+#Makes C\   /Cl
+#        C=C
+#     C1/   \Br
+c15 = Atom("C")
+CTmol2 = Molecule(c15)
+c16 = Atom("C")
+CTmol2.addAtom(c16, c15, 2)
+c17 = Atom("C")
+CTmol2.addAtom(c17, c15, 1)
+cl5 = Atom("Cl")
+CTmol2.addAtom(cl5, c15, 1)
+cl6 = Atom("Cl")
+CTmol2.addAtom(cl6, c16, 1)
+br15 = Atom("Br")
+CTmol2.addAtom(br15, c16, 1)
+c15.newCTCenter(c16, cl6, c17)
+c16.newCTCenter(c15, br15, cl5)
+
 #Makes  C\ /C-C
 #         C
 #      Br/ \H

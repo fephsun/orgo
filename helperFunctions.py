@@ -152,6 +152,13 @@ def neighborCompare(a,b, compareDict):
         chiralFlag = True
     else:
         chiralFlag = False
+    if hasattr(a, "CTotherC") != hasattr(b, "CTotherC"):
+        #One atom has a cis-trans center, where the other doesn't.  Obviously no pairings.
+        return None
+    if hasattr(a, "CTotherC"):
+        CTFlag = True
+    else:
+        CTFlag = False
     #Generate all n! pairings, and prune as we go.
     out = []
     for aNeighborSet in itertools.permutations(a.neighbors):
@@ -173,6 +180,8 @@ def neighborCompare(a,b, compareDict):
                 break
             temp[aNeighborSet[i]] = b.neighbors.keys()[i]
         if chiralFlag and OKFlag:
+            #The following bit of code is still quite messy.  It tests whether the
+            #hypothesized pairing follows the correct chirality.
             aCW = []
             bCW = []
             for neighbor in a.chiralCWlist(aNeighborSet[randThing]):
@@ -199,6 +208,14 @@ def neighborCompare(a,b, compareDict):
                             pass
                         else:
                             OKFlag = False
+        if CTFlag and OKFlag:
+            #Makes sure that the hypothesized pairing follows the correct
+            #cis-trans relationship
+            if (a.CTa == None and b.CTa != None) or\
+               (a.CTa != None and temp[a.CTa] != b.CTa) or\
+               (a.CTb == None and b.CTb != None) or\
+               (a.CTb != None and temp[a.CTb] != b.CTb):
+                OKFlag = False
 
         if (temp not in out) and OKFlag:
             out.append(temp)

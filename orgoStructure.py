@@ -19,6 +19,12 @@ class Molecule:
     def addBond(self, atom1, atom2, bondOrder):
         atom1.neighbors[atom2] = bondOrder
         atom2.neighbors[atom1] = bondOrder
+
+    def addMolecule(self, molecule, foreignTarget, selfTarget, bo):
+        #Preserves objects in added molecule (no deepcopy)
+        for foreignAtom in molecule.atoms:
+            self.atoms.append(foreignAtom)
+        self.addBond(selfTarget, foreignTarget, bo)
         
     def removeAtom(self, target):
         for atom in self.atoms:

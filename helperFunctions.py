@@ -10,16 +10,9 @@ def antiAdd(molecule, target1, target2, add1, add2,
     return synAdd(molecule, target1, target2, add1, add2,
                   addtarget1, addtarget2, True)
 
-def synAdd(molecule, target1, target2, add1, add2,
-           addtarget1 = None, addtarget2 = None, antiAdd = False):
-    #Destroys the double bond and CTstereochemistry between target1 and target2.
-    #Adds add1 and add2 to target1 and target2.  If add1 and/or add2 are molecules,
-    #addtargets are needed to specify where the bond should originate from add.
-
-    #Also does anti-addition, if antiAdd is set to true.
-
-    #We need to remember where the targets are in the list of atoms, because
-    #we will be copying the molecules and destroying all references.
+def duplicateInputs(molecule, target1, target2, add1, add2, addtarget1,
+                    addtarget2):
+    #Helper function for adds.  Returns a deep-copied version of all the inputs.
     target1Pos = molecule.atoms.index(target1)
     target2Pos = molecule.atoms.index(target2)
     if addtarget1 != None:
@@ -27,28 +20,36 @@ def synAdd(molecule, target1, target2, add1, add2,
     if addtarget2 != None:
         addtarget2Pos = add2.atoms.index(addtarget2)
 
-    #deepcopy to make 2 cases: top addition or bottom addition
-    molecule = copy.deepcopy(molecule)
     Xmolecule = copy.deepcopy(molecule)
     #Remake pointers to targets
-    target1 = molecule.atoms[target1Pos]
     Xtarget1 = Xmolecule.atoms[target1Pos]
-    target2 = molecule.atoms[target2Pos]
     Xtarget2 = Xmolecule.atoms[target2Pos]
-    add1 = copy.deepcopy(add1)
     Xadd1 = copy.deepcopy(add1)
-    add2 = copy.deepcopy(add2)
     Xadd2 = copy.deepcopy(add2)
     if addtarget1 != None:
-        addtarget1 = add1.atoms[addtarget1Pos]
         Xaddtarget1 = Xadd1.atoms[addtarget1Pos]
     else:
         Xaddtarget1 = None
     if addtarget2 != None:
-        addtarget2 = add2.atoms[addtarget2Pos]
         Xaddtarget2 = Xadd2.atoms[addtarget2Pos]
     else:
         Xaddtarget2 = None
+    return (Xmolecule, Xtarget1, Xtarget2, Xadd1, Xadd2, Xaddtarget1, Xaddtarget2)
+
+def synAdd(molecule, target1, target2, add1, add2,
+           addtarget1 = None, addtarget2 = None, antiAdd = False):
+    #Destroys the double bond and CTstereochemistry between target1 and target2.
+    #Adds add1 and add2 to target1 and target2.  If add1 and/or add2 are molecules,
+    #addtargets are needed to specify where the bond should originate from add.
+
+    #Also does anti-addition, if antiAdd is set to true.
+    (molecule, target1, target2, add1, add2, addtarget1, addtarget2) =\
+               duplicateInputs(molecule, target1, target2, add1, add2, addtarget1,
+                               addtarget2)
+    (Xmolecule, Xtarget1, Xtarget2, Xadd1, Xadd2, Xaddtarget1, Xaddtarget2) =\
+               duplicateInputs(molecule, target1, target2, add1, add2, addtarget1,
+                               addtarget2)
+
     #Set bond orders to single.
     target1.neighbors[target2] = 1
     target2.neighbors[target1] = 1
@@ -91,6 +92,31 @@ def synAdd(molecule, target1, target2, add1, add2,
         return [molecule]
     else:
         return [molecule, Xmolecule]
+
+def allAdd(molecule, target1, target2, add1, add2, addtarget1=None, addtarget2=None):
+    #Adds add1 and add2 to target1 and target2, in both syn and anti fashions.
+    #Does not introduce stereochemistry (this kind of addition never results in
+    #stereochemistry).
+
+    #Protect the inputs from modification:
+    (molecule, target1, target2, add1, add2, addtarget1, addtarget2)=\
+               duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)
+    #Reduce double bond
+    molecule.changeBond(target1, target2, 1)
+    target1.eliminateCT()
+    target2.eliminateCT()
+    #Add new stuff
+    for thisTarget, thisAdd, thisAddtarget in (
+        (target1, add1, addtarget1), (target2, add2, addtarget2)):
+        if isinstance(thisAdd, Molecule):
+            molecule.addMolecule(thisAdd, thisAddtarget, thisTarget, 1)
+        elif isinstance(thisAdd, Atom):
+            molecule.addAtom(thisAdd, thisTarget, 1)
+        else:
+            #Hydrogens.  Do nothing.
+            pass
+    return molecule
+    
 
 def moleculeCompare(a, b, compareDict = None, expanded = []):
     #Determines whether two molecules are isomorphic.  In the worst case

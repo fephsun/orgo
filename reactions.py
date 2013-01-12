@@ -144,3 +144,33 @@ mol4.addAtom(c42, c40, 1)
 mol4.addAtom(c43, c41, 1)
 c40.newCTCenter(c41, c42, None)
 c41.newCTCenter(c40, c43, None)
+
+#        c50
+#Makes C-C<Cl
+#     /   \
+#   C<C   C>Br c51
+#      \C/
+c50 = Atom("C")
+c51 = Atom("C")
+c52 = Atom("C")
+c53 = Atom("C")
+c54 = Atom("C")
+cycPentMol = Molecule(c50)
+cycPentMol.addAtom(c51, c50, 1)
+cycPentMol.addAtom(c52, c51, 1)
+cycPentMol.addAtom(c53, c52, 1)
+cycPentMol.addAtom(c54, c53, 1)
+cycPentMol.addBond(c54, c50, 1)
+cl50 = Atom("Cl")
+cycPentMol.addAtom(cl50, c50, 1)
+c50.newChiralCenter(c54, (cl50, c51, None))
+br50 = Atom("Br")
+cycPentMol.addAtom(br50, c51, 1)
+c51.newChiralCenter(c50, (c52, br50, None))
+c55 = Atom("C")
+cycPentMol.addAtom(c55, c53, 1)
+c53.newChiralCenter(c52, (c55, None, c54))
+
+
+
+

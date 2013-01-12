@@ -6,6 +6,9 @@ randThing = 0
 
 def bothAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None):
 
+
+def singleAdd(molecule, target, add, addtarget):
+
 def antiAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None):
     #Destroys the double bond and CTstereochemistry between target1 and target2.
     #Adds add1 and add2 to target1 and target2.  If add1 and/or add2 are molecules,
@@ -16,12 +19,24 @@ def antiAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget
     
     #Add targets, creating new bonds
     if addtarget1 == None:
-        
+        newMolecule1.addAtom(add1)
+        newMolecule1.addBond(target1, add1, 1)
     else:
         for atom in add1.atoms:
-           newMolecule1.addAtom(atom) 
+           newMolecule1.addAtom(atom)
+           if atom == addtarget1:
+               newMolecule1.addBond(target1, atom, 1)
     
     #Apply tetrahedral stereochemistry
+    
+    if addtarget2 == None:
+        newMolecule2.addAtom(add2)
+    
+
+
+
+
+    
 
     #Remove CT stereochemistry
     

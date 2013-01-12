@@ -9,45 +9,48 @@ def synAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2
     #Adds add1 and add2 to target1 and target2.  If add1 and/or add2 are molecules,
     #addtargets are needed to specify where the bond should originate from add.
 
-    #Set bond orders to single.
-    molecule = copy.deepcopy(molecule)
-    target1.neighbors[target2] = 1
-    target2.neighbors[target1] = 1
-    #Insert flags onto atoms, so we can find them after deepcopy.
-    target1.targetFlag = 1
-    target2.targetFlag = 2
+    #We need to remember where the targets are in the list of atoms, because
+    #we will be copying the molecules and destroying all references.
+    target1Pos = molecule.atoms.index(target1)
+    target2Pos = molecule.atoms.index(target2)
     if addtarget1 != None:
-        addtarget1.atFlag = 1
+        addtarget1Pos = add1.atoms.index(addtarget1)
     if addtarget2 != None:
-        addtarget2.atFlag = 2
+        addtarget2Pos = add2.atoms.index(addtarget2)
 
     #deepcopy to make 2 cases: top addition or bottom addition
+    molecule = copy.deepcopy(molecule)
     Xmolecule = copy.deepcopy(molecule)
-    for atom in Xmolecule.atoms:
-        if hasattr(atom, "targetFlag"):
-            if atom.targetFlag == 1:
-                Xtarget1 = atom
-            elif atom.targetFlag == 2:
-                Xtarget2 = atom
+    #Remake pointers to targets
+    target1 = molecule.atoms[target1Pos]
+    Xtarget1 = Xmolecule.atoms[target1Pos]
+    target2 = molecule.atoms[target2Pos]
+    Xtarget2 = Xmolecule.atoms[target2Pos]
+    add1 = copy.deepcopy(add1)
     Xadd1 = copy.deepcopy(add1)
+    add2 = copy.deepcopy(add2)
     Xadd2 = copy.deepcopy(add2)
     if addtarget1 != None:
-        for atom in Xadd1.atoms:
-            if hasattr(atom, "atFlag"):
-                Xaddtarget1 = atom
+        addtarget1 = add1.atoms[addtarget1Pos]
+        Xaddtarget1 = Xadd1.atoms[addtarget1Pos]
     else:
         Xaddtarget1 = None
     if addtarget2 != None:
-        for atom in Xadd2.atoms:
-            if hasattr(atom, "atFlag"):
-                Xaddtarget2 = atom
+        addtarget2 = add2.atoms[addtarget2Pos]
+        Xaddtarget2 = Xadd2.atoms[addtarget2Pos]
     else:
         Xaddtarget2 = None
+    #Set bond orders to single.
+    target1.neighbors[target2] = 1
+    target2.neighbors[target1] = 1
+    Xtarget1.neighbors[Xtarget2] = 1
+    Xtarget2.neighbors[Xtarget1] = 1
 
-    #Add the add's to both targets, following chirality.  Sorry for the copy-paste.
-    for thisAdd, thisTarget, thisAddTarget, otherTarget, ct1, ct2\
-            in ((add1, target1, addtarget1, target2, target1.CTb, target1.CTa),
-                (add2, target2, addtarget2, target1, target2.CTa, target2.CTb)):
+    for thismolecule, thisAdd, thisTarget, thisAddTarget, otherTarget, ct1, ct2\
+            in ((molecule, add1, target1, addtarget1, target2, target1.CTb, target1.CTa),
+                (molecule, add2, target2, addtarget2, target1, target2.CTa, target2.CTb),
+                (Xmolecule, Xadd1, Xtarget1, Xaddtarget1, Xtarget2, Xtarget1.CTa, Xtarget1.CTb),
+                (Xmolecule, Xadd2, Xtarget2, Xaddtarget2, Xtarget1, Xtarget2.CTb, Xtarget2.CTa)):
         if isinstance(thisAdd, Atom):
             molecule.addAtom(thisAdd, thisTarget, 1)
             if ct1 != None or ct2 != None:
@@ -65,30 +68,6 @@ def synAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2
                 thisTarget.newChiralCenter(otherTarget,
                         (None, ct1, ct2))
         thisTarget.eliminateCT()
-
-    for thisAdd, thisTarget, thisAddTarget, otherTarget, ct1, ct2\
-            in ((Xadd1, Xtarget1, Xaddtarget1, Xtarget2, Xtarget1.CTb, Xtarget1.CTa),
-                (Xadd2, Xtarget2, Xaddtarget2, Xtarget1, Xtarget2.CTa, Xtarget2.CTb)):
-        if isinstance(thisAdd, Atom):
-            Xmolecule.addAtom(thisAdd, thisTarget, 1)
-            if ct1 != None or ct2 != None:
-                thisTarget.newChiralCenter(otherTarget,
-                        (thisAdd, ct2, ct1))
-        elif isinstance(thisAdd, Molecule):
-            #Untested.
-            Xmolecule.addMolecule(thisAdd, thisAddTarget, thisTarget, 1)
-            if ct1 != None or ct2 != None:
-                thisTarget.newChiralCenter(otherTarget,
-                        (thisAddTarget, ct2, ct1))
-        else:
-            #Hydrogens.
-            if ct1 != None and ct2 != None:
-                thisTarget.newChiralCenter(otherTarget,
-                        (None, ct2, ct1))
-        thisTarget.eliminateCT()
-    print smiles(molecule)
-    print smiles(Xmolecule)
-    #If molecule and Xmolecule are the same, we only need to return one product.
     if moleculeCompare(molecule, Xmolecule):
         return [molecule]
     else:

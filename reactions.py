@@ -2,14 +2,18 @@ from helperFunctions import *
 
 def hydrogenate(molecules):
     #H2/PdC catalyst reaction for double bonds only, for now.  Syn addition.
-    for molecule in molecules:
-        for carbon in molecule.atoms:
-            if carbon.element != 'C':
-                continue
-            for neighbor in carbon.neighbors:
-                if neighbor.element == 'C' and carbon.neighbors[neighbor] == 2:
-                    molecules.remove(molecule)
-                    molecules += synAdd(molecule, carbon, neighbor, None, None)
+    while True:
+        alkenes = [findAlkenes(molecule) for molecule in molecules]
+        #The line below flattens a nested list, I swear.  Just don't ask how
+        #it works.  -FS
+        flatAlkenes = [item for sublist in alkenes for item in sublist]
+        if len(flatAlkenes) == 0:
+            break
+        alkenes = [(molecule,findAlkenes(molecule)) for molecule in molecules]
+        for molecule, alkeneList in alkenes:
+            molecules.remove(molecule)
+            molecules += synAdd(molecule, alkeneList[0][0], alkeneList[0][1],
+                                None, None)
     return molecules
 
 
@@ -33,7 +37,7 @@ def hydrohalogenate(molecules, halogen):
         for doublebond in findAlkenes(molecule):
             mkvCarbons = markovnikov(doublebond[0], doublebond[1])
             for pairing in mkvCarbons:
-                newMolecules += synAdd(molecule, pairing[0], pairing[1], 
+                newMolecules += synAdd(molecule, pairing[0], pairing[1])
             
 #Makes     C-C-C<C
 #          |   |
@@ -120,5 +124,3 @@ mol4.addAtom(c42, c40, 1)
 mol4.addAtom(c43, c41, 1)
 c40.newCTCenter(c41, c42, None)
 c41.newCTCenter(c40, c43, None)
-
-hydrogenate([mol])

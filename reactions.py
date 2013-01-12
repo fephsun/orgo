@@ -72,7 +72,7 @@ c2.newCTCenter(c1, n1, None)
 
 #Makes C\   /Cl
 #        C=C
-#     C1/
+#     C1/   \Br
 c10 = Atom("C")
 CTmol = Molecule(c10)
 c11 = Atom("C")
@@ -83,8 +83,10 @@ cl1 = Atom("Cl")
 CTmol.addAtom(cl1, c10, 1)
 cl2 = Atom("Cl")
 CTmol.addAtom(cl2, c11, 1)
+br10 = Atom("Br")
+CTmol.addAtom(br10, c11, 1)
 c10.newCTCenter(c11, cl1, c12)
-c11.newCTCenter(c10, cl2, None)
+c11.newCTCenter(c10, cl2, br10)
 
 #Makes  C\ /C-C
 #         C

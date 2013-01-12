@@ -4,10 +4,19 @@ import itertools
 
 randThing = 0
 
-def synAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None):
+def antiAdd(molecule, target1, target2, add1, add2,
+            addtarget1 = None, addtarget2 = None):
+    #Just a wrapper function, to make antiAdd less confusing.
+    return synAdd(molecule, target1, target2, add1, add2,
+                  addtarget1, addtarget2, True)
+
+def synAdd(molecule, target1, target2, add1, add2,
+           addtarget1 = None, addtarget2 = None, antiAdd = False):
     #Destroys the double bond and CTstereochemistry between target1 and target2.
     #Adds add1 and add2 to target1 and target2.  If add1 and/or add2 are molecules,
     #addtargets are needed to specify where the bond should originate from add.
+
+    #Also does anti-addition, if antiAdd is set to true.
 
     #We need to remember where the targets are in the list of atoms, because
     #we will be copying the molecules and destroying all references.
@@ -46,11 +55,21 @@ def synAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2
     Xtarget1.neighbors[Xtarget2] = 1
     Xtarget2.neighbors[Xtarget1] = 1
 
+    if antiAdd:
+        bigListOfStuff =\
+        ((molecule, add1, target1, addtarget1, target2, target1.CTa, target1.CTb),
+        (molecule, add2, target2, addtarget2, target1, target2.CTa, target2.CTb),
+        (Xmolecule, Xadd1, Xtarget1, Xaddtarget1, Xtarget2, Xtarget1.CTb, Xtarget1.CTa),
+        (Xmolecule, Xadd2, Xtarget2, Xaddtarget2, Xtarget1, Xtarget2.CTb, Xtarget2.CTa))
+    else:
+        bigListOfStuff =\
+        ((molecule, add1, target1, addtarget1, target2, target1.CTb, target1.CTa),
+        (molecule, add2, target2, addtarget2, target1, target2.CTa, target2.CTb),
+        (Xmolecule, Xadd1, Xtarget1, Xaddtarget1, Xtarget2, Xtarget1.CTa, Xtarget1.CTb),
+        (Xmolecule, Xadd2, Xtarget2, Xaddtarget2, Xtarget1, Xtarget2.CTb, Xtarget2.CTa))
+
     for thismolecule, thisAdd, thisTarget, thisAddTarget, otherTarget, ct1, ct2\
-            in ((molecule, add1, target1, addtarget1, target2, target1.CTb, target1.CTa),
-                (molecule, add2, target2, addtarget2, target1, target2.CTa, target2.CTb),
-                (Xmolecule, Xadd1, Xtarget1, Xaddtarget1, Xtarget2, Xtarget1.CTa, Xtarget1.CTb),
-                (Xmolecule, Xadd2, Xtarget2, Xaddtarget2, Xtarget1, Xtarget2.CTb, Xtarget2.CTa)):
+            in bigListOfStuff:
         if isinstance(thisAdd, Atom):
             molecule.addAtom(thisAdd, thisTarget, 1)
             if ct1 != None or ct2 != None:

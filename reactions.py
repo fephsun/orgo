@@ -81,19 +81,23 @@ to have) would be nice."""
 def hydrohalogenate(molecules, halogen):
     def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
         a = findAlkenes(molecule)
+        if a == None:
+            a = findAlkynes(molecule)
+
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
-        pass
+        return bothAdd(molecule, place[0], place[1], Atom(halogen), None)
+    
     return react(molecules, findPlace, reactAtPlace)
 
 
     
-    newMolecules = []
+    '''newMolecules = []
     for molecule in molecules:
         for doublebond in findAlkenes(molecule):
             mkvCarbons = markovnikov(doublebond[0], doublebond[1])
             for pairing in mkvCarbons:
                 newMolecules += bothAdd(molecule, pairing[0], pairing[1], Atom(halogen), None)
-    return newMolecules
+    return newMolecules'''
 
 
 
@@ -104,6 +108,8 @@ Anti addition of an X to each atom in the alkene.
 if 1eqv specified --> add once
 if 2eqv or if excess specified --> add twice
 if no quantity specified --> don't let it be a valid reaction? Some sort of feedback to make user specify _how much_ when reacting with alkynes (which is a good habit to have) would be nice."""
+
+#halogen is a string
 def halogenate(molecules, halogen):
     pass
 '''
@@ -121,13 +127,29 @@ def halogenate(molecules, halogen):
 Candidate reactants: alkenes
 HBr cat ROOR, hv or heat
 Adds the X to the anti-Markovnikov-most carbon in the alkene, and the H to the other one. Neither syn nor anti."""
+
+#halogen is a string
 def radicalhydrohalogenate(molecules, halogen):
     newMolecules = []
+
+    
+    def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
+        a = findAlkenes(molecule)
+        if a == None:
+            a = findAlkynes(molecule)
+
+    def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
+        print "Got here!"
+        return bothAdd(molecule, place[0], place[1], None, Atom(halogen))
+    
+    return react(molecules, findPlace, reactAtPlace)
+
+    '''
     for molecule in molecules:
         for doublebond in findAlkenes(molecule):
             mkvCarbons = markovnikov(doublebond[0], doublebond[1])
             for pairing in mkvCarbons:
-                newMolecules += bothAdd(molecule, pairing[0], pairing[1], None, Atom(halogen))
+                newMolecules += bothAdd(molecule, pairing[0], pairing[1], None, Atom(halogen))'''
 
 
 

@@ -127,6 +127,11 @@ class Atom:
 
 
 def smiles(molecule):
+
+    if isinstance(molecule, list):
+        return [smiles(molec) for molec in molecule]
+
+    
     if len(molecule.atoms)==0: return ""
     
     ringsfound = 0

@@ -105,7 +105,13 @@ if 1eqv specified --> add once
 if 2eqv or if excess specified --> add twice
 if no quantity specified --> don't let it be a valid reaction? Some sort of feedback to make user specify _how much_ when reacting with alkynes (which is a good habit to have) would be nice."""
 def halogenate(molecules, halogen):
-    pass
+    def findPlace(molecule):
+        return findAlkenes(molecule)
+    def reactAtPlace(molecule, place):
+        atomicHalogen = Atom(halogen)
+        atomicHalogen2 = Atom(halogen)
+        return antiAdd(molecule, place[0], place[1], atomicHalogen, atomicHalogen2)
+    return react(molecules, findPlace, reactAtPlace)
 '''
     newMolecules = []
     for molecule in molecules:

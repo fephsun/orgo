@@ -25,7 +25,10 @@ def react(molecules, findPlace, reactAtPlace):
         for molecule, place in places:
             if place != None:
                 molecules.remove(molecule)
-                molecules += reactAtPlace(molecule, place)
+                x = reactAtPlace(molecule, place)
+                if not isinstance(x, list):
+                    x = [x]
+                molecules += x
     return molecules
 
 
@@ -85,9 +88,9 @@ def hydrohalogenate(molecules, halogen):
         a = findAlkenes(molecule)
         if a == None:
             a = findAlkynes(molecule)
-
+        return a
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
-        return bothAdd(molecule, place[0], place[1], Atom(halogen), None)
+        return allAdd(molecule, place[0], place[1], Atom(halogen), None)
     
     return react(molecules, findPlace, reactAtPlace)
 
@@ -138,17 +141,13 @@ Adds the X to the anti-Markovnikov-most carbon in the alkene, and the H to the o
 
 #halogen is a string
 def radicalhydrohalogenate(molecules, halogen):
-    newMolecules = []
-
-    
     def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
         a = findAlkenes(molecule)
         if a == None:
             a = findAlkynes(molecule)
-
+        return a
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
-        print "Got here!"
-        return bothAdd(molecule, place[0], place[1], None, Atom(halogen))
+        return allAdd(molecule, place[0], place[1], None, Atom(halogen))
     
     return react(molecules, findPlace, reactAtPlace)
 

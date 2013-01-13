@@ -4,6 +4,9 @@ import itertools
 
 randThing = 0
 
+
+
+#Returns a list of molecules.
 def antiAdd(molecule, target1, target2, add1, add2,
             addtarget1 = None, addtarget2 = None):
     #Just a wrapper function, to make antiAdd less confusing.
@@ -36,6 +39,8 @@ def duplicateInputs(molecule, target1, target2, add1, add2, addtarget1,
         Xaddtarget2 = None
     return (Xmolecule, Xtarget1, Xtarget2, Xadd1, Xadd2, Xaddtarget1, Xaddtarget2)
 
+
+#Returns a list of molecules.
 def synAdd(molecule, target1, target2, add1, add2,
            addtarget1 = None, addtarget2 = None, antiAdd = False):
     #Destroys the double bond and CTstereochemistry between target1 and target2.
@@ -115,7 +120,7 @@ def allAdd(molecule, target1, target2, add1, add2, addtarget1=None, addtarget2=N
         else:
             #Hydrogens.  Do nothing.
             pass
-    return molecule
+    return [molecule]
     
 
 def moleculeCompare(a, b, compareDict = None, expanded = []):

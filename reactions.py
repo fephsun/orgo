@@ -1,18 +1,6 @@
 from helperFunctions import *
 
 
-#abstract
-def reactAtPlace(molecule, place):
-    #react molecule using data provided by place
-    #return a list of molecules
-    pass
-
-#abstract
-def findPlace(molecule):
-    #return some sort of data that can be used by its partner reactAtPlace method
-    #if no such place exists, return None
-    pass
-
 
 
 def react(molecules, findPlace, reactAtPlace):
@@ -32,23 +20,11 @@ def react(molecules, findPlace, reactAtPlace):
     return molecules
 
 
-'''def hydrogenate(molecules):
-    #H2/PdC catalyst reaction for double bonds only, for now.  Syn addition.
-    while True:
-        alkenes = [findAlkenes(molecule) for molecule in molecules]
-        #The line below flattens a nested list, I swear.  Just don't ask how
-        #it works.  -FS
-        flatAlkenes = [item for sublist in alkenes for item in sublist]
-        if len(flatAlkenes) == 0:
-            break
-        alkenes = [(molecule,findAlkenes(molecule)) for molecule in molecules]
-        for molecule, alkeneList in alkenes:
-            molecules.remove(molecule)
-            molecules += synAdd(molecule, alkeneList[0], alkeneList[1],
-                                None, None)
-    return molecules
-'''
 
+"""Hydrogenation
+Candidate reactants: alkenes, alkynes
+H2 cat Pd|C in EtOH
+Syn addition of an H to each atom in the alkene or alkyne. Go all the way to single bond."""
 
 def hydrogenate(molecules):
     def findPlace(molecule):
@@ -61,11 +37,11 @@ def hydrogenate(molecules):
 
 
 #abstract
-def genericReaction(molecules, ):
+def genericReaction(molecules):
     def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
-        pass
+        return None
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
-        pass
+        return None
     return react(molecules, findPlace, reactAtPlace)
     
 
@@ -86,23 +62,15 @@ to have) would be nice."""
 def hydrohalogenate(molecules, halogen):
     def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
         a = findAlkenes(molecule)
-        if a == None:
-            a = findAlkynes(molecule)
         return a
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
-        return allAdd(molecule, place[0], place[1], Atom(halogen), None)
-    
+        newMolecules = []
+        mkvCarbons = markovnikov(doublebond[0], doublebond[1])
+        for pairing in mkvCarbons:
+                newMolecules += allAdd(molecule, pairing[0], pairing[1], Atom(halogen), None)
+        return newMolecules
     return react(molecules, findPlace, reactAtPlace)
 
-
-    
-    '''newMolecules = []
-    for molecule in molecules:
-        for doublebond in findAlkenes(molecule):
-            mkvCarbons = markovnikov(doublebond[0], doublebond[1])
-            for pairing in mkvCarbons:
-                newMolecules += bothAdd(molecule, pairing[0], pairing[1], Atom(halogen), None)
-    return newMolecules'''
 
 
 
@@ -123,15 +91,9 @@ def halogenate(molecules, halogen):
         atomicHalogen2 = Atom(halogen)
         return antiAdd(molecule, place[0], place[1], atomicHalogen, atomicHalogen2)
     return react(molecules, findPlace, reactAtPlace)
-'''
-    newMolecules = []
-    for molecule in molecules:
-        for doublebond in findAlkenes(molecule):
-            newMolecules += antiAdd(molecule, pairing[0], pairing[1], Atom(halogen), Atom(halogen))
-        for triplebond in findAlkynes(molecule):
 
-    return newMolecules
-'''
+
+
 
 
 """Free-radical hydrohalogenation
@@ -143,12 +105,13 @@ Adds the X to the anti-Markovnikov-most carbon in the alkene, and the H to the o
 def radicalhydrohalogenate(molecules, halogen):
     def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
         a = findAlkenes(molecule)
-        if a == None:
-            a = findAlkynes(molecule)
         return a
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
-        return allAdd(molecule, place[0], place[1], None, Atom(halogen))
-    
+        newMolecules = []
+        mkvCarbons = markovnikov(doublebond[0], doublebond[1])
+        for pairing in mkvCarbons:
+                newMolecules += allAdd(molecule, pairing[0], pairing[1], None, Atom(halogen))
+        return newMolecules
     return react(molecules, findPlace, reactAtPlace)
 
     '''
@@ -157,6 +120,80 @@ def radicalhydrohalogenate(molecules, halogen):
             mkvCarbons = markovnikov(doublebond[0], doublebond[1])
             for pairing in mkvCarbons:
                 newMolecules += bothAdd(molecule, pairing[0], pairing[1], None, Atom(halogen))'''
+
+
+"""
+Epoxidation
+Candidate reactants: alkenes
+mCPBA or PhCO3H or RCO3H, in CH2Cl2
+Converts alkene bond to an epoxide. Two possible stereochemical outcomes (up-epoxide or down-epoxide)
+"""
+def epoxidate(molecules):
+    def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
+        return None
+    def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
+        return None
+    return react(molecules, findPlace, reactAtPlace)
+
+
+"""
+Hydration
+Candidate reactants: alkenes
+H2SO4 (or other acid) in ROH, where R can also be H
+If alkene: Adds an OR to the Markovnikov carbon of the alkene, and an H to the anti-Markovnikov carbon. Neither syn nor anti, since carbocation.
+If alkyne and H2O: Form a ketone or aldehyde, placing the O at the Markovnikov carbon.
+If alkyne and ROH: I'm not sure. Forms some strange enolate-ester? Possibly best to leave this out?
+
+Halohydration
+Candidate reactants: alkenes
+X2 in ROH, where R can also be H
+Adds an OR to the Markovnikov carbon of the alkene, and an X to the anti-Markovnikov carbon. Anti.
+
+Hydroboration
+Candidate reactants: alkenes
+BH3 in THF, then NaOH and H2O2
+If alkene: Adds an OH to the anti-Markovnikov carbon, then adds an H to the other one. Syn addition.
+If alkyne: Form a ketone or aldehyde, placing the O at the anti-Markovnikov carbon.
+
+Dihydroxylation (Upjohn dihydroxylation)
+Candidate reactants: alkenes
+cat. OsO4 in NMO and acetone or H2O
+Syn addition of two OH groups to each carbon.
+
+Ozonolysis
+Candidate reactants: alkenes
+O3 in CH2Cl2, with Me2S or Zn
+Adds two oxygens, splitting alkene bond, producing carbonyls.
+
+Lindlar reduction
+Candidate reactants: alkynes
+H2, cat. Lindlar
+Produces the cis alkene from an alkyne. Adds two Hs.
+
+Sodium-ammonia reduction
+Candidate reactants: alkynes
+Na, in NH3 (L)
+Produces the trans alkene from an alkyne. Adds two Hs.
+
+Alkyne deprotonation to acetylide
+Candidate reactants: alkynes, in which one end is an H
+NaNH2 in NH3
+Produces an acetylide ion. Removes the H+, resulting in a negative charge.
+"""
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,6 +1,33 @@
 from helperFunctions import *
 
-def hydrogenate(molecules):
+
+#abstract
+def reactAtPlace(molecule, place):
+    #react molecule using data provided by place
+    #return a list of molecules
+    pass
+
+#abstract
+def findPlace(molecule):
+    #return some sort of data that can be used by its partner reactAtPlace method
+    #if no such place exists, return None
+    pass
+
+
+
+def react(molecules, findPlace, reactAtPlace):
+    while True:
+        places = [(molecule, findPlace(molecule)) for molecule in molecules]
+        if not (False in [item[1]==None for item in places]):
+            break
+        for molecule, place in places:
+            if place != None:
+                molecules.remove(molecule)
+                molecules += reactAtPlace(molecule, place)
+    return molecules
+
+
+'''def hydrogenate(molecules):
     #H2/PdC catalyst reaction for double bonds only, for now.  Syn addition.
     while True:
         alkenes = [findAlkenes(molecule) for molecule in molecules]
@@ -12,10 +39,30 @@ def hydrogenate(molecules):
         alkenes = [(molecule,findAlkenes(molecule)) for molecule in molecules]
         for molecule, alkeneList in alkenes:
             molecules.remove(molecule)
-            molecules += synAdd(molecule, alkeneList[0][0], alkeneList[0][1],
+            molecules += synAdd(molecule, alkeneList[0], alkeneList[1],
                                 None, None)
     return molecules
+'''
 
+
+def hydrogenate(molecules):
+    def findPlace(molecule):
+        return findAlkenes(molecule)
+
+    def reactAtPlace(molecule, place):
+        return synAdd(molecule, place[0], place[1], None, None)
+
+    return react(molecules, findPlace, reactAtPlace)
+
+
+#abstract
+def genericReaction(molecules, ):
+    def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
+        pass
+    def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
+        pass
+    return react(molecules, findPlace, reactAtPlace)
+    
 
 
 """Hydrohalogenation
@@ -32,6 +79,14 @@ to have) would be nice."""
 
 #halogen is a string
 def hydrohalogenate(molecules, halogen):
+    def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
+        a = findAlkenes(molecule)
+    def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
+        pass
+    return react(molecules, findPlace, reactAtPlace)
+
+
+    
     newMolecules = []
     for molecule in molecules:
         for doublebond in findAlkenes(molecule):
@@ -50,11 +105,31 @@ if 1eqv specified --> add once
 if 2eqv or if excess specified --> add twice
 if no quantity specified --> don't let it be a valid reaction? Some sort of feedback to make user specify _how much_ when reacting with alkynes (which is a good habit to have) would be nice."""
 def halogenate(molecules, halogen):
+    pass
+'''
     newMolecules = []
     for molecule in molecules:
         for doublebond in findAlkenes(molecule):
-                newMolecules += antiAdd(molecule, pairing[0], pairing[1], Atom(halogen), Atom(halogen))
+            newMolecules += antiAdd(molecule, pairing[0], pairing[1], Atom(halogen), Atom(halogen))
+        for triplebond in findAlkynes(molecule):
+
     return newMolecules
+'''
+
+
+"""Free-radical hydrohalogenation
+Candidate reactants: alkenes
+HBr cat ROOR, hv or heat
+Adds the X to the anti-Markovnikov-most carbon in the alkene, and the H to the other one. Neither syn nor anti."""
+def radicalhydrohalogenate(molecules, halogen):
+    newMolecules = []
+    for molecule in molecules:
+        for doublebond in findAlkenes(molecule):
+            mkvCarbons = markovnikov(doublebond[0], doublebond[1])
+            for pairing in mkvCarbons:
+                newMolecules += bothAdd(molecule, pairing[0], pairing[1], None, Atom(halogen))
+
+
 
 #Makes     C-C-C<C
 #          |   |

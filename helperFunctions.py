@@ -72,13 +72,13 @@ def synAdd(molecule, target1, target2, add1, add2,
     for thismolecule, thisAdd, thisTarget, thisAddTarget, otherTarget, ct1, ct2\
             in bigListOfStuff:
         if isinstance(thisAdd, Atom):
-            molecule.addAtom(thisAdd, thisTarget, 1)
+            thismolecule.addAtom(thisAdd, thisTarget, 1)
             if ct1 != None or ct2 != None:
                 thisTarget.newChiralCenter(otherTarget,
                         (thisAdd, ct1, ct2))
         elif isinstance(thisAdd, Molecule):
             #Untested.
-            molecule.addMolecule(thisAdd, thisAddTarget, thisTarget, 1)
+            thismolecule.addMolecule(thisAdd, thisAddTarget, thisTarget, 1)
             if ct1 != None or ct2 != None:
                 thisTarget.newChiralCenter(otherTarget,
                         (thisAddTarget, ct1, ct2))
@@ -320,13 +320,20 @@ def findAlkenes(molecule):
         for neighbor in atom.neighbors:
             if neighbor.element == 'C' and atom.neighbors[neighbor] == 2:
                 return (atom, neighbor)
+    return None
 
-    
+#Returns a tuple of atoms.
+def findAlkynes(molecule):
+    for atom in molecule.atoms:
+        if not (atom.element == 'C'):
+            continue
+        for neighbor in atom.neighbors:
+            if neighbor.element == 'C' and atom.neighbors[neighbor] == 3:
+                return (atom, neighbor)
     return None
 
 
 
 
-    
 
 

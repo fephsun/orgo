@@ -28,10 +28,19 @@ Syn addition of an H to each atom in the alkene or alkyne. Go all the way to sin
 
 def hydrogenate(molecules):
     def findPlace(molecule):
-        return findAlkenes(molecule)
+        x = findAlkenes(molecule)
+        if x == None:
+            return findAlkynes(molecule)
+        else:
+            return x
 
     def reactAtPlace(molecule, place):
-        return synAdd(molecule, place[0], place[1], None, None)
+        if place[0].neighbors[place[1]] == 2:
+            #Alkene
+            return synAdd(molecule, place[0], place[1], None, None)
+        else:
+            #Alkyne
+            return 
 
     return react(molecules, findPlace, reactAtPlace)
 
@@ -169,12 +178,26 @@ Lindlar reduction
 Candidate reactants: alkynes
 H2, cat. Lindlar
 Produces the cis alkene from an alkyne. Adds two Hs.
-
+"""
+def lindlar(molecules):
+    def findPlace(molecule):
+        return findAlkynes(molecule)
+    def reactAtPlace(molecule, place):
+        tripleAdd(molecule, place[0], place[1], None, None, 'cis')
+    return react(molecules, findPlace, reactAtPlace)
+"""
 Sodium-ammonia reduction
 Candidate reactants: alkynes
 Na, in NH3 (L)
 Produces the trans alkene from an alkyne. Adds two Hs.
-
+"""
+def sodiumAmmonia(molecules):
+    def findPlace(molecule):
+        return findAlkynes(molecule)
+    def reactAtPlace(molecule, place):
+        tripleAdd(molecule, place[0], place[1], None, None, 'trans')
+    return react(molecules, findPlace, reactAtPlace)
+"""
 Alkyne deprotonation to acetylide
 Candidate reactants: alkynes, in which one end is an H
 NaNH2 in NH3
@@ -237,32 +260,32 @@ c11 = Atom("C")
 CTmol.addAtom(c11, c10, 2)
 c12 = Atom("C")
 CTmol.addAtom(c12, c10, 1)
-cl1 = Atom("Cl")
-CTmol.addAtom(cl1, c10, 1)
-cl2 = Atom("Cl")
-CTmol.addAtom(cl2, c11, 1)
+cL1 = Atom("Cl")
+CTmol.addAtom(cL1, c10, 1)
+cL2 = Atom("Cl")
+CTmol.addAtom(cL2, c11, 1)
 br10 = Atom("Br")
 CTmol.addAtom(br10, c11, 1)
-c10.newCTCenter(c11, cl1, c12)
-c11.newCTCenter(c10, cl2, br10)
+c10.newCTCenter(c11, cL1, c12)
+c11.newCTCenter(c10, cL2, br10)
 
-#Makes C\   /Cl
+#Makes C\   /Br
 #        C=C
-#     C1/   \Br
+#     C1/   \Cl
 c15 = Atom("C")
 CTmol2 = Molecule(c15)
 c16 = Atom("C")
 CTmol2.addAtom(c16, c15, 2)
 c17 = Atom("C")
 CTmol2.addAtom(c17, c15, 1)
-cl5 = Atom("Cl")
-CTmol2.addAtom(cl5, c15, 1)
-cl6 = Atom("Cl")
-CTmol2.addAtom(cl6, c16, 1)
+cL5 = Atom("Cl")
+CTmol2.addAtom(cL5, c15, 1)
+cL6 = Atom("Cl")
+CTmol2.addAtom(cL6, c16, 1)
 br15 = Atom("Br")
 CTmol2.addAtom(br15, c16, 1)
-c15.newCTCenter(c16, cl6, c17)
-c16.newCTCenter(c15, br15, cl5)
+c15.newCTCenter(c16, cL5, c17)
+c16.newCTCenter(c15, br15, cL6)
 
 #Makes  C\ /C-C
 #         C
@@ -303,6 +326,18 @@ mol4.addAtom(c43, c41, 1)
 c40.newCTCenter(c41, c42, None)
 c41.newCTCenter(c40, c43, None)
 
+#Makes C\C=C\C
+c45 = Atom("C")
+c46 = Atom("C")
+mol4alt = Molecule(c45)
+mol4alt.addAtom(c46, c45, 2)
+c47 = Atom("C")
+c48 = Atom("C")
+mol4alt.addAtom(c47, c45, 1)
+mol4alt.addAtom(c48, c46, 1)
+c45.newCTCenter(c46, None, c47)
+c46.newCTCenter(c45, None, c48)
+
 #        c50
 #Makes C-C<Cl
 #     /   \
@@ -329,6 +364,14 @@ c55 = Atom("C")
 cycPentMol.addAtom(c55, c53, 1)
 c53.newChiralCenter(c52, (c55, None, c54))
 
-
+#Makes C-C#C-C
+c60 = Atom("C")
+c61 = Atom("C")
+c62 = Atom("C")
+c63 = Atom("C")
+propyne = Molecule(c60)
+propyne.addAtom(c61, c60, 3)
+propyne.addAtom(c62, c61, 1)
+propyne.addAtom(c63, c60, 1)
 
 

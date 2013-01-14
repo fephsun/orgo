@@ -133,16 +133,15 @@ def tripleAdd(molecule, target1, target2, add1, add2, cisOrTrans,
     #Protect the inputs from modification:
     (molecule, target1, target2, add1, add2, addtarget1, addtarget2)=\
         duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)
-    #This time, there are up to 2 possible outcomes.
-    (Xmolecule, Xtarget1, Xtarget2, Xadd1, Xadd2, Xaddtarget1, Xaddtarget2)=\
-        duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)
 
     #Change bond orders
     if target1.neighbors[target2] != 3:
         print "Error in tripleAdd: no triple bond specified."
         raise StandardError
-    for thisMol, thisTarget, otherTarget, thisAdd, thisAddtarget in\
-        ('Fill in this blank'):
+
+    stuff = ((molecule, target1, target2, add1, addtarget1),
+     (molecule, target2, target1, add2, addtarget2))
+    for thisMol, thisTarget, otherTarget, thisAdd, thisAddtarget in stuff:
         thisMol.changeBond(thisTarget, otherTarget, 2)
         if isinstance(thisAdd, Atom):
             thisMol.addAtom(thisAdd, thisTarget, 1)
@@ -153,8 +152,19 @@ def tripleAdd(molecule, target1, target2, add1, add2, cisOrTrans,
         else:
             #Hydrogen
             CTthing = None
-        if cisOrTrans.lower() == 'cis':
-            pass
+        for neighbor in thisTarget.neighbors:
+            if neighbor != otherTarget:
+                otherAttached = neighbor
+        if cisOrTrans.lower() == 'trans':
+            thisTarget.newCTCenter(otherTarget, otherAttached, thisAdd)
+        else:
+            if hasattr(otherTarget, "CTotherC"):
+                print "blah"
+                thisTarget.newCTCenter(otherTarget, otherAttached, thisAdd)
+            else:
+                thisTarget.newCTCenter(otherTarget, thisAdd, otherAttached)
+    return molecule
+
         
     
 

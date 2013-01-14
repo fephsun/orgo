@@ -107,8 +107,9 @@ def allAdd(molecule, target1, target2, add1, add2, addtarget1=None, addtarget2=N
     #Protect the inputs from modification:
     (molecule, target1, target2, add1, add2, addtarget1, addtarget2)=\
                duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)
-    #Reduce double bond
-    molecule.changeBond(target1, target2, 1)
+    #Reduces bond order by 1
+    bo = target1.neighbors[target2]
+    molecule.changeBond(target1, target2, bo-1)
     target1.eliminateCT()
     target2.eliminateCT()
     #Add new stuff
@@ -122,6 +123,50 @@ def allAdd(molecule, target1, target2, add1, add2, addtarget1=None, addtarget2=N
             #Hydrogens.  Do nothing.
             pass
     return [molecule]
+
+def tripleAdd(molecule, target1, target2, add1, add2, cisOrTrans,
+              addtarget1=None, addtarget2=None):
+    #A triple bond must be between targets 1 and 2.  Adds add1 and add2
+    #while reducing order by 1 (to double bond).  cisOrTrans must be specified,
+    #as a string ("cis" or "trans")
+    #As always, addtargets are needed iff add1 and add2 are molecules.
+    
+    #Protect the inputs from modification:
+    (molecule, target1, target2, add1, add2, addtarget1, addtarget2)=\
+        duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)
+
+    #Change bond orders
+    if target1.neighbors[target2] != 3:
+        print "Error in tripleAdd: no triple bond specified."
+        raise StandardError
+
+    stuff = ((molecule, target1, target2, add1, addtarget1),
+     (molecule, target2, target1, add2, addtarget2))
+    for thisMol, thisTarget, otherTarget, thisAdd, thisAddtarget in stuff:
+        thisMol.changeBond(thisTarget, otherTarget, 2)
+        if isinstance(thisAdd, Atom):
+            thisMol.addAtom(thisAdd, thisTarget, 1)
+            CTthing = thisAdd
+        elif isinstance(thisAdd, Molecule):
+            thisMol.addMolecule(thisAdd, thisAddtarget, thisTarget, 1)
+            CTthing = thisAddtarget
+        else:
+            #Hydrogen
+            CTthing = None
+        for neighbor in thisTarget.neighbors:
+            if neighbor != otherTarget:
+                otherAttached = neighbor
+        if cisOrTrans.lower() == 'trans':
+            thisTarget.newCTCenter(otherTarget, otherAttached, thisAdd)
+        else:
+            if hasattr(otherTarget, "CTotherC"):
+                print "blah"
+                thisTarget.newCTCenter(otherTarget, otherAttached, thisAdd)
+            else:
+                thisTarget.newCTCenter(otherTarget, thisAdd, otherAttached)
+    return molecule
+
+        
     
 
 def moleculeCompare(a, b, compareDict = None, expanded = []):
@@ -144,16 +189,19 @@ def moleculeCompare(a, b, compareDict = None, expanded = []):
     if compareDict == None:
         for atom in b.atoms:
             if atom.element == a.atoms[randThing].element:
-                newCompareDicts = neighborCompare(a.atoms[randThing], atom, dict())
+                oldCompareDict = {a.atoms[randThing]:atom, None:None}
+                newCompareDicts = neighborCompare(a.atoms[randThing], atom,
+                                oldCompareDict)
                 if newCompareDicts == None:
                     continue
                 for newCompareDict in newCompareDicts:
-                    if moleculeCompare(a, b, newCompareDict, [a.atoms[randThing]]):
+                    if moleculeCompare(a, b, dict(newCompareDict.items()+
+                                    oldCompareDict.items()), [a.atoms[randThing]]):
                         return True
         return False
 
     for aAtom in compareDict:
-        if aAtom in expanded:
+        if (aAtom in expanded) or aAtom == None:
             #Already expanded this atom.  Don't do it again.
             continue
         newDictSectors = neighborCompare(aAtom, compareDict[aAtom], compareDict)
@@ -194,7 +242,7 @@ def neighborCompare(a,b, compareDict):
     #Generate all n! pairings, and prune as we go.
     out = []
     for aNeighborSet in itertools.permutations(a.neighbors):
-        temp = dict()
+        temp = {None: None}
         OKFlag = True
         for i in xrange(len(aNeighborSet)):
             if aNeighborSet[i].element != b.neighbors.keys()[i].element:
@@ -243,12 +291,15 @@ def neighborCompare(a,b, compareDict):
         if CTFlag and OKFlag:
             #Makes sure that the hypothesized pairing follows the correct
             #cis-trans relationship
-            if (a.CTa == None and b.CTa != None) or\
-               (a.CTa != None and temp[a.CTa] != b.CTa) or\
-               (a.CTb == None and b.CTb != None) or\
-               (a.CTb != None and temp[a.CTb] != b.CTb):
-                OKFlag = False
+            if a.CTotherC in compareDict:
+                # and a.CTotherC.CTa in compareDict
+                if ((b.CTa == temp[a.CTa]) !=
+                   (b.CTotherC.CTa == compareDict[a.CTotherC.CTa])) or\
+                   ((b.CTb == temp[a.CTb]) !=
+                    (b.CTotherC.CTb == compareDict[a.CTotherC.CTb])):
+                    OKFlag = False
 
+        del(temp[None])
         if (temp not in out) and OKFlag:
             out.append(temp)
     return out

@@ -359,11 +359,46 @@ def markovnikov(a, b):
 
 
 '''
-#Finds candidate alkenes within a molecule.
-#(define "alkenes" as "alkenes that are not in an aromatic ring")
-#Returns a tuple of tuples of atoms. The lowest tuple is a pair of two atoms, which share a double bond.
-#Make sure not to include duplicates.
+
+'''
+
+
+#Returns a tuple of atoms.
+#Returns None if none found.
 def findAlkene(molecule):
+    for atom in molecule.atoms:
+        if not (atom.element == 'C'):
+            continue
+        for neighbor in atom.neighbors:
+            if neighbor.element == 'C' and atom.neighbors[neighbor] == 2:
+                return (atom, neighbor)
+    return None
+
+
+
+#Returns a tuple of atoms.
+def findAlkyne(molecule):
+    for atom in molecule.atoms:
+        if not (atom.element == 'C'):
+            continue
+        for neighbor in atom.neighbors:
+            if neighbor.element == 'C' and atom.neighbors[neighbor] == 3:
+                return (atom, neighbor)
+    return None
+
+
+def findAlkenes(molecule):
+    return findAlkenesOrAlkynes(molecule, 2)
+
+def findAlkynes(molecule):
+    return findAlkenesOrAlkynes(molecule, 3)
+
+#Finds all candidate alkenes within a molecule.
+#(define "alkenes" as "alkenes that are not in an aromatic ring")
+#Returns a list of tuples of atoms. The lowest tuple is a pair of two atoms, which share a double bond.
+#Make sure not to include duplicates.
+def findAlkenesOrAlkynes(molecule, bo):
+    #bo = bond order (2 or 3)
     #To track which bonds we've counted, we use the atom.flag property.
     #atom.flag starts at 0, and must be reset to 0 at the end.
     doubleBonds = []
@@ -371,7 +406,7 @@ def findAlkene(molecule):
         if not(atom.element == 'C'):
             continue
         for neighbor in atom.neighbors:
-            if neighbor.element == 'C' and atom.neighbors[neighbor] == 2:
+            if neighbor.element == 'C' and atom.neighbors[neighbor] == bo:
                 if atom.flag != 0 and neighbor.flag != 0 and atom in neighbor.flag\
                    and neighbor in atom.flag:
                     #We've already counted this bond.  Move on.
@@ -389,44 +424,6 @@ def findAlkene(molecule):
     for atom in molecule.atoms:
         atom.flag = 0
     return doubleBonds
-'''
-
-
-#Returns a tuple of atoms.
-#Returns None if none found.
-def findAlkene(molecule):
-    for atom in molecule.atoms:
-        if not (atom.element == 'C'):
-            continue
-        for neighbor in atom.neighbors:
-            if neighbor.element == 'C' and atom.neighbors[neighbor] == 2:
-                return (atom, neighbor)
-    return None
-
-#Returns a list of tuples of atoms.
-#Returns [] if none found.
-def findAlkenes(molecule):
-    output = []
-    for atom in molecule.atoms:
-        if not (atom.element == 'C'):
-            continue
-        for neighbor in atom.neighbors:
-            if neighbor.element == 'C' and atom.neighbors[neighbor] == 2:
-                output += [(atom, neighbor)]
-    return output
-
-#Returns a tuple of atoms.
-def findAlkyne(molecule):
-    for atom in molecule.atoms:
-        if not (atom.element == 'C'):
-            continue
-        for neighbor in atom.neighbors:
-            if neighbor.element == 'C' and atom.neighbors[neighbor] == 3:
-                return (atom, neighbor)
-    return None
-
-
-
 
 
 

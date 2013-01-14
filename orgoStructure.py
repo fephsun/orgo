@@ -112,6 +112,11 @@ class Atom:
             return [self.chiralA, self.chiralB, self.chiralD]
         elif reference == self.chiralD:
             return [self.chiralA, self.chiralC, self.chiralB]
+        else:
+            print "chiralCWlist: no such reference."
+            print reference
+            print self.chiralA, self.chiralB, self.chiralC, self.chiralD
+            raise StandardError
         
     def newCTCenter(self, otherC, a, b):
         #CTCenters (cis-trans centers) must come in pairs.  Both of the
@@ -125,6 +130,20 @@ class Atom:
         del(self.CTotherC)
         del(self.CTa)
         del(self.CTb)
+
+    def totalBondOrder(self):
+        #Returns the total bond order, not including hydrogens
+        out = 0
+        for neighbor in self.neighbors:
+            out += self.neighbors[neighbor]
+        return out
+
+    def findAlkeneBond(self):
+        #Returns the carbon atom to which this one is double-bonded.
+        for neighbor in self.neighbors:
+            if self.neighbors[neighbor] == 2 and neighbor.element == 'C':
+                return neighbor
+        return None
 
 
 def smiles(molecule):

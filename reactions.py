@@ -209,26 +209,57 @@ If alkyne and ROH: I'm not sure. Forms some strange enolate-ester? Possibly best
 #TO DO: add alkyne functionality
 
 #When there is an other-molecule:
-    #Check both the current molecule and the other-molecule for alkenes and hydroxyls.
-    #If the molecule can react with itself, make that the product.
-    #If the other can react with itself, add that as another product.
-    #Only if none of the above can occur, react them against each other.
+    #If any incoming molecules can react with themselves, use that as the product.
+    #Only if none of the molecules can react with themselves, react them against each other in all possible ways.
         #Afterwards, check the resulting molecule for self-reactivity.
 
-def acidhydrate(molecules, other):
+def acidhydrate(molecules, others):
     
-    def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
-        return findAlkenes(molecule)
-    def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
-        newMolecules = []
-        mkvCarbons = markovnikov(place[0], place[1])
-        for pairing in mkvCarbons:
-                newMolecules += allAdd(molecule, pairing[0], pairing[1], )
-        return newMolecules
-    return react(molecules, findPlace, reactAtPlace)
 
-def twoReact
 
+def twoReact(molecules, others, findPlaces1, findPlaces2, reactAtPlaces):
+    if not isinstance(molecules, list):
+        return twoReact([molecules], others, findPlaces1, findPlaces2, reactAtPlaces)
+    if not isinstance(others, list):
+        return twoReact(molecules, [others], findPlaces1, findPlaces2, reactAtPlaces)
+    output = []
+    molecules1 = [] #molecules which are capable of playing role 1
+    molecules2 = [] #molecules which are capable of playing role 2
+    for molecule in molecules+others:
+        candidates1 = [x for x in findPlaces1(molecule) if x != None] #places in molecule which can react as role 1
+        candidates2 = [x for x in findPlaces2(molecule) if x != None] #places in molecule which can react as role 2
+        if len(candidates1) != 0:
+            if len(candidates2) != 0:
+                #self-react and add to list
+                output += [reactAtPlaces(molecule, molecule, locus1, locus2) for locus1 in findPlaces1(molecule) for locus2 in findPlaces2(molecule)]
+
+        if len(candidates1) != 0:
+            molecules1 += [molecule]
+
+        if len(candidates2) != 0:
+            molecules2 += [molecule]
+
+    #If this is true, then no molecule reacted with itself. You may proceed to reacting the molecules in molecules1 and molecules2 with each other.
+    if len(output) == 0:
+        output = [reactAtPlaces(molecule1, molecule2, locus1, locus2) for molecule1 in molecules1 for molecule2 in molecules2 for locus1 in findPlaces1(molecule) for locus2 in findPlaces2(molecule)]
+        
+    
+        
+'''def react(molecules, findPlace, reactAtPlace):
+    if not isinstance(molecules, list):
+        return react([molecules], findPlace, reactAtPlace)
+    while True:
+        places = [(molecule, findPlace(molecule)) for molecule in molecules]
+        if not (False in [item[1]==None for item in places]):
+            break
+        for molecule, place in places:
+            if place != None:
+                molecules.remove(molecule)
+                x = reactAtPlace(molecule, place)
+                if not isinstance(x, list):
+                    x = [x]
+                molecules += x
+    return molecules'''
 
 
 """

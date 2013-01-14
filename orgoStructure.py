@@ -6,7 +6,8 @@ class Molecule:
     
     def __init__(self, firstAtom):
         self.atoms = [firstAtom]
-        
+
+    
     def addAtom(self, newAtom, targetAtom, bondOrder):
         if targetAtom not in self.atoms:
             print "Error in addAtom: target atom not already in molecule."

@@ -47,6 +47,7 @@ def synAdd(molecule, target1, target2, add1, add2,
     #Adds add1 and add2 to target1 and target2.  If add1 and/or add2 are molecules,
     #addtargets are needed to specify where the bond should originate from add.
 
+
     #Also does anti-addition, if antiAdd is set to true.
     (molecule, target1, target2, add1, add2, addtarget1, addtarget2) =\
                duplicateInputs(molecule, target1, target2, add1, add2, addtarget1,
@@ -278,9 +279,9 @@ def markovnikov(a, b):
     if aTotal == bTotal:
         return ((a,b),(b,a))
     elif aTotal > bTotal:
-        return ((a, b))
+        return ((a, b),)
     else:
-        return ((b, a))
+        return ((b, a),)
 
 
 '''
@@ -339,6 +340,56 @@ def findAlkynes(molecule):
 
 
 
+
+
+
+
+
+
+
+#Takes in a molecule or list of molecules
+#Outputs a list of molecule(s), representing distinct contiguous parts of the old molecule(s).
+#Uses include ozonolysis reactions.
+def splice(molecules):
+    if not isinstance(molecules, list):
+        molecules = [molecules]
+    output = []
+    for molecule in molecules:
+        #Find the next unflagged atom, if it exists
+        while 0 in [atom.flag for atom in molecule.atoms]:
+            originalAtom = [atom for atom in molecule.atoms if atom.flag == 0][0]
+            currentAtom = originalAtom
+            newMolecule = Molecule(originalAtom)
+            newMolecule.atoms = []
+            #Traverse the map of bonds, storing parent atoms and checking for flags
+            #Do this until you are back at the original atom with nothing left to check
+            while (0 in [atom.flag for atom in list(originalAtom.neighbors)]) or (currentAtom != originalAtom):
+                #If current atom unflagged:
+                if currentAtom.flag == 0:
+                    #Add current atom to list
+                    newMolecule.atoms += [currentAtom]
+                    #Flag current atom
+                    currentAtom.flag = 1
+                #If current atom lacks unflagged neighbors:
+                if not 0 in [atom.flag for atom in list(currentAtom.neighbors)]:
+                    #Return to parent atom.
+                    currentAtom = currentAtom.parentAtom
+                #Else:
+                else:
+                    #Next atom is the first unflagged neighbor.
+                    nextAtom = [atom for atom in list(currentAtom.neighbors) if atom.flag == 0][0]
+                    #Store current atom as next atom's parent.
+                    nextAtom.parentAtom = currentAtom
+                    #Store next atom as current atom.
+                    currentAtom = nextAtom
+            output += [newMolecule]
+
+
+        #Reset flags
+        for atom in molecule.atoms:
+            atom.flag = 0
+            atom.parentAtom = 0
+    return output
 
 
 

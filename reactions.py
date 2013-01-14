@@ -3,6 +3,20 @@ from helperFunctions import *
 
 
 
+
+#abstract
+def genericReaction(molecules):
+    def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
+        return None
+    def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
+        return None
+    return react(molecules, findPlace, reactAtPlace)
+
+
+
+
+
+
 def react(molecules, findPlace, reactAtPlace):
     if not isinstance(molecules, list):
         return react([molecules], findPlace, reactAtPlace)
@@ -18,6 +32,11 @@ def react(molecules, findPlace, reactAtPlace):
                     x = [x]
                 molecules += x
     return molecules
+#TO DO: put something here to decrease the size of molecules if things are identical
+#TO DO: make react deepcopy its input molecules?
+
+
+
 
 
 
@@ -25,6 +44,8 @@ def react(molecules, findPlace, reactAtPlace):
 Candidate reactants: alkenes, alkynes
 H2 cat Pd|C in EtOH
 Syn addition of an H to each atom in the alkene or alkyne. Go all the way to single bond."""
+
+#TO DO: implement alkynes
 
 def hydrogenate(molecules):
     def findPlace(molecule):
@@ -36,13 +57,7 @@ def hydrogenate(molecules):
     return react(molecules, findPlace, reactAtPlace)
 
 
-#abstract
-def genericReaction(molecules):
-    def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
-        return None
-    def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
-        return None
-    return react(molecules, findPlace, reactAtPlace)
+
     
 
 
@@ -58,6 +73,8 @@ if 2eqv or if excess specified --> add twice
 if no quantity specified --> don't let it be a valid reaction? Some sort of feedback to make user specify _how much_ when reacting with alkynes (which is a good habit 
 to have) would be nice."""
 
+#TO DO: implement alkynes
+
 #halogen is a string
 def hydrohalogenate(molecules, halogen):
     def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
@@ -65,7 +82,7 @@ def hydrohalogenate(molecules, halogen):
         return a
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
         newMolecules = []
-        mkvCarbons = markovnikov(doublebond[0], doublebond[1])
+        mkvCarbons = markovnikov(place[0], place[1])
         for pairing in mkvCarbons:
                 newMolecules += allAdd(molecule, pairing[0], pairing[1], Atom(halogen), None)
         return newMolecules
@@ -81,6 +98,8 @@ Anti addition of an X to each atom in the alkene.
 if 1eqv specified --> add once
 if 2eqv or if excess specified --> add twice
 if no quantity specified --> don't let it be a valid reaction? Some sort of feedback to make user specify _how much_ when reacting with alkynes (which is a good habit to have) would be nice."""
+
+#TO DO: implement alkynes
 
 #halogen is a string
 def halogenate(molecules, halogen):
@@ -104,22 +123,15 @@ Adds the X to the anti-Markovnikov-most carbon in the alkene, and the H to the o
 #halogen is a string
 def radicalhydrohalogenate(molecules, halogen):
     def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
-        a = findAlkenes(molecule)
-        return a
+        return findAlkenes(molecule)
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
         newMolecules = []
-        mkvCarbons = markovnikov(doublebond[0], doublebond[1])
+        mkvCarbons = markovnikov(place[0], place[1])
         for pairing in mkvCarbons:
                 newMolecules += allAdd(molecule, pairing[0], pairing[1], None, Atom(halogen))
         return newMolecules
     return react(molecules, findPlace, reactAtPlace)
 
-    '''
-    for molecule in molecules:
-        for doublebond in findAlkenes(molecule):
-            mkvCarbons = markovnikov(doublebond[0], doublebond[1])
-            for pairing in mkvCarbons:
-                newMolecules += bothAdd(molecule, pairing[0], pairing[1], None, Atom(halogen))'''
 
 
 """
@@ -129,10 +141,51 @@ mCPBA or PhCO3H or RCO3H, in CH2Cl2
 Converts alkene bond to an epoxide. Two possible stereochemical outcomes (up-epoxide or down-epoxide)
 """
 def epoxidate(molecules):
+    def epoxAdd(molecule, target1, target2, add1, add2):
+        addtarget1 = None
+        addtarget2 = None
+        antiAdd = False
+        #Also does anti-addition, if antiAdd is set to true.
+        (molecule, target1, target2, add1, add2, addtarget1, addtarget2) =\
+                   duplicateInputs(molecule, target1, target2, add1, add2, addtarget1,
+                                   addtarget2)
+        (Xmolecule, Xtarget1, Xtarget2, Xadd1, Xadd2, Xaddtarget1, Xaddtarget2) =\
+                   duplicateInputs(molecule, target1, target2, add1, add2, addtarget1,
+                                   addtarget2)
+        add1 = add2
+        Xadd1 = Xadd2
+
+        #Set bond orders to single.
+        target1.neighbors[target2] = 1
+        target2.neighbors[target1] = 1
+        Xtarget1.neighbors[Xtarget2] = 1
+        Xtarget2.neighbors[Xtarget1] = 1
+
+        bigListOfStuff =\
+        ((molecule, add1, target1, addtarget1, target2, target1.CTb, target1.CTa),
+        (molecule, add2, target2, addtarget2, target1, target2.CTa, target2.CTb),
+        (Xmolecule, Xadd1, Xtarget1, Xaddtarget1, Xtarget2, Xtarget1.CTa, Xtarget1.CTb),
+        (Xmolecule, Xadd2, Xtarget2, Xaddtarget2, Xtarget1, Xtarget2.CTb, Xtarget2.CTa))
+
+        for thismolecule, thisAdd, thisTarget, thisAddTarget, otherTarget, ct1, ct2\
+                in bigListOfStuff:
+            try:
+                thismolecule.addAtom(thisAdd, thisTarget, 1)
+            except:
+                thismolecule.addBond(thisAdd, thisTarget, 1)
+            if ct1 != None or ct2 != None:
+                thisTarget.newChiralCenter(otherTarget,
+                        (thisAdd, ct1, ct2))
+            thisTarget.eliminateCT()
+        if moleculeCompare(molecule, Xmolecule):
+            return [molecule]
+        else:
+            return [molecule, Xmolecule]
     def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
-        return None
+        return findAlkenes(molecule)
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
-        return None
+        oxygen = Atom("O")
+        return epoxAdd(molecule, place[0], place[1], oxygen, oxygen)
     return react(molecules, findPlace, reactAtPlace)
 
 
@@ -143,38 +196,100 @@ H2SO4 (or other acid) in ROH, where R can also be H
 If alkene: Adds an OR to the Markovnikov carbon of the alkene, and an H to the anti-Markovnikov carbon. Neither syn nor anti, since carbocation.
 If alkyne and H2O: Form a ketone or aldehyde, placing the O at the Markovnikov carbon.
 If alkyne and ROH: I'm not sure. Forms some strange enolate-ester? Possibly best to leave this out?
+"""
 
+
+
+"""
 Halohydration
 Candidate reactants: alkenes
 X2 in ROH, where R can also be H
 Adds an OR to the Markovnikov carbon of the alkene, and an X to the anti-Markovnikov carbon. Anti.
+"""
 
+
+
+"""
 Hydroboration
-Candidate reactants: alkenes
+Candidate reactants: alkenes, alkynes
 BH3 in THF, then NaOH and H2O2
 If alkene: Adds an OH to the anti-Markovnikov carbon, then adds an H to the other one. Syn addition.
 If alkyne: Form a ketone or aldehyde, placing the O at the anti-Markovnikov carbon.
+"""
+#TO DO: Implement with alkynes
+def hydroborate(molecules):
+    def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
+        return findAlkenes(molecule)
+    def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
+        newMolecules = []
+        mkvCarbons = markovnikov(place[0], place[1])
+        for pairing in mkvCarbons:
+            oxy = Atom("O")
+            newMolecules += synAdd(molecule, pairing[0], pairing[1], None, oxy)
+        return newMolecules
+    return react(molecules, findPlace, reactAtPlace)
 
+
+
+"""
 Dihydroxylation (Upjohn dihydroxylation)
 Candidate reactants: alkenes
 cat. OsO4 in NMO and acetone or H2O
 Syn addition of two OH groups to each carbon.
+"""
+def dihydroxylate(molecules):
+    def findPlace(molecule):
+        return findAlkenes(molecule)
+    def reactAtPlace(molecule, place):
+        return synAdd(molecule, place[0], place[1], Atom("O"), Atom("O"))
+    return react(molecules, findPlace, reactAtPlace)
 
+
+
+"""
 Ozonolysis
 Candidate reactants: alkenes
 O3 in CH2Cl2, with Me2S or Zn
 Adds two oxygens, splitting alkene bond, producing carbonyls.
+"""
+def ozonolyse(molecules):
+    def findPlace(molecule):
+        return findAlkenes(molecule)
+    def reactAtPlace(molecule, place):
+        #Break the double bond
+        molecule.changeBond(place[0], place[1], 0)
+        #Add two double bonds to two new oxygens
+        molecule.addAtom(Atom("O"), place[0], 2)
+        molecule.addAtom(Atom("O"), place[1], 2)
+        #Destroy CT stereochemistry
+        place[0].eliminateCT()
+        place[1].eliminateCT()
+        #Splice the molecule
+        return splice(molecule)
+    return react(copy.deepcopy(molecules), findPlace, reactAtPlace)
 
+
+
+
+"""
 Lindlar reduction
 Candidate reactants: alkynes
 H2, cat. Lindlar
 Produces the cis alkene from an alkyne. Adds two Hs.
+"""
 
+
+
+"""
 Sodium-ammonia reduction
 Candidate reactants: alkynes
 Na, in NH3 (L)
 Produces the trans alkene from an alkyne. Adds two Hs.
+"""
 
+
+
+"""
 Alkyne deprotonation to acetylide
 Candidate reactants: alkynes, in which one end is an H
 NaNH2 in NH3
@@ -230,7 +345,7 @@ c2.newCTCenter(c1, n1, None)
 
 #Makes C\   /Cl
 #        C=C
-#     C1/   \Br
+#     Cl/   \Br
 c10 = Atom("C")
 CTmol = Molecule(c10)
 c11 = Atom("C")

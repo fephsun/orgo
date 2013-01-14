@@ -288,6 +288,10 @@ def subsmiles(molecule, startAtom, parentAtom):
     #Prepare to add new groups for all neighbor atoms which are not the parent atom and not the rAtom.
     else:
         toAdd = [atom for atom in list(startAtom.nonHNeighbors) if not (atom==parentAtom or atom==None)]
+
+#    if toAdd == None:
+#        toAdd = [atom for atom in list(startAtom.nonHNeighbors) if not (atom==parentAtom or atom==None)]
+
     
     #Recursion is your friend.
     #Be sure to specify the base case (when zero non-parent non-ring atoms are available to bond to)

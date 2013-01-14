@@ -90,13 +90,7 @@ def hydrohalogenate(molecules, halogen):
         return newMolecules
     return react(molecules, findPlace, reactAtPlace)
 
-def findAlkeneAndAlkyne(molecule):
-    #Tiny helper function.
-    x = findAlkene(molecule)
-    if x == None:
-        return findAlkyne(molecule)
-    else:
-        return x
+
 
 """Halogenation
 Candidate reactants: alkenes, alkynes
@@ -205,6 +199,8 @@ H2SO4 (or other acid) in ROH, where R can also be H
 If alkene: Adds an OR to the Markovnikov carbon of the alkene, and an H to the anti-Markovnikov carbon. Neither syn nor anti, since carbocation.
 If alkyne and H2O: Form a ketone or aldehyde, placing the O at the Markovnikov carbon.
 If alkyne and ROH: I'm not sure. Forms some strange enolate-ester? Possibly best to leave this out?
+
+For alkynes to react, usually also mention "HgSO4 accels."
 """
 #TO DO: add alkyne functionality
 
@@ -216,18 +212,45 @@ If alkyne and ROH: I'm not sure. Forms some strange enolate-ester? Possibly best
 def acidhydrate(molecules, others):
 
     def findPlaces1(molecule):
-        return findAlkeneAndAlkyne(molecule)
+        return findAlkenesAndAlkynes(molecule)
     def findPlaces2(molecule):
-        return findHydroxyl(molecule)
+        return findHydroxyls(molecule)
 
-    #Place 1 is an alkene or an alkyne
-    #Place 
+    #Place 1 is an alkene or an alkyne (tuple of atoms)
+    #Place 2 is an oxygen connected to 1 or 0 neighbors
     def reactAtPlaces(molecule1, molecule2, place1, place2):
+        #Use addMolecule(self, molecule, foreignTarget, selfTarget, bo)
+        if place1[0].neighbors[place1[1]] == 2: #if is alkene:
+            newMolecules = []
+            mkvCarbons = markovnikov(place1[0], place1[1])
+            for pairing in mkvCarbons:
+                newMolecules += allAdd(molecule, pairing[0], pairing[1], place2, None)
+            return newMolecules
+        elif place1[0].neighbors[place1[1]] == 3: #if is alkyne:
+            if len(list(place2.neighbors)) == 0: #if is water:
+                #Make the alkyne bond a single bond
+                molecule1.changeBond(place1[0], place1[1], 1)
+                #Add a double-bond-O to the Markovnikov carbon
+                #If each carbon is equally Markovnikov, do some duplication-hacks
+
+                #Make a double bond between each Markovnikov carbon and the O of place2
+            elif len(list(place2.neighbors)) == 1: #if is alcohol:
+                #form an enol ether?
+                #Make the alkyne bond a double bond
+                #Add a single-bond connecting the Markovnikov carbon to the alcohol
+                #If each carbon is equally Markovnikov, do some copying-hacks
+                pass
+        else:
+            print "Error: findAlkenes, findAlkynes returning non-alkene and/or non-alkyne"
+            raise StandardError
+        
+        
         
 
-    return twoReact(molecules, others, findPlaces1, findPlaces2, reactAtPlaces)
+    return twoReact(copy.deepcopy(molecules), copy.deepcopy(others), findPlaces1, findPlaces2, reactAtPlaces)
 
 
+#NOTE: findPlaces methods passed into this method MUST return lists
 def twoReact(molecules, others, findPlaces1, findPlaces2, reactAtPlaces):
     if not isinstance(molecules, list):
         return twoReact([molecules], others, findPlaces1, findPlaces2, reactAtPlaces)
@@ -242,7 +265,7 @@ def twoReact(molecules, others, findPlaces1, findPlaces2, reactAtPlaces):
         if len(candidates1) != 0:
             if len(candidates2) != 0:
                 #self-react and add to list
-                output += [reactAtPlaces(molecule, molecule, locus1, locus2) for locus1 in findPlaces1(molecule) for locus2 in findPlaces2(molecule)]
+                output += [item for sublist in [reactAtPlaces(molecule, molecule, locus1, locus2) for locus1 in findPlaces1(molecule) for locus2 in findPlaces2(molecule)] for item in sublist]
 
         if len(candidates1) != 0:
             molecules1 += [molecule]
@@ -252,7 +275,7 @@ def twoReact(molecules, others, findPlaces1, findPlaces2, reactAtPlaces):
 
     #If this is true, then no molecule reacted with itself. You may proceed to reacting the molecules in molecules1 and molecules2 with each other.
     if len(output) == 0:
-        output = [reactAtPlaces(molecule1, molecule2, locus1, locus2) for molecule1 in molecules1 for molecule2 in molecules2 for locus1 in findPlaces1(molecule) for locus2 in findPlaces2(molecule)]
+        output = [item for sublist in [reactAtPlaces(molecule1, molecule2, locus1, locus2) for molecule1 in molecules1 for molecule2 in molecules2 for locus1 in findPlaces1(molecule) for locus2 in findPlaces2(molecule)] for item in sublist]
         
     
         

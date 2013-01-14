@@ -48,22 +48,15 @@ Syn addition of an H to each atom in the alkene or alkyne. Go all the way to sin
 #TO DO: implement alkynes
 
 def hydrogenate(molecules):
-    def findPlace(molecule):
-        x = findAlkenes(molecule)
-        if x == None:
-            return findAlkynes(molecule)
-        else:
-            return x
-
     def reactAtPlace(molecule, place):
         if place[0].neighbors[place[1]] == 2:
             #Alkene
             return synAdd(molecule, place[0], place[1], None, None)
         else:
             #Alkyne
-            return 
+            return allTripleAdd(molecule, place[0], place[1], None, None)
 
-    return react(molecules, findPlace, reactAtPlace)
+    return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
 
 
 
@@ -97,8 +90,13 @@ def hydrohalogenate(molecules, halogen):
         return newMolecules
     return react(molecules, findPlace, reactAtPlace)
 
-
-
+def findAlkeneAndAlkyne(molecule):
+    #Tiny helper function.
+    x = findAlkenes(molecule)
+    if x == None:
+        return findAlkynes(molecule)
+    else:
+        return x
 
 """Halogenation
 Candidate reactants: alkenes, alkynes
@@ -112,13 +110,15 @@ if no quantity specified --> don't let it be a valid reaction? Some sort of feed
 
 #halogen is a string
 def halogenate(molecules, halogen):
-    def findPlace(molecule):
-        return findAlkenes(molecule)
     def reactAtPlace(molecule, place):
         atomicHalogen = Atom(halogen)
         atomicHalogen2 = Atom(halogen)
-        return antiAdd(molecule, place[0], place[1], atomicHalogen, atomicHalogen2)
-    return react(molecules, findPlace, reactAtPlace)
+        if place[0].neighbors[place[1]] == 2:
+            #Double bond.
+            return antiAdd(molecule, place[0], place[1], atomicHalogen, atomicHalogen2)
+        else:
+            return allTripleAdd(molecule, place[0], place[1], atomicHalogen, atomicHalogen2)
+    return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
 
 
 
@@ -227,7 +227,6 @@ def acidhydrate(molecules, other):
         return newMolecules
     return react(molecules, findPlace, reactAtPlace)
 
-def twoReact
 
 
 

@@ -228,7 +228,9 @@ def subsmiles(molecule, startAtom, parentAtom):
     #Adds ring labels.
     if hasattr(startAtom, 'CTotherC'):
         atomsToLink = [startAtom.CTotherC, startAtom.CTa, startAtom.CTb]
-        begin = ["","/","\\"]
+        begin = ["", "/", "\\"]
+        if startAtom.CTotherC.flag == 2:
+            begin = ["", "\\", "/"]
         for ind in range(3):
             atom = atomsToLink[ind]
             if (atom != None) and (atom != parentAtom):

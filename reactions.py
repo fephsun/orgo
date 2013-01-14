@@ -197,6 +197,28 @@ If alkene: Adds an OR to the Markovnikov carbon of the alkene, and an H to the a
 If alkyne and H2O: Form a ketone or aldehyde, placing the O at the Markovnikov carbon.
 If alkyne and ROH: I'm not sure. Forms some strange enolate-ester? Possibly best to leave this out?
 """
+#TO DO: add alkyne functionality
+
+#When there is an other-molecule:
+    #Check both the current molecule and the other-molecule for alkenes and hydroxyls.
+    #If the molecule can react with itself, make that the product.
+    #If the other can react with itself, add that as another product.
+    #Only if none of the above can occur, react them against each other.
+        #Afterwards, check the resulting molecule for self-reactivity.
+
+def acidhydrate(molecules, other):
+    
+    def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
+        return findAlkenes(molecule)
+    def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
+        newMolecules = []
+        mkvCarbons = markovnikov(place[0], place[1])
+        for pairing in mkvCarbons:
+                newMolecules += allAdd(molecule, pairing[0], pairing[1], )
+        return newMolecules
+    return react(molecules, findPlace, reactAtPlace)
+
+def twoReact
 
 
 

@@ -80,7 +80,7 @@ to have) would be nice."""
 #halogen is a string
 def hydrohalogenate(molecules, halogen):
     def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
-        a = findAlkenes(molecule)
+        a = findAlkene(molecule)
         return a
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
         newMolecules = []
@@ -92,7 +92,7 @@ def hydrohalogenate(molecules, halogen):
 
 def findAlkeneAndAlkyne(molecule):
     #Tiny helper function.
-    x = findAlkenes(molecule)
+    x = findAlkene(molecule)
     if x == None:
         return findAlkynes(molecule)
     else:
@@ -132,7 +132,7 @@ Adds the X to the anti-Markovnikov-most carbon in the alkene, and the H to the o
 #halogen is a string
 def radicalhydrohalogenate(molecules, halogen):
     def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
-        return findAlkenes(molecule)
+        return findAlkene(molecule)
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
         newMolecules = []
         mkvCarbons = markovnikov(place[0], place[1])
@@ -191,7 +191,7 @@ def epoxidate(molecules):
         else:
             return [molecule, Xmolecule]
     def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
-        return findAlkenes(molecule)
+        return findAlkene(molecule)
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
         oxygen = Atom("O")
         return epoxAdd(molecule, place[0], place[1], oxygen, oxygen)
@@ -281,7 +281,7 @@ If alkyne: Form a ketone or aldehyde, placing the O at the anti-Markovnikov carb
 #TO DO: Implement with alkynes
 def hydroborate(molecules):
     def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
-        return findAlkenes(molecule)
+        return findAlkene(molecule)
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
         newMolecules = []
         mkvCarbons = markovnikov(place[0], place[1])
@@ -301,7 +301,7 @@ Syn addition of two OH groups to each carbon.
 """
 def dihydroxylate(molecules):
     def findPlace(molecule):
-        return findAlkenes(molecule)
+        return findAlkene(molecule)
     def reactAtPlace(molecule, place):
         return synAdd(molecule, place[0], place[1], Atom("O"), Atom("O"))
     return react(molecules, findPlace, reactAtPlace)
@@ -316,7 +316,7 @@ Adds two oxygens, splitting alkene bond, producing carbonyls.
 """
 def ozonolyse(molecules):
     def findPlace(molecule):
-        return findAlkenes(molecule)
+        return findAlkene(molecule)
     def reactAtPlace(molecule, place):
         #Break the double bond
         molecule.changeBond(place[0], place[1], 0)

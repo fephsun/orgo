@@ -363,7 +363,7 @@ def markovnikov(a, b):
 #(define "alkenes" as "alkenes that are not in an aromatic ring")
 #Returns a tuple of tuples of atoms. The lowest tuple is a pair of two atoms, which share a double bond.
 #Make sure not to include duplicates.
-def findAlkenes(molecule):
+def findAlkene(molecule):
     #To track which bonds we've counted, we use the atom.flag property.
     #atom.flag starts at 0, and must be reset to 0 at the end.
     doubleBonds = []
@@ -393,7 +393,7 @@ def findAlkenes(molecule):
 
 
 #Returns a tuple of atoms.
-def findAlkenes(molecule):
+def findAlkene(molecule):
     for atom in molecule.atoms:
         if not (atom.element == 'C'):
             continue

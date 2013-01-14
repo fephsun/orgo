@@ -94,7 +94,7 @@ def findAlkeneAndAlkyne(molecule):
     #Tiny helper function.
     x = findAlkene(molecule)
     if x == None:
-        return findAlkynes(molecule)
+        return findAlkyne(molecule)
     else:
         return x
 
@@ -214,7 +214,18 @@ If alkyne and ROH: I'm not sure. Forms some strange enolate-ester? Possibly best
         #Afterwards, check the resulting molecule for self-reactivity.
 
 def acidhydrate(molecules, others):
-    
+
+    def findPlaces1(molecule):
+        return findAlkeneAndAlkyne(molecule)
+    def findPlaces2(molecule):
+        return findHydroxyl(molecule)
+
+    #Place 1 is an alkene or an alkyne
+    #Place 
+    def reactAtPlaces(molecule1, molecule2, place1, place2):
+        
+
+    return twoReact(molecules, others, findPlaces1, findPlaces2, reactAtPlaces)
 
 
 def twoReact(molecules, others, findPlaces1, findPlaces2, reactAtPlaces):
@@ -341,7 +352,7 @@ Produces the cis alkene from an alkyne. Adds two Hs.
 """
 def lindlar(molecules):
     def findPlace(molecule):
-        return findAlkynes(molecule)
+        return findAlkyne(molecule)
     def reactAtPlace(molecule, place):
         tripleAdd(molecule, place[0], place[1], None, None, 'cis')
     return react(molecules, findPlace, reactAtPlace)
@@ -356,7 +367,7 @@ Produces the trans alkene from an alkyne. Adds two Hs.
 """
 def sodiumAmmonia(molecules):
     def findPlace(molecule):
-        return findAlkynes(molecule)
+        return findAlkyne(molecule)
     def reactAtPlace(molecule, place):
         tripleAdd(molecule, place[0], place[1], None, None, 'trans')
     return react(molecules, findPlace, reactAtPlace)

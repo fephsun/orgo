@@ -393,6 +393,7 @@ def findAlkene(molecule):
 
 
 #Returns a tuple of atoms.
+#Returns None if none found.
 def findAlkene(molecule):
     for atom in molecule.atoms:
         if not (atom.element == 'C'):
@@ -402,8 +403,20 @@ def findAlkene(molecule):
                 return (atom, neighbor)
     return None
 
+#Returns a list of tuples of atoms.
+#Returns [] if none found.
+def findAlkenes(molecule):
+    output = []
+    for atom in molecule.atoms:
+        if not (atom.element == 'C'):
+            continue
+        for neighbor in atom.neighbors:
+            if neighbor.element == 'C' and atom.neighbors[neighbor] == 2:
+                output += [(atom, neighbor)]
+    return output
+
 #Returns a tuple of atoms.
-def findAlkynes(molecule):
+def findAlkyne(molecule):
     for atom in molecule.atoms:
         if not (atom.element == 'C'):
             continue

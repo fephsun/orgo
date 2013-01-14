@@ -166,7 +166,30 @@ def tripleAdd(molecule, target1, target2, add1, add2, cisOrTrans,
                 thisTarget.newCTCenter(otherTarget, thisAdd, otherAttached)
     return molecule
 
-        
+def allTripleAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None):
+    #Adds two copies of add1 and two copies of add2 to target1 and target2, respectively.
+    #Breaks a triple bond.  Introduces no new stereochemistry.
+
+    #Protect the inputs from modification:
+    (molecule, target1, target2, add1, add2, addtarget1, addtarget2)=\
+               duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)
+    #We need an extra copy of add1 and add2, along with corresponding addtargets.
+    (notused, notused2, notused3, add1b, add2b, addtarget1b, addtarget2b)=\
+               duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)
+    #Change to single bond
+    molecule.changeBond(target1, target2, 1)
+    #Add new stuff
+    for thisTarget, thisAdd, thisAddtarget in (
+        (target1, add1, addtarget1), (target2, add2, addtarget2),
+        (target1, add1b, addtarget1b), (target2, add2b, addtarget2b)):
+        if isinstance(thisAdd, Molecule):
+            molecule.addMolecule(thisAdd, thisAddtarget, thisTarget, 1)
+        elif isinstance(thisAdd, Atom):
+            molecule.addAtom(thisAdd, thisTarget, 1)
+        else:
+            #Hydrogens.  Do nothing.
+            pass
+    return [molecule]
     
 
 def moleculeCompare(a, b, compareDict = None, expanded = []):

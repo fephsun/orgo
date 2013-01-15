@@ -354,6 +354,25 @@ Candidate reactants: alkenes
 X2 in ROH, where R can also be H
 Adds an OR to the Markovnikov carbon of the alkene, and an X to the anti-Markovnikov carbon. Anti.
 """
+def halohydrate(molecules, others, halogen):
+
+    atomicHalogen = Atom(halogen)
+    def findPlaces1(molecule):
+        return findAlkenes(molecule)
+    def findPlaces2(molecule):
+        return findHydroxyls(molecule)
+
+    #Place 1 is an alkene (tuple of atoms)
+    #Place 2 is an oxygen connected to 1 or 0 neighbors
+    def reactAtPlaces(molecule1, molecule2, place1, place2):
+        #Use addMolecule(self, molecule, foreignTarget, selfTarget, bo)
+        newMolecules = []
+        mkvCarbons = markovnikov(place1[0], place1[1])
+        for pairing in mkvCarbons:
+            newMolecules += antiAdd(molecule1, pairing[0], pairing[1], molecule2, atomicHalogen, place2, None)
+        return newMolecules
+        
+    return twoReact(copy.deepcopy(molecules), copy.deepcopy(others), findPlaces1, findPlaces2, reactAtPlaces)
 
 
 

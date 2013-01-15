@@ -1,12 +1,5 @@
 from helperFunctions import *
 
-
-
-
-
-
-
-
 def removeDuplicates(moleculeList):
     if not isinstance(moleculeList, list):
         return [moleculeList]
@@ -24,10 +17,7 @@ def removeDuplicatesAt(moleculeList, ind):
             del moleculeList[ind]
             break
 
-    return removeDuplicatesAt(moleculeList, ind+1)s
-
-
-
+    return removeDuplicatesAt(moleculeList, ind+1)
 
 
 def react(molecules, findPlace, reactAtPlace):
@@ -45,8 +35,7 @@ def react(molecules, findPlace, reactAtPlace):
                     x = [x]
                 molecules += x
     return removeDuplicates(molecules)
-#TO DO: put something here to decrease the size of molecules if things are identical
-#TO DO: make react deepcopy its input molecules?
+
 
 
 
@@ -107,7 +96,7 @@ def hydrohalogenate(molecules, halogen):
 
 """Halogenation
 Candidate reactants: alkenes, alkynes
-X2 in CH2Cl2, dark
+X2 in CH2Cl2
 Anti addition of an X to each atom in the alkene.
 if 1eqv specified --> add once
 if 2eqv or if excess specified --> add twice

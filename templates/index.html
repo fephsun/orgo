@@ -2,4 +2,16 @@
 <h1> Hello world </h1>
 
 {{molecule|safe}} <!--The safe tag prevents character escaping -->
+
+<h2> Log In </h2>
+<form action="/orgo/api/login/" method="post" class="form-horizontal">{% csrf_token %}
+    {{logInForm.as_p}}
+    <input type="submit" value="Submit" class="btn"/>
+</form>
+
+<h2> Sign Up </h2>
+<form action="/orgo/api/signup/" method="post" class="form-horizontal">{% csrf_token %}
+    {{signUpForm.as_p}}
+    <input type="submit" value="Submit" class="btn"/>
+</form>
 </html>

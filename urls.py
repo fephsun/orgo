@@ -7,7 +7,8 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'orgo.views.home', name='home'),
-    # url(r'^orgo/', include('orgo.foo.urls')),
+    url(r'^api/signup/$', 'orgo.views.signUp', name='signUp'),
+    url(r'^api/login/$', 'orgo.views.logIn', name='logIn'),    
 
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

@@ -5,7 +5,7 @@ def randomStart():
     lastAtom = Atom("C")
     frontAtom = lastAtom
     mol = Molecule(lastAtom)
-    while random.random() < 0.9 or len(mol.atoms) < 5:
+    while (random.random() < 0.8 or len(mol.atoms) < 3) and len(mol.atoms) < 10:
         switcher = random.random()
         if switcher < 1:
             newMol, thisAtom, nextAtom = randC()
@@ -15,13 +15,14 @@ def randomStart():
 ##            newMol, thisAtom, nextAtom = randRing(6)
 
         switcher = random.random()
-        if switcher < 0.5 and len(thisAtom.neighbors) == 0\
+        if switcher < 0.2 and len(thisAtom.neighbors) == 0\
            and lastAtom.totalBondOrder() == 1:
             #Make a triple bond.
             mol.addMolecule(newMol, thisAtom, lastAtom, 3)
-        elif switcher < 0.4 and len(thisAtom.neighbors) <= 1\
+        elif switcher < 0.6 and len(thisAtom.neighbors) <= 1\
              and lastAtom.totalBondOrder() <= 2\
-             and lastAtom.findAlkeneBond() == None:
+             and lastAtom.findAlkeneBond() == None\
+             and lastAtom.totalBondOrder() > 0:
             #Make a double bond.  Watch out for cis/trans.
             #Each double bond must have a cis/trans specification.
             mol.addMolecule(newMol, thisAtom, lastAtom, 2)
@@ -35,7 +36,8 @@ def randomStart():
             else:
                 lastAtom.newCTCenter(thisAtom, otherNeighbors[0],
                                      otherNeighbors[1])
-            #Will make other half of cis/trans later
+            #Flag thisAtom so that we add stereo to it, later.
+            thisAtom.makeCTFlag = True
         else:
             #Make single bond
             mol.addMolecule(newMol, thisAtom, lastAtom, 1)
@@ -53,10 +55,10 @@ def randC():
     #Add up to 2 substituents
     for i in xrange(2):
         switcher = random.random()
-        if switcher < 0.2:
+        if switcher < 0.1:
             newS = Atom("Cl")
             mol.addAtom(newS, c, 1)
-        elif switcher < 0.4:
+        elif switcher < 0.2:
             newS = Atom("Br")
             mol.addAtom(newS, c, 1)            
         elif switcher < 0.3:
@@ -71,7 +73,8 @@ def randRing(noCs):
 def fixStereo(mol, thisAtom, lastAtom):
     #Look to see if the *last* piece we added requires stereochem
     otherC = lastAtom.findAlkeneBond()
-    if otherC != None:
+    if hasattr(lastAtom, "makeCTFlag"):
+        del(lastAtom.makeCTFlag)
         #Find the last neighbor of lastAtom (other than thisAtom
         #and otherC).  None means Hydrogen.
         otherN = None

@@ -69,17 +69,22 @@ if no quantity specified --> don't let it be a valid reaction? Some sort of feed
 to have) would be nice."""
 #halogen is a string
 def hydrohalogenate(molecules, halogen):
-    
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
         newMolecules = []
         atomicHalogen = Atom(halogen)
         mkvCarbons = markovnikov(place[0], place[1])
         for pairing in mkvCarbons:
-            if pairing[0].neighbors(pairing[1]) == 2:
-                newMolecules += allAdd(molecule, pairing[0], pairing[1], atomicHalogen, None)
+            if place[0].neighbors[place[1]] == 2:
+                #Double bond
+                newMolecules += allAdd(molecule, pairing[0], pairing[1], Atom(halogen), None)
             else:
-                newMolecules += allTripleAdd(molecule, pairing[0], pairing[1], atomicHalogen, None)
-        return newMolecules
+                #Triple bond
+                newMolecules += allTripleAdd(molecule, pairing[0], pairing[1], Atom(halogen), None)
+        #Sometimes, Mkv's rule results in two identical products.  Return only one of them.
+        if moleculeCompare(newMolecules[0], newMolecules[1]):
+            return newMolecules[0]
+        else:
+            return newMolecules
     return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
 
 
@@ -105,9 +110,20 @@ def halogenate(molecules, halogen):
             return allTripleAdd(molecule, place[0], place[1], atomicHalogen, atomicHalogen2)
     return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
 
-
-
-
+def halogenate1eq(molecules, halogen):
+    #Reacts one equivalent of X2 with a molecule containing one alkyne and no alkenes.  Will
+    #not do anything (e.g. will return the input molecules) if there are multiple alkynes or any
+    #alkenes.
+    #Creates a trans alkene.
+    def findPlace(molecule):
+        if findAlkene(molecule) != None:
+            return None
+        if len(findAlkynes(molecule)) != 1:
+            return None
+        return findAlkyne(molecule)  
+    def reactAtPlace(molecule, place):
+        return tripleAdd(molecule, place[0], place[1], Atom(halogen), Atom(halogen), 'trans')
+    return react(molecules, findPlace, reactAtPlace)
 
 """Free-radical hydrohalogenation
 Candidate reactants: alkenes
@@ -272,6 +288,7 @@ def acidhydrate(molecules, others):
         else:
             print "Error: findAlkenes, findAlkynes returning non-alkene and/or non-alkyne"
             raise StandardError
+
         
         
         
@@ -618,18 +635,8 @@ ethanol = Molecule(c64)
 ethanol.addAtom(c65, c64, 1)
 ethanol.addAtom(o66, c64, 1)
 
-print "----------------------------------------"
-ether = acidhydrate(mol4, ethanol)
-print smiles(ether)
-print "----------------------------------------"
-ether2 = acidhydrate(mol4, Molecule(Atom("O")))
-print smiles(ether2)
-print "----------------------------------------"
-ether3 = acidhydrate(propyne, ethanol)
-print smiles(ether3)
-print "----------------------------------------"
-ether4 = acidhydrate(propyne, Molecule(Atom("O")))
-print smiles(ether4)
-print "----------------------------------------"
+
+
+
 
 

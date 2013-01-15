@@ -4,14 +4,11 @@ from helperFunctions import *
 
 
 
-#abstract
-def genericReaction(molecules):
-    def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
-        return None
-    def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
-        return None
-    return react(molecules, findPlace, reactAtPlace)
 
+
+
+def removeDuplicates(moleculeList):
+    return moleculeList
 
 
 
@@ -31,10 +28,9 @@ def react(molecules, findPlace, reactAtPlace):
                 if not isinstance(x, list):
                     x = [x]
                 molecules += x
-    return molecules
+    return removeDuplicates(molecules)
 #TO DO: put something here to decrease the size of molecules if things are identical
 #TO DO: make react deepcopy its input molecules?
-
 
 
 
@@ -197,11 +193,10 @@ Candidate reactants: alkenes
 H2SO4 (or other acid) in ROH, where R can also be H
 If alkene: Adds an OR to the Markovnikov carbon of the alkene, and an H to the anti-Markovnikov carbon. Neither syn nor anti, since carbocation.
 If alkyne and H2O: Form a ketone or aldehyde, placing the O at the Markovnikov carbon.
-If alkyne and ROH: I'm not sure. Forms some strange enolate-ester? Possibly best to leave this out?
+If alkyne and ROH: form an enolate-ether, I think...     or form two ethers.
 
 For alkynes to react, usually also mention "HgSO4 accels."
 """
-#TO DO: add alkyne functionality
 
 #When there is an other-molecule:
     #If any incoming molecules can react with themselves, use that as the product.
@@ -218,34 +213,76 @@ def acidhydrate(molecules, others):
     #Place 1 is an alkene or an alkyne (tuple of atoms)
     #Place 2 is an oxygen connected to 1 or 0 neighbors
     def reactAtPlaces(molecule1, molecule2, place1, place2):
+        
         #Use addMolecule(self, molecule, foreignTarget, selfTarget, bo)
+        print place1
         if place1[0].neighbors[place1[1]] == 2: #if is alkene:
+            print "Hi!"
             newMolecules = []
             mkvCarbons = markovnikov(place1[0], place1[1])
             for pairing in mkvCarbons:
-                newMolecules += allAdd(molecule, pairing[0], pairing[1], place2, None)
+                print (pairing[0] in molecule1.atoms)
+                newMolecules += allAdd(molecule1, pairing[0], pairing[1], molecule2, None, place2, None)
             return newMolecules
-        elif place1[0].neighbors[place1[1]] == 3: #if is alkyne:
-            if len(list(place2.neighbors)) == 0: #if is water:
-                #Make the alkyne bond a single bond
-                molecule1.changeBond(place1[0], place1[1], 1)
-                #Add a double-bond-O to the Markovnikov carbon
-                #If each carbon is equally Markovnikov, do some duplication-hacks
 
+        elif place1[0].neighbors[place1[1]] == 3: #if is alkyne:
+            
+            if len(list(place2.neighbors)) == 0: #if adding water:
+                #Going to need to write a custom function here, borrowed from allTripleAdd.
+                #Make the alkyne bond a single bond
+                #Add a double-bond-O to the Markovnikov carbon
+                #If each carbon is equally Markovnikov, do some duplication-hacks and add to both
                 #Make a double bond between each Markovnikov carbon and the O of place2
+                def carbonylAdd(molecule, target1, target2):
+                    #Adds two copies of add1 and two copies of add2 to target1 and target2, respectively.
+                    #Breaks a triple bond.  Introduces no new stereochemistry.
+                    #MODIFICATION: Adds same copy of add1 to target1, instead producing a double bond.
+                    #add1 is an oxygen atom:
+                    add1 = Atom("O")
+                    add2 = None
+                    addtarget1 = None
+                    addtarget2 = None
+
+                    #Protect the inputs from modification:
+                    (molecule, target1, target2, add1, add2, addtarget1, addtarget2)=\
+                               duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)
+                    #We need an extra copy of add1 and add2, along with corresponding addtargets.
+                    (notused, notused2, notused3, add1b, add2b, addtarget1b, addtarget2b)=\
+                               duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)
+                    #Change to single bond
+                    molecule.changeBond(target1, target2, 1)
+                    #Add new stuff
+                    molecule.addAtom(add1, target1, 2)
+                    
+                    return [molecule]
+                
+                newMolecules = []
+                mkvCarbons = markovnikov(place1[0], place1[1])
+                for pairing in mkvCarbons:
+                    newMolecules += carbonylAdd(molecule1, pairing[0], pairing[1])
+                return newMolecules
+
+                
             elif len(list(place2.neighbors)) == 1: #if is alcohol:
+                #Use allTripleAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None)
+
                 #form an enol ether?
                 #Make the alkyne bond a double bond
                 #Add a single-bond connecting the Markovnikov carbon to the alcohol
-                #If each carbon is equally Markovnikov, do some copying-hacks
-                pass
+                
+                newMolecules = []
+                mkvCarbons = markovnikov(place1[0], place1[1])
+                for pairing in mkvCarbons:
+                    print (pairing[0] in molecule1.atoms)
+                    newMolecules += allTripleAdd(molecule1, pairing[0], pairing[1], molecule2, None, place2, None, )
+                return newMolecules
         else:
             print "Error: findAlkenes, findAlkynes returning non-alkene and/or non-alkyne"
             raise StandardError
         
         
         
-
+    print "Got here."
     return twoReact(copy.deepcopy(molecules), copy.deepcopy(others), findPlaces1, findPlaces2, reactAtPlaces)
 
 
@@ -261,10 +298,16 @@ def twoReact(molecules, others, findPlaces1, findPlaces2, reactAtPlaces):
     for molecule in molecules+others:
         candidates1 = [x for x in findPlaces1(molecule) if x != None] #places in molecule which can react as role 1
         candidates2 = [x for x in findPlaces2(molecule) if x != None] #places in molecule which can react as role 2
+        print (candidates1, candidates2)
         if len(candidates1) != 0:
             if len(candidates2) != 0:
                 #self-react and add to list
-                output += [item for sublist in [reactAtPlaces(molecule, molecule, locus1, locus2) for locus1 in findPlaces1(molecule) for locus2 in findPlaces2(molecule)] for item in sublist]
+                output += [item for sublist in [
+                    reactAtPlaces(molecule, molecule, locus1, locus2)
+                        for locus1 in findPlaces1(molecule)
+                        for locus2 in findPlaces2(molecule)
+                    ]
+                    for item in sublist]
 
         if len(candidates1) != 0:
             molecules1 += [molecule]
@@ -274,9 +317,11 @@ def twoReact(molecules, others, findPlaces1, findPlaces2, reactAtPlaces):
 
     #If this is true, then no molecule reacted with itself. You may proceed to reacting the molecules in molecules1 and molecules2 with each other.
     if len(output) == 0:
-        output = [item for sublist in [reactAtPlaces(molecule1, molecule2, locus1, locus2) for molecule1 in molecules1 for molecule2 in molecules2 for locus1 in findPlaces1(molecule) for locus2 in findPlaces2(molecule)] for item in sublist]
-        
-    
+        output = [item for sublist in [reactAtPlaces(molecule1, molecule2, locus1, locus2) for molecule1 in molecules1 for molecule2 in molecules2 for locus1 in findPlaces1(molecule1) for locus2 in findPlaces2(molecule2)] for item in sublist]
+
+    return removeDuplicates(output)
+
+
         
 '''def react(molecules, findPlace, reactAtPlace):
     if not isinstance(molecules, list):
@@ -573,5 +618,27 @@ propyne = Molecule(c60)
 propyne.addAtom(c61, c60, 3)
 propyne.addAtom(c62, c61, 1)
 propyne.addAtom(c63, c60, 1)
+
+#Makes C-C-OH, ethanol
+c64 = Atom("C")
+c65 = Atom("C")
+o66 = Atom("O")
+ethanol = Molecule(c64)
+ethanol.addAtom(c65, c64, 1)
+ethanol.addAtom(o66, c64, 1)
+
+print "----------------------------------------"
+ether = acidhydrate(mol4, ethanol)
+print smiles(ether)
+print "----------------------------------------"
+ether2 = acidhydrate(mol4, Molecule(Atom("O")))
+print smiles(ether2)
+print "----------------------------------------"
+ether3 = acidhydrate(propyne, ethanol)
+print smiles(ether3)
+print "----------------------------------------"
+ether4 = acidhydrate(propyne, Molecule(Atom("O")))
+print smiles(ether4)
+print "----------------------------------------"
 
 

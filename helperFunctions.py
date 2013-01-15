@@ -389,10 +389,10 @@ def findAlkenes(molecule):
     output2 = []
     for item in output:
         if not ((item[1], item[0]) in output2):
-            output2 += item
+            output2 += [item]
     return output2
 
-s
+
 
 #Returns a tuple of atoms.
 #Returns None if none found.
@@ -419,28 +419,30 @@ def findAlkynes(molecule):
     output2 = []
     for item in output:
         if not ((item[1], item[0]) in output2):
-            output2 += item
+            output2 += [item]
     return output2
     
 #Returns a list of atoms.
 #Returns [] if none found.
 def findHydroxyls(molecule):
+    print smiles(molecule)
     output = []
     if moleculeCompare(Molecule(Atom("O")), molecule):
-        return [x for x in molecule.atoms if x.element == "O"][0]
+        return [[x for x in molecule.atoms if x.element == "O"][0]]
     for atom in molecule.atoms:
         if not (atom.element == 'O'):
             continue
         if len(list(atom.neighbors)) <= 1: #it's a hydroxyl or water, so return it
-            output += atom
-        elif len(list(atom.neighbors)) == 2: #it's an ester, don't return it
+            output += [atom]
+        elif len(list(atom.neighbors)) == 2: #it's an ether, don't return it
             continue
         else:
             print "Error -- Invalid oxygen atom with 3+ neighbors."
             raise StandardError
+    print output
+    print "..."
     return output
 
-<<<<<<< HEAD
 #Returns a list of tuples of atoms.
 #Returns [] if none found.
 def findAlkenesAndAlkynes(molecule):
@@ -455,13 +457,12 @@ def findAlkeneAndAlkyne(molecule):
         return findAlkyne(molecule)
     else:
         return x
-=======
-def findAlkenes(molecule):
-    return findAlkenesOrAlkynes(molecule, 2)
 
-def findAlkynes(molecule):
-    return findAlkenesOrAlkynes(molecule, 3)
->>>>>>> 993b7e9736c2dff37ef08654d82da6ba60095373
+#def findAlkenes(molecule):
+#    return findAlkenesOrAlkynes(molecule, 2)
+
+#def findAlkynes(molecule):
+#    return findAlkenesOrAlkynes(molecule, 3)
 
 #Finds all candidate alkenes within a molecule.
 #(define "alkenes" as "alkenes that are not in an aromatic ring")

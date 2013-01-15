@@ -75,20 +75,24 @@ if 2eqv or if excess specified --> add twice
 if no quantity specified --> don't let it be a valid reaction? Some sort of feedback to make user specify _how much_ when reacting with alkynes (which is a good habit 
 to have) would be nice."""
 
-#TO DO: implement alkynes
-
 #halogen is a string
 def hydrohalogenate(molecules, halogen):
-    def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
-        a = findAlkene(molecule)
-        return a
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
         newMolecules = []
         mkvCarbons = markovnikov(place[0], place[1])
         for pairing in mkvCarbons:
+            if place[0].neighbors[place[1]] == 2:
+                #Double bond
                 newMolecules += allAdd(molecule, pairing[0], pairing[1], Atom(halogen), None)
-        return newMolecules
-    return react(molecules, findPlace, reactAtPlace)
+            else:
+                #Triple bond
+                newMolecules += allTripleAdd(molecule, pairing[0], pairing[1], Atom(halogen), None)
+        #Sometimes, Mkv's rule results in two identical products.  Return only one of them.
+        if moleculeCompare(newMolecules[0], newMolecules[1]):
+            return newMolecules[0]
+        else:
+            return newMolecules
+    return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
 
 def findAlkeneAndAlkyne(molecule):
     #Tiny helper function.
@@ -119,9 +123,20 @@ def halogenate(molecules, halogen):
             return allTripleAdd(molecule, place[0], place[1], atomicHalogen, atomicHalogen2)
     return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
 
-
-
-
+def halogenate1eq(molecules, halogen):
+    #Reacts one equivalent of X2 with a molecule containing one alkyne and no alkenes.  Will
+    #not do anything (e.g. will return the input molecules) if there are multiple alkynes or any
+    #alkenes.
+    #Creates a trans alkene.
+    def findPlace(molecule):
+        if findAlkene(molecule) != None:
+            return None
+        if len(findAlkynes(molecule)) != 1:
+            return None
+        return findAlkyne(molecule)  
+    def reactAtPlace(molecule, place):
+        return tripleAdd(molecule, place[0], place[1], Atom(halogen), Atom(halogen), 'trans')
+    return react(molecules, findPlace, reactAtPlace)
 
 """Free-radical hydrohalogenation
 Candidate reactants: alkenes
@@ -222,7 +237,7 @@ def acidhydrate(molecules, others):
     #Place 1 is an alkene or an alkyne
     #Place 
     def reactAtPlaces(molecule1, molecule2, place1, place2):
-        
+        pass
 
     return twoReact(molecules, others, findPlaces1, findPlaces2, reactAtPlaces)
 

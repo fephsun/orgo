@@ -160,7 +160,6 @@ def tripleAdd(molecule, target1, target2, add1, add2, cisOrTrans,
             thisTarget.newCTCenter(otherTarget, otherAttached, thisAdd)
         else:
             if hasattr(otherTarget, "CTotherC"):
-                print "blah"
                 thisTarget.newCTCenter(otherTarget, otherAttached, thisAdd)
             else:
                 thisTarget.newCTCenter(otherTarget, thisAdd, otherAttached)
@@ -425,7 +424,6 @@ def findAlkynes(molecule):
 #Returns a list of atoms.
 #Returns [] if none found.
 def findHydroxyls(molecule):
-    print smiles(molecule)
     output = []
     if moleculeCompare(Molecule(Atom("O")), molecule):
         return [[x for x in molecule.atoms if x.element == "O"][0]]
@@ -439,8 +437,6 @@ def findHydroxyls(molecule):
         else:
             print "Error -- Invalid oxygen atom with 3+ neighbors."
             raise StandardError
-    print output
-    print "..."
     return output
 
 #Returns a list of tuples of atoms.

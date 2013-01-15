@@ -40,9 +40,6 @@ def react(molecules, findPlace, reactAtPlace):
 Candidate reactants: alkenes, alkynes
 H2 cat Pd|C in EtOH
 Syn addition of an H to each atom in the alkene or alkyne. Go all the way to single bond."""
-
-#TO DO: implement alkynes
-
 def hydrogenate(molecules):
     def reactAtPlace(molecule, place):
         if place[0].neighbors[place[1]] == 2:
@@ -70,21 +67,20 @@ if 1eqv specified --> add once
 if 2eqv or if excess specified --> add twice
 if no quantity specified --> don't let it be a valid reaction? Some sort of feedback to make user specify _how much_ when reacting with alkynes (which is a good habit 
 to have) would be nice."""
-
-#TO DO: implement alkynes
-
 #halogen is a string
 def hydrohalogenate(molecules, halogen):
-    def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
-        a = findAlkene(molecule)
-        return a
+    
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
         newMolecules = []
+        atomicHalogen = Atom(halogen)
         mkvCarbons = markovnikov(place[0], place[1])
         for pairing in mkvCarbons:
-                newMolecules += allAdd(molecule, pairing[0], pairing[1], Atom(halogen), None)
+            if pairing[0].neighbors(pairing[1]) == 2:
+                newMolecules += allAdd(molecule, pairing[0], pairing[1], atomicHalogen, None)
+            else:
+                newMolecules += allTripleAdd(molecule, pairing[0], pairing[1], atomicHalogen, None)
         return newMolecules
-    return react(molecules, findPlace, reactAtPlace)
+    return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
 
 
 
@@ -215,13 +211,10 @@ def acidhydrate(molecules, others):
     def reactAtPlaces(molecule1, molecule2, place1, place2):
         
         #Use addMolecule(self, molecule, foreignTarget, selfTarget, bo)
-        print place1
         if place1[0].neighbors[place1[1]] == 2: #if is alkene:
-            print "Hi!"
             newMolecules = []
             mkvCarbons = markovnikov(place1[0], place1[1])
             for pairing in mkvCarbons:
-                print (pairing[0] in molecule1.atoms)
                 newMolecules += allAdd(molecule1, pairing[0], pairing[1], molecule2, None, place2, None)
             return newMolecules
 
@@ -282,7 +275,6 @@ def acidhydrate(molecules, others):
         
         
         
-    print "Got here."
     return twoReact(copy.deepcopy(molecules), copy.deepcopy(others), findPlaces1, findPlaces2, reactAtPlaces)
 
 
@@ -298,7 +290,6 @@ def twoReact(molecules, others, findPlaces1, findPlaces2, reactAtPlaces):
     for molecule in molecules+others:
         candidates1 = [x for x in findPlaces1(molecule) if x != None] #places in molecule which can react as role 1
         candidates2 = [x for x in findPlaces2(molecule) if x != None] #places in molecule which can react as role 2
-        print (candidates1, candidates2)
         if len(candidates1) != 0:
             if len(candidates2) != 0:
                 #self-react and add to list

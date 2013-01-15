@@ -8,7 +8,23 @@ from helperFunctions import *
 
 
 def removeDuplicates(moleculeList):
-    return moleculeList
+    if not isinstance(moleculeList, list):
+        return [moleculeList]
+    if len(moleculeList) == 0:
+        return []
+    return removeDuplicatesAt(copy.deepcopy(moleculeList), 0)
+
+
+def removeDuplicatesAt(moleculeList, ind):
+    if len(moleculeList) < ind+2:
+        return moleculeList
+    a = moleculeList[ind]
+    for i in range(ind+1, len(moleculeList)):
+        if a == moleculeList[i] or moleculeCompare(a, moleculeList[i]):
+            del moleculeList[ind]
+            break
+
+    return removeDuplicatesAt(moleculeList, ind+1)s
 
 
 
@@ -16,10 +32,8 @@ def removeDuplicates(moleculeList):
 
 def react(molecules, findPlace, reactAtPlace):
     if not isinstance(molecules, list):
-        print "hi."
         return react([molecules], findPlace, reactAtPlace)
     while True:
-        print molecules
         places = [(molecule, findPlace(molecule)) for molecule in molecules]
         if not (False in [item[1]==None for item in places]):
             break

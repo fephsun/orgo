@@ -27,9 +27,16 @@ class moleculeField(models.Field):
         #No unlimited-length fields?
         return 'text'
 
-class synthesisProblem(models.Model):
-    startingMol = moleculeField()
+
+class moleculeListModel(models.Model):
+    molecule = PickledObjectField()
+
+
+class synthesisProblemModel(models.Model):
+    synthesisProblem = PickledObjectField()
+
     
+
 class UserForm(ModelForm):
     password = forms.CharField(label="Password", widget=forms.PasswordInput)
     class Meta:

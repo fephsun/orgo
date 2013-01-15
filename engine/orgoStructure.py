@@ -25,7 +25,8 @@ class Molecule:
     def addMolecule(self, molecule, foreignTarget, selfTarget, bo):
         #Preserves objects in added molecule (no deepcopy)
         for foreignAtom in molecule.atoms:
-            self.atoms.append(foreignAtom)
+            if not (foreignAtom in self.atoms):
+                self.atoms.append(foreignAtom)
         self.addBond(selfTarget, foreignTarget, bo)
         
     def removeAtom(self, target):
@@ -115,7 +116,7 @@ class Atom:
             return [self.chiralA, self.chiralC, self.chiralB]
         else:
             print "chiralCWlist: no such reference."
-            print reference
+            print reference.element
             print self.chiralA, self.chiralB, self.chiralC, self.chiralD
             raise StandardError
         
@@ -232,7 +233,7 @@ bondSymbols = ['0', '-', '=', '#', '4', '5', '6', '7', '8', '9']
 #Precondition: molecule has been flagged for ring positioning (some rflag values on atoms might != 0). This is done by smiles().
 #Creates and returns a SMILES string for unflagged (!atom.flag==2) atoms within a molecule, starting with the given atom.
 def subsmiles(molecule, startAtom, parentAtom):
-
+    
     #Flag the current atom.
     startAtom.flag = 2
 
@@ -248,10 +249,15 @@ def subsmiles(molecule, startAtom, parentAtom):
     #Remember to worry about whether or not an atom has a parent atom.
     #Adds ring labels.
     if hasattr(startAtom, 'CTotherC'):
+        print (True, startAtom.element)
         atomsToLink = [startAtom.CTotherC, startAtom.CTa, startAtom.CTb]
         begin = ["", "/", "\\"]
         if startAtom.CTotherC.flag == 2:
             begin = ["", "\\", "/"]
+        if startAtom.CTa == parentAtom:
+            outp = begin[2] + outp
+        if startAtom.CTb == parentAtom:
+            outp = begin[1] + outp
         for ind in range(3):
             atom = atomsToLink[ind]
             if (atom != None) and (atom != parentAtom):
@@ -259,6 +265,7 @@ def subsmiles(molecule, startAtom, parentAtom):
                     outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + str(startAtom.rflag) + ")"
                 elif atom.flag == 1:
                     outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + subsmiles(molecule, atom, startAtom) + ")"
+        print outp
         return outp
     
    
@@ -325,6 +332,7 @@ def subsmiles(molecule, startAtom, parentAtom):
                 
         outp += "(" +bondSymbols[startAtom.nonHNeighbors[atom]] + add + ")"
 
+    print outp
     return outp
 
 

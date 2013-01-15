@@ -25,7 +25,8 @@ class Molecule:
     def addMolecule(self, molecule, foreignTarget, selfTarget, bo):
         #Preserves objects in added molecule (no deepcopy)
         for foreignAtom in molecule.atoms:
-            self.atoms.append(foreignAtom)
+            if not (foreignAtom in self.atoms):
+                self.atoms.append(foreignAtom)
         self.addBond(selfTarget, foreignTarget, bo)
         
     def removeAtom(self, target):
@@ -115,7 +116,7 @@ class Atom:
             return [self.chiralA, self.chiralC, self.chiralB]
         else:
             print "chiralCWlist: no such reference."
-            print reference
+            print reference.element
             print self.chiralA, self.chiralB, self.chiralC, self.chiralD
             raise StandardError
         

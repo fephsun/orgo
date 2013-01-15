@@ -262,7 +262,6 @@ def acidhydrate(molecules, others):
                 newMolecules = []
                 mkvCarbons = markovnikov(place1[0], place1[1])
                 for pairing in mkvCarbons:
-                    print (pairing[0] in molecule1.atoms)
                     newMolecules += allTripleAdd(molecule1, pairing[0], pairing[1], molecule2, None, place2, None, )
                 return newMolecules
         else:
@@ -345,7 +344,6 @@ def halohydrate(molecules, others, halogen):
     #Place 1 is an alkene (tuple of atoms)
     #Place 2 is an oxygen connected to 1 or 0 neighbors
     def reactAtPlaces(molecule1, molecule2, place1, place2):
-        #Use addMolecule(self, molecule, foreignTarget, selfTarget, bo)
         newMolecules = []
         mkvCarbons = markovnikov(place1[0], place1[1])
         for pairing in mkvCarbons:
@@ -474,8 +472,51 @@ Get rid of the X in R-CH2-X.
 Attach the bare negative end of the acetylide (R-C#Cminus) to the R-CH2-.
 The result should look like R-CH2-C#C-R".
 """
+HALOGENS = ["Br","I", "Cl"]
+def acetylideAdd(molecules, others):
+    
+    def findPlaces1(molecule):
+        #findAlkyneCarbanions(molecule)
+        places = []
+        for atom in molecule.atoms:
+            if atom.charge == -1 and atom.element == "C" and (True in [other.neighbors[atom]==3 for other in list(atom.neighbors) if other.element == "C"]):
+                places += [atom]
+        return places
+    def findPlaces2(molecule):
+        #findHalogenCarbons(molecule)
+        places = []
+        for atom in molecule.atoms:
+            if atom.element == "C" and len(list(atom.neighbors))==2 and (True in [(other.element in HALOGENS) for other in list(atom.neighbors)]):
+                places += [atom]
+        return places
 
-
+    #Place 1 is a negatively charged carbon atom
+    #Place 2 is a carbon connected to at least one halogen
+    def reactAtPlaces(molecule1, molecule2, place1, place2):
+        #Duplicate inputs
+        (molecule1, place1, unused0, unused1, unused2, unused3, unused4)=\
+               duplicateInputs(molecule1, place1, place1, None, None, None, None)
+        (molecule2, place2, unused0, unused1, unused2, unused3, unused4)=\
+               duplicateInputs(molecule2, place2, place2, None, None, None, None)
+        #Remove negative charge
+        place1.charge = 0
+        #Find halogen
+        halogen = None
+        for atom in list(place2.neighbors):
+            if atom.element in HALOGENS:
+                halogen = atom
+        if halogen == None:
+            print "Error: your HalogenCarbons method isn't working as intended"
+            raise StandardError
+        #Remove halogen
+        molecule2.removeAtom(halogen)
+        #Add a single bond between the two carbons
+        molecule1.addMolecule(molecule2, place2, place1, 1)
+        
+        return [molecule1]
+        
+        
+    return twoReact(copy.deepcopy(molecules), copy.deepcopy(others), findPlaces1, findPlaces2, reactAtPlaces)
 
 
 
@@ -651,6 +692,14 @@ c67 = Atom("C")
 c68 = Atom("C")
 ethylene = Molecule(c67)
 ethylene.addAtom(c68, c67, 3)
+
+#Makes C-C-Br
+c69 = Atom("C")
+br70 = Atom("Br")
+c71 = Atom("C")
+bromoethane = Molecule(c69)
+bromoethane.addAtom(c71, c69, 1)
+bromoethane.addAtom(br70, c69, 1)
 
 
 

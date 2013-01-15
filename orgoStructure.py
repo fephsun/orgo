@@ -81,6 +81,7 @@ class Atom:
     
     def __init__(self, element):
         self.element = element
+        self.charge = 0
         self.neighbors = dict()
 
         #Temporary values which should only be meaningful within smiles() and subsmiles().
@@ -237,9 +238,10 @@ def subsmiles(molecule, startAtom, parentAtom):
 
     outp = startAtom.element
 
-    #Add charge if relevant.
-    #UNIMPLEMENTED
-
+    if startAtom.charge < 0:
+        outp = "["+outp + str(startAtom.charge)+"]"
+    if startAtom.charge > 0:
+        outp = "["+outp + "+"+str(startAtom.charge)+"]"
 
     #Check if the atom is a cis-trans center. Output correctly if so.
     #Remember to worry about cis-trans centers that might be part of a ring system.

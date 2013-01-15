@@ -356,10 +356,25 @@ def markovnikov(a, b):
     else:
         return ((b, a),)
 
+#Converts an alkyne to a carbonyl at target1 carbon.
+def carbonylAdd(molecule, target1, target2):
+    add1 = Atom("O")
+    add2 = None
+    addtarget1 = None
+    addtarget2 = None
 
-'''
-
-'''
+    #Protect the inputs from modification:
+    (molecule, target1, target2, add1, add2, addtarget1, addtarget2)=\
+               duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)
+    #We need an extra copy of add1 and add2, along with corresponding addtargets.
+    (notused, notused2, notused3, add1b, add2b, addtarget1b, addtarget2b)=\
+               duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)
+    #Change to single bond
+    molecule.changeBond(target1, target2, 1)
+    #Add new stuff
+    molecule.addAtom(add1, target1, 2)
+    
+    return [molecule]
 
 
 #Returns a tuple of atoms.
@@ -402,6 +417,22 @@ def findAlkyne(molecule):
         for neighbor in atom.neighbors:
             if neighbor.element == 'C' and atom.neighbors[neighbor] == 3:
                 return (atom, neighbor)
+    return None
+
+
+#Returns an atom. That atom is part of an alkyne, and is attached to an H.
+#Returns None if none found.
+def findHydrogenAlkyne(molecule):
+    for atom in molecule.atoms:
+        if not (atom.element == 'C'):
+            continue
+        if len(list(atom.neighbors)) != 1:
+            continue
+        if atom.charge != 0:
+            continue
+        for neighbor in atom.neighbors:
+            if neighbor.element == 'C' and atom.neighbors[neighbor] == 3 and neighbor.charge == 0:
+                return atom
     return None
 
 #Returns a list of tuples of atoms.

@@ -16,8 +16,10 @@ def removeDuplicates(moleculeList):
 
 def react(molecules, findPlace, reactAtPlace):
     if not isinstance(molecules, list):
+        print "hi."
         return react([molecules], findPlace, reactAtPlace)
     while True:
+        print molecules
         places = [(molecule, findPlace(molecule)) for molecule in molecules]
         if not (False in [item[1]==None for item in places]):
             break
@@ -242,28 +244,6 @@ def acidhydrate(molecules, others):
                 #Add a double-bond-O to the Markovnikov carbon
                 #If each carbon is equally Markovnikov, do some duplication-hacks and add to both
                 #Make a double bond between each Markovnikov carbon and the O of place2
-                def carbonylAdd(molecule, target1, target2):
-                    #Adds two copies of add1 and two copies of add2 to target1 and target2, respectively.
-                    #Breaks a triple bond.  Introduces no new stereochemistry.
-                    #MODIFICATION: Adds same copy of add1 to target1, instead producing a double bond.
-                    #add1 is an oxygen atom:
-                    add1 = Atom("O")
-                    add2 = None
-                    addtarget1 = None
-                    addtarget2 = None
-
-                    #Protect the inputs from modification:
-                    (molecule, target1, target2, add1, add2, addtarget1, addtarget2)=\
-                               duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)
-                    #We need an extra copy of add1 and add2, along with corresponding addtargets.
-                    (notused, notused2, notused3, add1b, add2b, addtarget1b, addtarget2b)=\
-                               duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)
-                    #Change to single bond
-                    molecule.changeBond(target1, target2, 1)
-                    #Add new stuff
-                    molecule.addAtom(add1, target1, 2)
-                    
-                    return [molecule]
                 
                 newMolecules = []
                 mkvCarbons = markovnikov(place1[0], place1[1])
@@ -385,16 +365,19 @@ If alkyne: Form a ketone or aldehyde, placing the O at the anti-Markovnikov carb
 """
 #TO DO: Implement with alkynes
 def hydroborate(molecules):
-    def findPlace(molecule): #returns one place at which the molecule can react -- e.g. a tuple of atoms, for alkenes/alkynes
-        return findAlkene(molecule)
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
         newMolecules = []
+        oxy = Atom("O")
         mkvCarbons = markovnikov(place[0], place[1])
-        for pairing in mkvCarbons:
-            oxy = Atom("O")
-            newMolecules += synAdd(molecule, pairing[0], pairing[1], None, oxy)
+        if place[0].neighbors[place[1]] == 2: #Alkene
+            for pairing in mkvCarbons:
+                newMolecules += synAdd(molecule, pairing[0], pairing[1], None, oxy)
+        else: #Alkyne
+            for pairing in mkvCarbons:
+                newMolecules += carbonylAdd(molecule1, pairing[1], pairing[0])
         return newMolecules
-    return react(molecules, findPlace, reactAtPlace)
+    
+    return react(molecules, findAlkeneOrAlkyne, reactAtPlace)
 
 
 
@@ -405,11 +388,9 @@ cat. OsO4 in NMO and acetone or H2O
 Syn addition of two OH groups to each carbon.
 """
 def dihydroxylate(molecules):
-    def findPlace(molecule):
-        return findAlkene(molecule)
     def reactAtPlace(molecule, place):
         return synAdd(molecule, place[0], place[1], Atom("O"), Atom("O"))
-    return react(molecules, findPlace, reactAtPlace)
+    return react(molecules, findAlkene, reactAtPlace)
 
 
 
@@ -420,8 +401,6 @@ O3 in CH2Cl2, with Me2S or Zn
 Adds two oxygens, splitting alkene bond, producing carbonyls.
 """
 def ozonolyse(molecules):
-    def findPlace(molecule):
-        return findAlkene(molecule)
     def reactAtPlace(molecule, place):
         #Break the double bond
         molecule.changeBond(place[0], place[1], 0)
@@ -433,7 +412,7 @@ def ozonolyse(molecules):
         place[1].eliminateCT()
         #Splice the molecule
         return splice(molecule)
-    return react(copy.deepcopy(molecules), findPlace, reactAtPlace)
+    return react(copy.deepcopy(molecules), findAlkene, reactAtPlace)
 
 
 
@@ -445,11 +424,9 @@ H2, cat. Lindlar
 Produces the cis alkene from an alkyne. Adds two Hs.
 """
 def lindlar(molecules):
-    def findPlace(molecule):
-        return findAlkyne(molecule)
     def reactAtPlace(molecule, place):
         tripleAdd(molecule, place[0], place[1], None, None, 'cis')
-    return react(molecules, findPlace, reactAtPlace)
+    return react(molecules, findAlkyne, reactAtPlace)
 
 
 
@@ -460,11 +437,9 @@ Na, in NH3 (L)
 Produces the trans alkene from an alkyne. Adds two Hs.
 """
 def sodiumAmmonia(molecules):
-    def findPlace(molecule):
-        return findAlkyne(molecule)
     def reactAtPlace(molecule, place):
         tripleAdd(molecule, place[0], place[1], None, None, 'trans')
-    return react(molecules, findPlace, reactAtPlace)
+    return react(molecules, findAlkyne, reactAtPlace)
 
 
 
@@ -475,13 +450,30 @@ Candidate reactants: alkynes, in which one end is an H
 NaNH2 in NH3
 Produces an acetylide ion. Removes the H+, resulting in a negative charge.
 """
+def alkyneDeprotonate(molecules):
+    def findPlace(molecule):
+        print molecule
+        return findHydrogenAlkyne(molecule)
+    def reactAtPlace(molecule, place):
+        if place == None:
+            return []
+        
+        place.charge = -1
+        return [molecule]
+        
+    return react(copy.deepcopy(molecules), findPlace, reactAtPlace)
 
 
 
 
 
-
-
+"""
+Reactants: one acetylide ion, one molecule of the form R-CH2-Br or R-CH2-I
+No additional reagents needed (can drag one molecule onto the other?)
+Get rid of the X in R-CH2-X.
+Attach the bare negative end of the acetylide (R-C#Cminus) to the R-CH2-.
+The result should look like R-CH2-C#C-R".
+"""
 
 
 
@@ -654,6 +646,11 @@ ethanol = Molecule(c64)
 ethanol.addAtom(c65, c64, 1)
 ethanol.addAtom(o66, c64, 1)
 
+#Makes C#C
+c67 = Atom("C")
+c68 = Atom("C")
+ethylene = Molecule(c67)
+ethylene.addAtom(c68, c67, 3)
 
 
 

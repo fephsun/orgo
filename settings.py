@@ -73,6 +73,8 @@ STATICFILES_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
 )
 
+LOGIN_URL = "/orgo/"
+
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
@@ -110,6 +112,8 @@ MIDDLEWARE_CLASSES = (
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+
+AUTH_PROFILE_MODULE = "models.UserProfile"
 
 ROOT_URLCONF = 'orgo.urls'
 

@@ -4,14 +4,15 @@ import orgo.engine.orgoStructure as orgoStructure
 import cPickle
 import django.forms as forms
 from django.forms import ModelForm
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-class moleculeField(models.Field):
+class PickledObjectField(models.Field):
     description = "A molecule."
     __metaclass__ = models.SubfieldBase
     
     def __init__ (self, *args, **kwargs):
-        super(moleculeField, self).__init__(*args, **kwargs)
+        super(PickledObjectField, self).__init__(*args, **kwargs)
     
     #Loads a saved molecule pickle-thing to Python
     def to_python(self, value):
@@ -34,3 +35,22 @@ class moleculeListModel(models.Model):
 
 class synthesisProblemModel(models.Model):
     synthesisProblem = PickledObjectField()
+    
+class mySignUpForm(UserCreationForm):
+    #Just like the default user registration form, except with an email blank.
+    #Hey look, one line of code!
+    email = forms.EmailField()
+
+class UserProfile(models.Model):
+    #A user profile - saves all the important stuff about each user, including
+    #reactions-in-progress, diagnostic stats, and default problem settings.
+    #More to come.
+    user = models.ForeignKey(User, unique=True)
+    savedProblem = models.ForeignKey(synthesisProblemModel)
+
+#Auto-make a UserProfile for each user when needed
+User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
+    
+    
+    
+    

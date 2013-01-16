@@ -15,7 +15,7 @@ def removeDuplicatesAt(moleculeList, ind):
     for i in range(ind+1, len(moleculeList)):
         if a == moleculeList[i] or moleculeCompare(a, moleculeList[i]):
             del moleculeList[ind]
-            break
+            return removeDuplicatesAt(moleculeList, ind)
 
     return removeDuplicatesAt(moleculeList, ind+1)
 
@@ -220,10 +220,13 @@ For alkynes to react, usually also mention "HgSO4 accels."
     #Only if none of the molecules can react with themselves, react them against each other in all possible ways.
         #Afterwards, check the resulting molecule for self-reactivity.
 
-def acidhydrate(molecules, others):
+def acidhydrate(molecules, others, alkynesOk = False):
 
     def findPlaces1(molecule):
-        return findAlkenesAndAlkynes(molecule)
+        if alkynesOk:
+            return findAlkenesAndAlkynes(molecule)
+        else:
+            return findAlkenes(molecule)
     def findPlaces2(molecule):
         return findHydroxyls(molecule)
 
@@ -312,22 +315,7 @@ def twoReact(molecules, others, findPlaces1, findPlaces2, reactAtPlaces):
     return removeDuplicates(output)
 
 
-        
-'''def react(molecules, findPlace, reactAtPlace):
-    if not isinstance(molecules, list):
-        return react([molecules], findPlace, reactAtPlace)
-    while True:
-        places = [(molecule, findPlace(molecule)) for molecule in molecules]
-        if not (False in [item[1]==None for item in places]):
-            break
-        for molecule, place in places:
-            if place != None:
-                molecules.remove(molecule)
-                x = reactAtPlace(molecule, place)
-                if not isinstance(x, list):
-                    x = [x]
-                molecules += x
-    return molecules'''
+
 
 
 """
@@ -364,7 +352,7 @@ BH3 in THF, then NaOH and H2O2
 If alkene: Adds an OH to the anti-Markovnikov carbon, then adds an H to the other one. Syn addition.
 If alkyne: Form a ketone or aldehyde, placing the O at the anti-Markovnikov carbon.
 """
-#TO DO: Implement with alkynes
+#Both steps at once
 def hydroborate(molecules):
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
         newMolecules = []
@@ -378,8 +366,33 @@ def hydroborate(molecules):
                 newMolecules += carbonylAdd(molecule1, pairing[1], pairing[0])
         return newMolecules
     
-    return react(molecules, findAlkeneOrAlkyne, reactAtPlace)
+    return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
 
+#Only BH3 in THF
+def hydroborate1(molecules):
+    def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
+        newMolecules = []
+        boron = Atom("B")
+        mkvCarbons = markovnikov(place[0], place[1])
+        if place[0].neighbors[place[1]] == 2: #Alkene
+            for pairing in mkvCarbons:
+                newMolecules += synAdd(molecule, pairing[0], pairing[1], None, boron)
+        else: #Alkyne
+            for pairing in mkvCarbons:
+                newMolecules += carbonylAdd(molecule1, pairing[1], pairing[0])
+        return newMolecules
+    
+    return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
+
+#Subsequent NaOH and H2O2 step
+def hydroborate2(molecules):
+    def BtoO(molecule):
+        for atom in molecule.atoms:
+            if atom.element == "B" and len(list(atom.neighbors)) < 2:
+                atom.element = "O"
+        return molecule
+    newMolecules = copy.deepcopy(molecules)
+    return [BtoO(molecule) for molecule in newMolecules]
 
 
 """
@@ -682,7 +695,8 @@ propyne.addAtom(c61, c60, 3)
 propyne.addAtom(c62, c61, 1)
 propyne.addAtom(c63, c60, 1)
 
-#Makes C-C-OH, ethanol
+#DO NOT DELETE. This is referred to by code in other files.
+#Makes C-C-OH, ethanol.
 c64 = Atom("C")
 c65 = Atom("C")
 o66 = Atom("O")
@@ -703,6 +717,13 @@ c71 = Atom("C")
 bromoethane = Molecule(c69)
 bromoethane.addAtom(c71, c69, 1)
 bromoethane.addAtom(br70, c69, 1)
+
+#DO NOT DELETE. This is referred to by code in other files.
+#Makes C-OH, methanol.
+c72 = Atom("C")
+o73 = Atom("O")
+methanol = Molecule(c72)
+methanol.addAtom(o73, c72, 1)
 
 
 

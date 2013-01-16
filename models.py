@@ -41,6 +41,7 @@ class mySignUpForm(UserCreationForm):
     #Hey look, one line of code!
     email = forms.EmailField()
 
+    
 ###Can delete; this is me learning Django
 class MoleculeForm(forms.Form):
     smiles = forms.CharField(max_length = 100)

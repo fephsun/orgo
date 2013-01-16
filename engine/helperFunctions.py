@@ -485,6 +485,9 @@ def findAlkeneAndAlkyne(molecule):
     else:
         return x
 
+def findAlkeneOrAlkyne(molecule):
+    return findAlkeneAndAlkyne
+
 #def findAlkenes(molecule):
 #    return findAlkenesOrAlkynes(molecule, 2)
 

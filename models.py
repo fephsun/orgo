@@ -42,12 +42,8 @@ class mySignUpForm(UserCreationForm):
     email = forms.EmailField()
 
 ###Can delete; this is me learning Django
-class SimpleMolecule(models.Model):
+class MoleculeForm(forms.Form):
     smiles = forms.CharField(max_length = 100)
-###Can delete; this is me learning Django
-class MoleculeForm(ModelForm):
-    class Meta:
-        model = SimpleMolecule
     
     
 class UserProfile(models.Model):

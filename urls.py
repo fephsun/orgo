@@ -9,6 +9,7 @@ urlpatterns = patterns('',
     url(r'^$', 'orgo.views.home', name='home'),
     url(r'^api/signup/$', 'orgo.views.signUp', name='signUp'),
     url(r'^api/login/$', 'orgo.views.logIn', name='logIn'),    
+    url(r'^homeMoleculeChanger/$', 'orgo.views.homeMoleculeChanger', name='homeMoleculeChanger'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

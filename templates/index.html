@@ -1,11 +1,25 @@
 <html>
+<head>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+<script>
+setInterval(function() {
+    $.ajax({
+        type: "POST",
+        url: "/orgo/homeMoleculeChanger/",
+        data: {'random': 'blah'},
+        success: function(data) {
+            $("#molecule").html(data);
+        },
+    });
+}, 3000);
+</script>
+</head>
 <h1> Hello world </h1>
 
+<div id="molecule">
 {{molecule|safe}} <!--The safe tag prevents character escaping -->
+</div>
 
-{% if user.is_authenticated %}
-    <p>Welcome, {{user.username}}</p>
-{% endif %}
 <h2> Log In </h2>
 <form action="/orgo/api/login/" method="post" class="form-horizontal">{% csrf_token %}
     {{logInForm.as_p}}

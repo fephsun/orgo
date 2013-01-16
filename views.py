@@ -2,14 +2,17 @@
 from django.shortcuts import render
 from django.contrib.auth import *
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 import orgo.engine.serverRender as serverRender
 import orgo.engine.reactions as reactions
+import orgo.engine.randomGenerator as randomGenerator
 import orgo.models as models
 
 def home(request, debug = ""):
     #Home page.
     logout(request)
-    outSmiles = reactions.smiles(reactions.mol)
+    outSmiles = reactions.smiles(randomGenerator.randomStart()[0])
     svg = serverRender.render(outSmiles)
     return render(request, 'index.html', {'molecule': svg, 'signUpForm': models.mySignUpForm,
             'logInForm': forms.AuthenticationForm(), 'debug':debug})
@@ -33,9 +36,17 @@ def logIn(request):
             login(request, user)
             return loggedInHome(request)
     return home(request, debug = "Invalid login, sorry.")
+
+@csrf_exempt
+def homeMoleculeChanger(request):
+    #Returns new molecules for the AJAX tester (home molecule changer)
+    outSmiles = reactions.smiles(randomGenerator.randomStart()[0])
+    svg = serverRender.render(outSmiles)
+    return HttpResponse(svg)
             
 @login_required
 def loggedInHome(request):
     #Home page for those who have logged in.
     name = request.user.username
     return render(request, 'loggedin.html', {'name': name})
+    

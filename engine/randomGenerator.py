@@ -1,25 +1,34 @@
 from helperFunctions import *
 import random
 
-def randomStart():
+def randomStart(endProb=0.3, maxBranchLength=8,
+                alkyneProb=0.2, alkeneProb=0.4,
+                BrProb=0.1, ClProb=0.1, OHProb=0.1, BranchProb=0.05,
+                forceTerminalAlkyne = False):
+    #Want more alkynes?  You need to make fewer substituents.
+    for subsProb in (BrProb, ClProb, OHProb, BranchProb):
+        subsProb *= 1-2*alkyneProb
     lastAtom = Atom("C")
     frontAtom = lastAtom
     mol = Molecule(lastAtom)
-    while (random.random() < 0.8 or len(mol.atoms) < 3) and len(mol.atoms) < 10:
+    if forceTerminalAlkyne:
+        lastAtom = Atom("C")
+        mol.addAtom(lastAtom, frontAtom, 3)
+    while (random.random() < 1.0-endProb or len(mol.atoms) < 3) and len(mol.atoms) < maxBranchLength:
         switcher = random.random()
         if switcher < 1:
-            newMol, thisAtom, nextAtom = randC()
+            newMol, thisAtom, nextAtom = randC(BrProb, ClProb, OHProb, BranchProb)
 ##        elif switcher < 0.75:
 ##            newMol, thisAtom, nextAtom = randRing(5)
 ##        else:
 ##            newMol, thisAtom, nextAtom = randRing(6)
 
         switcher = random.random()
-        if switcher < 0.2 and len(thisAtom.neighbors) == 0\
+        if switcher < alkyneProb and len(thisAtom.neighbors) == 0\
            and lastAtom.totalBondOrder() == 1:
             #Make a triple bond.
             mol.addMolecule(newMol, thisAtom, lastAtom, 3)
-        elif switcher < 0.6 and len(thisAtom.neighbors) <= 1\
+        elif switcher < alkeneProb+alkyneProb and len(thisAtom.neighbors) <= 1\
              and lastAtom.totalBondOrder() <= 2\
              and lastAtom.findAlkeneBond() == None\
              and lastAtom.totalBondOrder() > 0:
@@ -48,20 +57,23 @@ def randomStart():
     fixStereo(mol, None, lastAtom) #May be a slight problem with chirality?
     return mol, frontAtom, None
 
-def randC():
+def randC(ClProb, BrProb, OHProb, BranchProb):
     #Makes a random carbon atom with some substituents
     c = Atom("C")
     mol = Molecule(c)
     #Add up to 2 substituents
     for i in xrange(2):
         switcher = random.random()
-        if switcher < 0.1:
+        if switcher < ClProb:
             newS = Atom("Cl")
             mol.addAtom(newS, c, 1)
-        elif switcher < 0.2:
+        elif switcher < ClProb+BrProb:
             newS = Atom("Br")
-            mol.addAtom(newS, c, 1)            
-        elif switcher < 0.3:
+            mol.addAtom(newS, c, 1)
+        elif switcher < ClProb+BrProb+OHProb:
+            newS = Atom("O")
+            mol.addAtom(newS, c, 1)
+        elif switcher < ClProb+BrProb+OHProb+BranchProb:
             print "Branching"
             newS, frontAtom, notused = randomStart()
             mol.addMolecule(newS, frontAtom, c, 1)

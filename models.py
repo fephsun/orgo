@@ -48,6 +48,7 @@ class MoleculeForm(forms.Form):
 class MoleculeModel(models.Model):
     smiles = models.CharField(max_length=100)
     
+    @classmethod
     def create(cls, s):
         x = cls(smiles = s)
         return x

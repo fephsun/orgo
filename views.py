@@ -62,4 +62,4 @@ def loggedInHome(request):
 ###Can delete; this is me learning Django
 def renderSmiles(request):
     smiles = request.POST['smiles']
-    return render(request, 'loggedin.html', {'name': serverRender.render(smiles))
+    return render(request, 'loggedin.html', {'name': serverRender.render(smiles)})

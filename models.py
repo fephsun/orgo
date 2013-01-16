@@ -8,7 +8,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
 class PickledObjectField(models.Field):
-    description = "A molecule."
+    description = "An object."
     __metaclass__ = models.SubfieldBase
     
     def __init__ (self, *args, **kwargs):
@@ -41,6 +41,15 @@ class mySignUpForm(UserCreationForm):
     #Hey look, one line of code!
     email = forms.EmailField()
 
+###Can delete; this is me learning Django
+class SimpleMolecule(models.Model):
+    smiles = forms.CharField(max_length = 100)
+###Can delete; this is me learning Django
+class MoleculeForm(ModelForm):
+    class Meta:
+        model = SimpleMolecule
+    
+    
 class UserProfile(models.Model):
     #A user profile - saves all the important stuff about each user, including
     #reactions-in-progress, diagnostic stats, and default problem settings.

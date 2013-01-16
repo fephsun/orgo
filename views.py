@@ -15,7 +15,7 @@ def home(request, debug = ""):
     outSmiles = reactions.smiles(randomGenerator.randomStart()[0])
     svg = serverRender.render(outSmiles)
     return render(request, 'index.html', {'molecule': svg, 'signUpForm': models.mySignUpForm,
-            'logInForm': forms.AuthenticationForm(), 'debug':debug})
+            'logInForm': forms.AuthenticationForm(), 'debug':debug, 'outpSmilesForm': models.MoleculeForm})###Can delete "outpSmilesForm" term; this is me learning Django
 
 def signUp(request):
     if request.method == 'POST':
@@ -37,6 +37,15 @@ def logIn(request):
             return loggedInHome(request)
     return home(request, debug = "Invalid login, sorry.")
 
+###Can delete; this is me learning Django
+def outpSmiles(request):
+    if request.method == 'POST':
+        form = models.MoleculeForm(request.POST)
+        if form.is_valid():
+            form.save()=
+            return renderSmiles(request)
+    
+    
 @csrf_exempt
 def homeMoleculeChanger(request):
     #Returns new molecules for the AJAX tester (home molecule changer)
@@ -50,3 +59,7 @@ def loggedInHome(request):
     name = request.user.username
     return render(request, 'loggedin.html', {'name': name})
     
+###Can delete; this is me learning Django
+def renderSmiles(request):
+    smiles = request.POST['smiles']
+    return render(request, 'loggedin.html', {'name': serverRender.render(smiles))

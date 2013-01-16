@@ -42,7 +42,7 @@ def outpSmiles(request):
     if request.method == 'POST':
         form = models.MoleculeForm(request.POST)
         if form.is_valid():
-            form.save()=
+            form.save()
             return renderSmiles(request)
     
     

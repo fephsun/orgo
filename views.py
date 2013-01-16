@@ -42,7 +42,9 @@ def outpSmiles(request):
     if request.method == 'POST':
         form = models.MoleculeForm(request.POST)
         if form.is_valid():
-            return renderSmiles(request)
+            molecule = MoleculeModel.create("CCCCC")
+            molecule.save()
+            return renderSmiles(request, molecule)
     
     
 @csrf_exempt
@@ -59,6 +61,6 @@ def loggedInHome(request):
     return render(request, 'loggedin.html', {'name': name})
     
 ###Can delete; this is me learning Django
-def renderSmiles(request):
+def renderSmiles(request, molecule):
     smiles = request.POST['smiles']
-    return render(request, 'loggedin.html', {'name': serverRender.render(str(smiles))})
+    return render(request, 'loggedin.html', {'item1': serverRender.render(str(smiles)), 'item2': serverRender.render(str(molecule.smiles))})

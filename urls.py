@@ -9,7 +9,7 @@ urlpatterns = patterns('',
     url(r'^$', 'orgo.views.home', name='home'),
     url(r'^api/signup/$', 'orgo.views.signUp', name='signUp'),
     url(r'^api/login/$', 'orgo.views.logIn', name='logIn'),    
-#   url(r'^api/outpsmiles/$', 'orgo.views.outpSmiles', name='outpSmiles'),  ###Can delete; this is me learning Django  
+    url(r'^api/outpsmiles/$', 'orgo.views.outpSmiles', name='outpSmiles'),  ###Can delete; this is me learning Django  
     url(r'^homeMoleculeChanger/$', 'orgo.views.homeMoleculeChanger', name='homeMoleculeChanger'),
 
     # Uncomment the admin/doc line below to enable admin documentation:

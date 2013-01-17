@@ -28,14 +28,21 @@ class PickledObjectField(models.Field):
         #No unlimited-length fields?
         return 'text'
 
-
-class moleculeListModel(models.Model):
-    molecule = PickledObjectField()
-
-
-class synthesisProblemModel(models.Model):
-    synthesisProblem = PickledObjectField()
+        
+        
+"""
+SynthesisProblemModel
+Contains: pickled list of molecule-models by unique ID
+Contains: pickled list of reagent-models by unique ID
+Contains: pickled list of reaction-step-models by unique ID
+Contains: pickled synthesis problem solution
+"""
+class SynthesisProblemModel(models.Model):
     
+        
+        
+        
+        
 class mySignUpForm(UserCreationForm):
     #Just like the default user registration form, except with an email blank.
     #Hey look, one line of code!
@@ -43,14 +50,14 @@ class mySignUpForm(UserCreationForm):
 
     
 ###Can delete; this is me learning Django
-#class MoleculeForm(forms.Form):
-#    smiles = forms.CharField(max_length = 100)
-#class MoleculeModel(models.Model):
-#    smiles = models.CharField(max_length=100)    
-#    @classmethod
-#    def create(cls, s):
-#        x = cls(smiles = s)
-#        return x
+class MoleculeForm(forms.Form):
+    smiles = forms.CharField(max_length = 100)
+class MoleculeModel(models.Model):
+    smiles = models.CharField(max_length=100)    
+    @classmethod
+    def create(cls, s):
+        x = cls(smiles = s)
+        return x
         
     
     

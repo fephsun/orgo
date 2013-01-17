@@ -162,12 +162,12 @@ def tripleAdd(molecule, target1, target2, add1, add2, cisOrTrans,
             if neighbor != otherTarget and neighbor != thisAdd and neighbor != thisAddtarget:
                 otherAttached = neighbor
         if cisOrTrans.lower() == 'trans':
-            thisTarget.newCTCenter(otherTarget, otherAttached, thisAdd)
+            thisTarget.newCTCenter(otherTarget, otherAttached, CTthing)
         else:
             if hasattr(otherTarget, "CTotherC"):
-                thisTarget.newCTCenter(otherTarget, otherAttached, thisAdd)
+                thisTarget.newCTCenter(otherTarget, otherAttached, CTthing)
             else:
-                thisTarget.newCTCenter(otherTarget, thisAdd, otherAttached)
+                thisTarget.newCTCenter(otherTarget, CTthing, otherAttached)
 
     return [molecule]
 

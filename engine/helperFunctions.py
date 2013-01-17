@@ -4,6 +4,7 @@ import itertools
 
 randThing = 0
 
+debug = True
 
 
 #Returns a list of molecules.
@@ -112,6 +113,8 @@ def allAdd(molecule, target1, target2, add1, add2, addtarget1=None, addtarget2=N
     molecule.changeBond(target1, target2, bo-1)
     target1.eliminateCT()
     target2.eliminateCT()
+    target1.eliminateChiral()
+    target2.eliminateChiral()
     #Add new stuff
     for thisTarget, thisAdd, thisAddtarget in (
         (target1, add1, addtarget1), (target2, add2, addtarget2)):
@@ -163,6 +166,9 @@ def tripleAdd(molecule, target1, target2, add1, add2, cisOrTrans,
                 thisTarget.newCTCenter(otherTarget, otherAttached, thisAdd)
             else:
                 thisTarget.newCTCenter(otherTarget, thisAdd, otherAttached)
+    print "!!!"
+    print molecule
+    print "iii"
     return molecule
 
 def allTripleAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None):
@@ -283,15 +289,16 @@ def neighborCompare(a,b, compareDict):
             temp[aNeighborSet[i]] = b.neighbors.keys()[i]
         if chiralFlag and OKFlag:
             if not(set(a.neighbors.keys()) <= set((a.chiralA, a.chiralB, a.chiralC, a.chiralD))):
-                print "Error thing"
-                for neighbor in a.neighbors.keys():
-                    if neighbor != None:
-                        print neighbor.element
-                print "------"
-                for ch in (a.chiralA, a.chiralB, a.chiralC, a.chiralD):
-                    if ch != None:
-                        print ch.element
-                print "------"
+                if debug:
+                    print "Error thing"
+                    for neighbor in a.neighbors.keys():
+                        if neighbor != None:
+                            print neighbor.element
+                    print "------"
+                    for ch in (a.chiralA, a.chiralB, a.chiralC, a.chiralD):
+                        if ch != None:
+                            print ch.element
+                    print "------"
                 raise StandardError
             #The following bit of code is still quite messy.  It tests whether the
             #hypothesized pairing follows the correct chirality.

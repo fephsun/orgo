@@ -171,14 +171,16 @@ def randomSynthesisProblemMake(mode = "Everything", steps = 10):
         legalRxns = REACTIONS
         legalAddRxns = [reaction for reaction in ADDREACTIONS if (reaction in legalRxns)]
     #Add other modes here.
-    print "Initial mol: "+str(smiles(molBoxes[0].molecules)) + ' , ' + str(smiles(molBoxes[1].molecules))
+    if debug:
+        print "Initial mol: "+str(smiles(molBoxes[0].molecules)) + ' , ' + str(smiles(molBoxes[1].molecules))
     
     goodSteps = 0    #Number of successful steps taken.
     for attemptNo in xrange(steps*2):
         newMolBoxes = []
         for molBox in molBoxes:
             reagents, rxnFunction, ignore = legalRxns[random.randint(0, len(legalRxns)-1)]
-            print "Trying step: " + str(reagents)
+            if debug:
+                print "Trying step: " + str(reagents)
             currentRxn = ReactionStep(molBox)
             for reagent in reagents:
                 currentRxn.hasReagents[reagent[0]] = True
@@ -187,12 +189,14 @@ def randomSynthesisProblemMake(mode = "Everything", steps = 10):
                 newMolBoxes.append(currentRxn.productBox)
                 reactions.append(currentRxn)
                 goodSteps += 1
-                print "Result: " +str(smiles(currentRxn.productBox.molecules))
+                if debug:
+                    print "Result: " +str(smiles(currentRxn.productBox.molecules))
             else:
                 newMolBoxes.append(molBox)
         #Now, try to fuse molecules?
         reagents, rxnFunction, ignore = legalAddRxns[random.randint(0, len(legalAddRxns)-1)]
-        print "Trying fusion: "+str(reagents)
+        if debug:
+            print "Trying fusion: "+str(reagents)
         molBoxes = []
         if len(newMolBoxes) == 1:
             #No point in trying to fuse molecules if you only have one.
@@ -217,7 +221,8 @@ def randomSynthesisProblemMake(mode = "Everything", steps = 10):
                         newMolBoxes.remove(molBox1)
                         newMolBoxes.remove(molBox2)
                         molBoxes = newMolBoxes + [currentRxn.productBox]
-                        print "Result: " +str(smiles(currentRxn.productBox.molecules))
+                        if debug:
+                            print "Result: " +str(smiles(currentRxn.productBox.molecules))
         if len(molBoxes) == 0:
             #Didn't fuse any molecules.  Oh well.
             molBoxes = newMolBoxes
@@ -320,6 +325,7 @@ REACTIONS = (
 (((OSO4,), (NMO,), (ACETONE, H2O)), (lambda x: lambda o: dihydroxylate(x+o)), ()),
 (((O3,),(CH2CL2,),(ME2S,ZN)), (lambda x: lambda o: ozonolyse(x+o)), ()),
 (((NA,), (NH3,)), (lambda x: lambda o: sodiumAmmonia(x+o)), ()),
+(((LINDLAR,), (H2,)), (lambda x: lambda o: lindlar(x+o)), ()),
 (((NANH2,), (NH3,)), (lambda x: lambda o: alkyneDeprotonate(x+o)), ()),
 ((), (lambda x: lambda o: acetylideAdd(x, o)),('add'))
 )

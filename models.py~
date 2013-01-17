@@ -40,31 +40,7 @@ Contains: pickled synthesis problem solution
 class SynthesisProblemModel(models.Model):
     pass
         
-"""
-MoleculeBoxModel
-Contains: foreignkey to a SynthesisProblemModel
-Contains: pickled moleculebox
-Contains: SVG representation
-"""
-
-
-"""
-ReagentModel
-Contains: foreignkey to a SynthesisProblemModel
-Contains: pickled reagentbox
-Contains: its own HTML representation
-"""
-
-
-"""
-ReactionStepModel
-Contains: foreignkey to a SynthesisProblemModel
-Contains: pickled reactionstep
-Contains: HTML representation
-"""
-#class ReactionStepModel(models.Model):
-    
-
+        
         
         
 class mySignUpForm(UserCreationForm):
@@ -90,7 +66,7 @@ class UserProfile(models.Model):
     #reactions-in-progress, diagnostic stats, and default problem settings.
     #More to come.
     user = models.ForeignKey(User, unique=True)
-    #savedProblem = models.ForeignKey(SynthesisProblemModel)
+    savedProblem = models.ForeignKey(SynthesisProblemModel)
 
 #Auto-make a UserProfile for each user when needed
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])

@@ -85,7 +85,7 @@ def hydrohalogenate(molecules, halogen):
             else:
                 #Triple bond
                 newMolecules += allTripleAdd(molecule, pairing[0], pairing[1], Atom(halogen), None)
-
+        #Sometimes, Mkv's rule results in two identical products.  Return only one of them.
         return newMolecules
     return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
 

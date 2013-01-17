@@ -250,7 +250,7 @@ def subsmiles(molecule, startAtom, parentAtom):
     #Remember to worry about whether or not an atom has a parent atom.
     #Adds ring labels.
     if hasattr(startAtom, 'CTotherC'):
-        #print (True, startAtom.element)
+        print (True, startAtom.element)
         atomsToLink = [startAtom.CTotherC, startAtom.CTa, startAtom.CTb]
         begin = ["", "/", "\\"]
         if startAtom.CTotherC.flag == 2:
@@ -266,7 +266,7 @@ def subsmiles(molecule, startAtom, parentAtom):
                     outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + str(startAtom.rflag) + ")"
                 elif atom.flag == 1:
                     outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + subsmiles(molecule, atom, startAtom) + ")"
-        #print outp
+        print outp
         return outp
     
    
@@ -333,7 +333,7 @@ def subsmiles(molecule, startAtom, parentAtom):
                 
         outp += "(" +bondSymbols[startAtom.nonHNeighbors[atom]] + add + ")"
 
-    #print outp
+    print outp
     return outp
 
 

@@ -38,8 +38,10 @@ Contains: pickled list of reaction-step-models by unique ID
 Contains: pickled synthesis problem solution
 """
 class SynthesisProblemModel(models.Model):
-    pass
-        
+    
+
+    
+
 """
 MoleculeBoxModel
 Contains: foreignkey to a SynthesisProblemModel

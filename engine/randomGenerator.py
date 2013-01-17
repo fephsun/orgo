@@ -16,12 +16,12 @@ def randomStart(endProb=0.3, maxBranchLength=8,
         mol.addAtom(lastAtom, frontAtom, 3)
     while (random.random() < 1.0-endProb or len(mol.atoms) < 3) and len(mol.atoms) < maxBranchLength:
         switcher = random.random()
-        if switcher < 1:
+        if switcher < .8:
             newMol, thisAtom, nextAtom = randC(BrProb, ClProb, OHProb, BranchProb)
-##        elif switcher < 0.75:
-##            newMol, thisAtom, nextAtom = randRing(5)
-##        else:
-##            newMol, thisAtom, nextAtom = randRing(6)
+        elif switcher < 0.9:
+            newMol, thisAtom, nextAtom = randRing(5, BrProb, ClProb, OHProb)
+        else:
+            newMol, thisAtom, nextAtom = randRing(6, BrProb, ClProb, OHProb)
 
         switcher = random.random()
         if switcher < alkyneProb and len(thisAtom.neighbors) == 0\
@@ -79,8 +79,41 @@ def randC(ClProb, BrProb, OHProb, BranchProb):
             mol.addMolecule(newS, frontAtom, c, 1)
     return mol, c, c
 
-def randRing(noCs):
-    pass
+def randRing(noCs, BrProb, ClProb, OHProb):
+    initAtom = Atom("C")
+    mol = Molecule(initAtom)
+    oldAtom = initAtom
+    for i in xrange(noCs - 1):
+        newAtom = Atom('C')
+        mol.addAtom(newAtom, oldAtom, 1)
+        oldAtom = newAtom
+    #Now, close the loop!
+    mol.addBond(initAtom, oldAtom, 1)
+    outAtom = mol.atoms[random.randint(1,len(mol.atoms)-1)]
+    for atom in mol.atoms:
+        #Don't interfere with the larger structure.
+        if atom == initAtom or atom == outAtom:
+            continue
+        #Add some random substituents.
+        switcher = random.random()
+        if switcher < BrProb:
+            addAtom = Atom("Br")
+        elif switcher < BrProb + ClProb:
+            addAtom = Atom("Cl")
+        elif switcher < BrProb + ClProb + OHProb:
+            addAtom = Atom("O")
+        else:
+            continue
+        if len(atom.neighbors) < 2:
+            continue
+        #Do a coin flip to determine chirality.
+        if random.random() < 0.5:
+            atom.newChiralCenter(addAtom, (atom.neighbors.keys()[0], atom.neighbors.keys()[1], None))
+        else:
+            atom.newChiralCenter(addAtom, (atom.neighbors.keys()[1], atom.neighbors.keys()[0], None))
+        mol.addAtom(addAtom, atom, 1)
+    
+    return mol, initAtom, outAtom
 
 def fixStereo(mol, thisAtom, lastAtom):
     #Look to see if the *last* piece we added requires stereochem
@@ -133,6 +166,8 @@ def probablyChiral(atom):
     else:
         return False
 
+if __name__ == '__main__':
+    print smiles(randomStart()[0])
 
     
 

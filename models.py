@@ -37,10 +37,35 @@ Contains: pickled list of reagent-models by unique ID
 Contains: pickled list of reaction-step-models by unique ID
 Contains: pickled synthesis problem solution
 """
-class SynthesisProblemModel(models.Model):
+#class SynthesisProblemModel(models.Model):
     
         
         
+"""
+MoleculeBoxModel
+Contains: foreignkey to a SynthesisProblemModel
+Contains: pickled moleculebox
+Contains: SVG representation
+"""
+
+
+"""
+ReagentModel
+Contains: foreignkey to a SynthesisProblemModel
+Contains: pickled reagentbox
+Contains: its own HTML representation
+"""
+
+
+"""
+ReactionStepModel
+Contains: foreignkey to a SynthesisProblemModel
+Contains: pickled reactionstep
+Contains: HTML representation
+"""
+#class ReactionStepModel(models.Model):
+    
+
         
         
 class mySignUpForm(UserCreationForm):

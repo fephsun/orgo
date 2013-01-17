@@ -346,8 +346,8 @@ ALKENEALKYNE = (
 (((NAOH,), (H2O2,)), (lambda x: lambda o: hydroborate2(x+o)), ()),
 (((OSO4,), (NMO,), (ACETONE, H2O)), (lambda x: lambda o: dihydroxylate(x+o)), ()),
 (((O3,),(CH2CL2,),(ME2S,ZN)), (lambda x: lambda o: ozonolyse(x+o)), ()),
-(((NA,), (NH3,)), (lambda x: lambda o: sodiumAmmonia(x+o)), ()),-
-(((LINDLAR,), (H2,)), (lambda x: lambda o: lindlar(x+o)), ()),-
+(((NA,), (NH3,)), (lambda x: lambda o: sodiumAmmonia(x+o)), ()),
+(((LINDLAR,), (H2,)), (lambda x: lambda o: lindlar(x+o)), ()),
 (((NANH2,), (NH3,)), (lambda x: lambda o: alkyneDeprotonate(x+o)), ()),
 ((), (lambda x: lambda o: acetylideAdd(x, o)),('add'))
 )

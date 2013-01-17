@@ -34,10 +34,12 @@ def react(molecules, findPlace, reactAtPlace):
                 if not isinstance(x, list):
                     x = [x]
                 molecules += x
+                if debug:
+                    print "Added: "+str(x)
+    
     if debug:
         print "Results: "
         print smiles(molecules)
-    
     return removeDuplicates(molecules)
 
 
@@ -529,7 +531,7 @@ def lindlar(molecules):
         print smiles(molecules)
         
     def reactAtPlace(molecule, place):
-        tripleAdd(molecule, place[0], place[1], None, None, 'cis')
+        return tripleAdd(molecule, place[0], place[1], None, None, 'cis')
     return react(molecules, findAlkyne, reactAtPlace)
 
 
@@ -547,7 +549,7 @@ def sodiumAmmonia(molecules):
         print smiles(molecules)
         
     def reactAtPlace(molecule, place):
-        tripleAdd(molecule, place[0], place[1], None, None, 'trans')
+        return tripleAdd(molecule, place[0], place[1], None, None, 'trans')
     return react(molecules, findAlkyne, reactAtPlace)
 
 

@@ -159,7 +159,7 @@ def tripleAdd(molecule, target1, target2, add1, add2, cisOrTrans,
             CTthing = None
         otherAttached = None #By default, otherAttached is a hydrogen.
         for neighbor in thisTarget.neighbors:
-            if neighbor != otherTarget:
+            if neighbor != otherTarget and neighbor != thisAdd and neighbor != thisAddtarget:
                 otherAttached = neighbor
         if cisOrTrans.lower() == 'trans':
             thisTarget.newCTCenter(otherTarget, otherAttached, thisAdd)
@@ -169,7 +169,6 @@ def tripleAdd(molecule, target1, target2, add1, add2, cisOrTrans,
             else:
                 thisTarget.newCTCenter(otherTarget, thisAdd, otherAttached)
 
-    print "Result of tripleAdd: "+str(molecule)
     return [molecule]
 
     
@@ -441,6 +440,9 @@ def findAlkyne(molecule):
             continue
         for neighbor in atom.neighbors:
             if neighbor.element == 'C' and atom.neighbors[neighbor] == 3:
+                if atom == neighbor:
+                    print "OH NO WHAT JUST HAPPENED"
+                    raise StandardError
                 return (atom, neighbor)
     return None
 

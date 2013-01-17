@@ -15,7 +15,7 @@ def home(request, debug = ""):
     outSmiles = reactions.smiles(randomGenerator.randomStart()[0])
     svg = serverRender.render(outSmiles)
     return render(request, 'index.html', {'molecule': svg, 'signUpForm': models.mySignUpForm,
-            'logInForm': forms.AuthenticationForm(), 'debug':debug)###Can delete "outpSmilesForm" term; this is me learning Django      , 'outpSmilesForm': models.MoleculeForm}
+            'logInForm': forms.AuthenticationForm(), 'debug':debug , 'outpSmilesForm': models.MoleculeForm})###Can delete "outpSmilesForm" term; this is me learning Django     
 
 def signUp(request):
     if request.method == 'POST':
@@ -38,13 +38,13 @@ def logIn(request):
     return home(request, debug = "Invalid login, sorry.")
 
 ###Can delete; this is me learning Django
-#def outpSmiles(request):
-#    if request.method == 'POST':
-#        form = models.MoleculeForm(request.POST)
-#        if form.is_valid():
-#            molecule = models.MoleculeModel.create("CCCCC")
-#            molecule.save()
-#            return renderSmiles(request, molecule)
+def outpSmiles(request):
+    if request.method == 'POST':
+        form = models.MoleculeForm(request.POST)
+        if form.is_valid():
+            molecule = models.MoleculeModel.create("CCCCC")
+            molecule.save()
+            return renderSmiles(request, molecule)
     
     
 @csrf_exempt
@@ -61,6 +61,6 @@ def loggedInHome(request):
     return render(request, 'loggedin.html', {'name': name})
     
 ###Can delete; this is me learning Django
-#def renderSmiles(request, molecule):
-#    smiles = request.POST['smiles']
-#    return render(request, 'loggedin.html', {'item1': serverRender.render(str(smiles)), 'item2': serverRender.render(str(molecule.smiles))})
+def renderSmiles(request, molecule):
+    smiles = request.POST['smiles']
+    return render(request, 'loggedin.html', {'item1': serverRender.render(str(smiles)), 'item2': serverRender.render(str(molecule.smiles))})

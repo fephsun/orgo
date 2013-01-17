@@ -363,7 +363,7 @@ def hydroborate(molecules):
                 newMolecules += synAdd(molecule, pairing[0], pairing[1], None, oxy)
         else: #Alkyne
             for pairing in mkvCarbons:
-                newMolecules += carbonylAdd(molecule1, pairing[1], pairing[0])
+                newMolecules += carbonylAdd(molecule, pairing[1], pairing[0])
         return newMolecules
     
     return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
@@ -379,7 +379,7 @@ def hydroborate1(molecules):
                 newMolecules += synAdd(molecule, pairing[0], pairing[1], None, boron)
         else: #Alkyne
             for pairing in mkvCarbons:
-                newMolecules += carbonylAdd(molecule1, pairing[1], pairing[0])
+                newMolecules += carbonylAdd(molecule, pairing[1], pairing[0])
         return newMolecules
     
     return react(molecules, findAlkeneAndAlkyne, reactAtPlace)

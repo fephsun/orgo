@@ -22,12 +22,12 @@ import string
     #Can add: reagents to reaction-steps, reagents to molecule-boxes, reaction-steps to molecule-boxes, molecule-boxes to reaction-steps.
 class SynthesisProblem:
     def __init__(self, startingMaterials, finalProduct, solution):
+        self.
         self.startingMaterials = startingMaterials
         self.finalProduct = finalProduct
         self.steps = [] #to be a list of reactionSteps
         self.reagentsMade = [] #for the sidebar
         self.solution = solution
-        self.isSolved = False
 
 
 

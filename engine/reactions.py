@@ -86,10 +86,7 @@ def hydrohalogenate(molecules, halogen):
                 #Triple bond
                 newMolecules += allTripleAdd(molecule, pairing[0], pairing[1], Atom(halogen), None)
         #Sometimes, Mkv's rule results in two identical products.  Return only one of them.
-        if moleculeCompare(newMolecules[0], newMolecules[1]):
-            return newMolecules[0]
-        else:
-            return newMolecules
+        return newMolecules
     return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
 
 
@@ -363,7 +360,7 @@ def hydroborate(molecules):
                 newMolecules += synAdd(molecule, pairing[0], pairing[1], None, oxy)
         else: #Alkyne
             for pairing in mkvCarbons:
-                newMolecules += carbonylAdd(molecule1, pairing[1], pairing[0])
+                newMolecules += carbonylAdd(molecule, pairing[1], pairing[0])
         return newMolecules
     
     return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
@@ -379,7 +376,7 @@ def hydroborate1(molecules):
                 newMolecules += synAdd(molecule, pairing[0], pairing[1], None, boron)
         else: #Alkyne
             for pairing in mkvCarbons:
-                newMolecules += carbonylAdd(molecule1, pairing[1], pairing[0])
+                newMolecules += carbonylAdd(molecule, pairing[1], pairing[0])
         return newMolecules
     
     return react(molecules, findAlkeneAndAlkyne, reactAtPlace)

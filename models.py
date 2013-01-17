@@ -43,15 +43,14 @@ class mySignUpForm(UserCreationForm):
 
     
 ###Can delete; this is me learning Django
-class MoleculeForm(forms.Form):
-    smiles = forms.CharField(max_length = 100)
-class MoleculeModel(models.Model):
-    smiles = models.CharField(max_length=100)
-    
-    @classmethod
-    def create(cls, s):
-        x = cls(smiles = s)
-        return x
+#class MoleculeForm(forms.Form):
+#    smiles = forms.CharField(max_length = 100)
+#class MoleculeModel(models.Model):
+#    smiles = models.CharField(max_length=100)    
+#    @classmethod
+#    def create(cls, s):
+#        x = cls(smiles = s)
+#        return x
         
     
     

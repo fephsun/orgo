@@ -755,17 +755,17 @@ mol4.addAtom(c43, c41, 1)
 c40.newCTCenter(c41, c42, None)
 c41.newCTCenter(c40, c43, None)
 
-#Makes C\C=C\C
+#Makes Br/Br\C=C
 c45 = Atom("C")
 c46 = Atom("C")
 mol4alt = Molecule(c45)
 mol4alt.addAtom(c46, c45, 2)
-c47 = Atom("C")
-c48 = Atom("C")
-mol4alt.addAtom(c47, c45, 1)
-mol4alt.addAtom(c48, c46, 1)
-c45.newCTCenter(c46, None, c47)
-c46.newCTCenter(c45, None, c48)
+br40 = Atom("Br")
+br41 = Atom("Br")
+mol4alt.addAtom(br41, c45, 1)
+mol4alt.addAtom(br40, c45, 1)
+c45.newCTCenter(c46, br41, br40)
+c46.newCTCenter(c45, None, None)
 
 #        c50
 #Makes C-C<Cl
@@ -833,7 +833,7 @@ o73 = Atom("O")
 methanol = Molecule(c72)
 methanol.addAtom(o73, c72, 1)
 
-
+#print halohydrate([mol4alt], ethanol, "Br")
 
 
 

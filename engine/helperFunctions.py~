@@ -1,9 +1,11 @@
 from orgoStructure import *
 import copy
 import itertools
+import cPickle
 
 randThing = 0
 
+debug = True
 
 
 #Returns a list of molecules.
@@ -112,6 +114,8 @@ def allAdd(molecule, target1, target2, add1, add2, addtarget1=None, addtarget2=N
     molecule.changeBond(target1, target2, bo-1)
     target1.eliminateCT()
     target2.eliminateCT()
+    target1.eliminateChiral()
+    target2.eliminateChiral()
     #Add new stuff
     for thisTarget, thisAdd, thisAddtarget in (
         (target1, add1, addtarget1), (target2, add2, addtarget2)):
@@ -153,6 +157,7 @@ def tripleAdd(molecule, target1, target2, add1, add2, cisOrTrans,
         else:
             #Hydrogen
             CTthing = None
+        otherAttached = None #By default, otherAttached is a hydrogen.
         for neighbor in thisTarget.neighbors:
             if neighbor != otherTarget:
                 otherAttached = neighbor
@@ -163,8 +168,11 @@ def tripleAdd(molecule, target1, target2, add1, add2, cisOrTrans,
                 thisTarget.newCTCenter(otherTarget, otherAttached, thisAdd)
             else:
                 thisTarget.newCTCenter(otherTarget, thisAdd, otherAttached)
-    return molecule
 
+    print "Result of tripleAdd: "+str(molecule)
+    return [molecule]
+
+    
 def allTripleAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addtarget2 = None):
     #Adds two copies of add1 and two copies of add2 to target1 and target2, respectively.
     #Breaks a triple bond.  Introduces no new stereochemistry.
@@ -192,6 +200,9 @@ def allTripleAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addt
     
 
 def moleculeCompare(a, b, compareDict = None, expanded = []):
+    outFile = file('errorDump.txt', 'w')
+    print cPickle.dump(a, outFile)
+    outFile.close()
     #Determines whether two molecules are isomorphic.  In the worst case
     #(two molecules with the same atoms), this procedure does not run in
     #polynomial time, so be careful.
@@ -283,16 +294,17 @@ def neighborCompare(a,b, compareDict):
             temp[aNeighborSet[i]] = b.neighbors.keys()[i]
         if chiralFlag and OKFlag:
             if not(set(a.neighbors.keys()) <= set((a.chiralA, a.chiralB, a.chiralC, a.chiralD))):
-                print "Error thing"
-                for neighbor in a.neighbors.keys():
-                    if neighbor != None:
-                        print neighbor.element
-                print "------"
-                for ch in (a.chiralA, a.chiralB, a.chiralC, a.chiralD):
-                    if ch != None:
-                        print ch.element
-                print "------"
-                raise StandardError
+                if debug:
+                    print "Error thing"
+                    for neighbor in a.neighbors.keys():
+                        if neighbor != None:
+                            print neighbor.element
+                    print "------"
+                    for ch in (a.chiralA, a.chiralB, a.chiralC, a.chiralD):
+                        if ch != None:
+                            print ch.element
+                    print "------"
+                    raise StandardError
             #The following bit of code is still quite messy.  It tests whether the
             #hypothesized pairing follows the correct chirality.
             aCW = []
@@ -422,6 +434,8 @@ def findAlkenes(molecule):
 #Returns a tuple of atoms.
 #Returns None if none found.
 def findAlkyne(molecule):
+    if molecule == None:
+        return None
     for atom in molecule.atoms:
         if not (atom.element == 'C'):
             continue

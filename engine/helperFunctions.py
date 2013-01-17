@@ -1,6 +1,7 @@
 from orgoStructure import *
 import copy
 import itertools
+import cPickle
 
 randThing = 0
 
@@ -199,6 +200,9 @@ def allTripleAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addt
     
 
 def moleculeCompare(a, b, compareDict = None, expanded = []):
+    outFile = file('errorDump.txt', 'w')
+    cPickle.dump(a, outFile)
+    outFile.close()
     #Determines whether two molecules are isomorphic.  In the worst case
     #(two molecules with the same atoms), this procedure does not run in
     #polynomial time, so be careful.
@@ -300,7 +304,7 @@ def neighborCompare(a,b, compareDict):
                         if ch != None:
                             print ch.element
                     print "------"
-                raise StandardError
+                    raise StandardError
             #The following bit of code is still quite messy.  It tests whether the
             #hypothesized pairing follows the correct chirality.
             aCW = []

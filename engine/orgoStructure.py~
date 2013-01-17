@@ -2,6 +2,8 @@
 hydrogen = "H"
 import pybel
 
+debugSmiles = False
+
 class Molecule:
     
     def __init__(self, firstAtom):
@@ -128,6 +130,13 @@ class Atom:
         self.CTotherC = otherC
         self.CTa = a
         self.CTb = b
+    
+    def eliminateChiral(self):
+        if hasattr(self, 'chiralA'):
+            del(self.chiralA)
+            del(self.chiralB)
+            del(self.chiralC)
+            del(self.chiralD)
 
     def eliminateCT(self):
         del(self.CTotherC)
@@ -234,6 +243,12 @@ bondSymbols = ['0', '-', '=', '#', '4', '5', '6', '7', '8', '9']
 #Precondition: molecule has been flagged for ring positioning (some rflag values on atoms might != 0). This is done by smiles().
 #Creates and returns a SMILES string for unflagged (!atom.flag==2) atoms within a molecule, starting with the given atom.
 def subsmiles(molecule, startAtom, parentAtom):
+
+    if debugSmiles:
+        if parentAtom != 0:
+            print "\t\t\t [ Entering subsmiles with "+startAtom.element+" from "+parentAtom.element
+        else:
+            print "\t\t\t [ Entering subsmiles with "+startAtom.element+"..."
     
     #Flag the current atom.
     startAtom.flag = 2
@@ -250,7 +265,9 @@ def subsmiles(molecule, startAtom, parentAtom):
     #Remember to worry about whether or not an atom has a parent atom.
     #Adds ring labels.
     if hasattr(startAtom, 'CTotherC'):
-        print (True, startAtom.element)
+        if debugSmiles:
+            print "\t\t\tSubsmiles case - CT"
+        #print (True, startAtom.element)
         atomsToLink = [startAtom.CTotherC, startAtom.CTa, startAtom.CTb]
         begin = ["", "/", "\\"]
         if startAtom.CTotherC.flag == 2:
@@ -266,7 +283,8 @@ def subsmiles(molecule, startAtom, parentAtom):
                     outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + str(startAtom.rflag) + ")"
                 elif atom.flag == 1:
                     outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + subsmiles(molecule, atom, startAtom) + ")"
-        print outp
+        if debugSmiles:
+            print "\t\t\t >>> " + outp + " ] "
         return outp
     
    
@@ -277,6 +295,8 @@ def subsmiles(molecule, startAtom, parentAtom):
 
     #Check if the atom is a chiral center. If so:
     if hasattr(startAtom, 'chiralA'):
+        if debugSmiles:
+            print "\t\t\tSubsmiles case -- chiral"
         hasP = (parentAtom != 0)
         hasH = (True in [a.element.lower()=="h" for a in list(startAtom.neighbors)]) or (None in [startAtom.chiralA, startAtom.chiralB, startAtom.chiralC, startAtom.chiralD])
         #If the atom has a hydrogen:
@@ -289,25 +309,33 @@ def subsmiles(molecule, startAtom, parentAtom):
         if hasH:
             outp = "[" + outp + "@@H]"
             if hasP:
+                if debugSmiles:
+                    print "\t\t\t...hasH hasP"
                 #toAdd should have two elements
                 l = startAtom.chiralCWlist(parentAtom) #list of three atoms
                 x = l.index(None) #index of hydrogen atom in list
                 toAdd = [l[(x+1) %3], l[(x+2) %3]] #correct permutation
                 if None in toAdd:
-                    print "Error: atom "+startAtom.element+" is chiral, but has two hydrogens."
+                    print "\t\t\tError: atom "+startAtom.element+" is chiral, but has two hydrogens."
                     raise StandardError
             else:
+                if debugSmiles:
+                    print "\t\t\t...hasH !hasP"
                 #toAdd should have three elements
                 toAdd = startAtom.chiralCWlist(None) #list of three atoms
                 if None in toAdd:
-                    print "Error: atom "+startAtom.element+" is chiral, but has two hydrogens."
+                    print "\t\t\tError: atom "+startAtom.element+" is chiral, but has two hydrogens."
                     raise StandardError
         else:
             outp = "[" + outp + "@@]"
             if hasP:
+                if debugSmiles:
+                    print "\t\t\t...!hasH hasP"
                 #toAdd should have three elements
                 toAdd = startAtom.chiralCWlist(parentAtom)
             else:
+                if debugSmiles:
+                    print "\t\t\t...!hasH !hasP"
                 #toAdd should have four elements
                 arbitraryRef = list(startAtom.neighbors)[0]
                 l = startAtom.chiralCWlist(arbitraryRef)
@@ -316,6 +344,8 @@ def subsmiles(molecule, startAtom, parentAtom):
     
     #Prepare to add new groups for all neighbor atoms which are not the parent atom and not the rAtom.
     else:
+        if debugSmiles:
+            print "\t\t\tSubsmiles case -- normal"
         toAdd = [atom for atom in list(startAtom.nonHNeighbors) if not (atom==parentAtom or atom==None)]
 
 #    if toAdd == None:
@@ -333,7 +363,8 @@ def subsmiles(molecule, startAtom, parentAtom):
                 
         outp += "(" +bondSymbols[startAtom.nonHNeighbors[atom]] + add + ")"
 
-    print outp
+    if debugSmiles:
+        print "\t\t\t >>> " + outp + " ] "
     return outp
 
 

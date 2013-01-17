@@ -2,6 +2,7 @@ from reactions import *
 import randomGenerator
 import random
 import orgoStructure
+import reactions as reactionsModule
 import string
 
 #Synthesis problem class
@@ -181,8 +182,9 @@ def randomSynthesisProblemMake(mode = "Everything", steps = 10):
     if mode == "AlkeneAlkyne":
         molBoxes = []
         for i in xrange(2):
-            molBoxes.append(MoleculeBox([randomGenerator.randomStart(alkyneProb=0.3,
-            BrProb=0.05, ClProb=0.05, OHProb=0.05,forceTerminalAlkyne = True)[0]]))
+        #MoleculeBox([randomGenerator.randomStart(alkyneProb=0.3,
+        #    BrProb=0.05, ClProb=0.05, OHProb=0.05,forceTerminalAlkyne = True)[0]])
+            molBoxes.append(MoleculeBox([reactionsModule.propyne]))
         legalRxns = ALKENEALKYNE
     elif mode == "Everything":
         molBoxes = []
@@ -197,7 +199,7 @@ def randomSynthesisProblemMake(mode = "Everything", steps = 10):
         print "Initial mol: "+str(smiles(molBoxes[0].molecules)) + ' , ' + str(smiles(molBoxes[1].molecules))
     
     goodSteps = 0    #Number of successful steps taken.
-    for attemptNo in xrange(steps*2):
+    for attemptNo in xrange(steps):
         newMolBoxes = []
         for molBox in molBoxes:
             reagents, rxnFunction, ignore = legalRxns[random.randint(0, len(legalRxns)-1)]
@@ -213,6 +215,7 @@ def randomSynthesisProblemMake(mode = "Everything", steps = 10):
                 goodSteps += 1
                 if debug:
                     print "Result: " +str(smiles(currentRxn.productBox.molecules))
+                    print "I think there are: " +str(len(molBox.molecules))
             else:
                 newMolBoxes.append(molBox)
         #Now, try to fuse molecules?

@@ -67,8 +67,11 @@ class ReactionStep:
         
     #Returns True or False depending on whether or not a reaction occurred.
     #If True, it updates self.product to be a new MoleculeBox containing 
-    def react(self):
-    
+    def react(self, mode="generate"):
+        #mode can be "generate" or "check".  Generate returns true iff the reaction makes
+        #*new* products; check returns true iff the reaction specified is a valid combination
+        #of reagents.
+        
         #a helper function
         def hasReagent(acceptableReagents):
             return True in [self.hasReagents[x] for x in acceptableReagents]
@@ -80,15 +83,27 @@ class ReactionStep:
             else:
                 #react!
                 products = reaction[1](self.reactantBox.molecules)(self.otherMolecules) #a function of two variables
-                #check if the output list is non-empty
-                #if so, reaction is successful
-                if products != []:
-                    self.productBox = MoleculeBox(products)
-                    return True
-                #if not, the old set of molecules remain intact
+                if mode == "check":
+                    #check if the output list is non-empty
+                    #if so, reaction is successful
+                    if products != []:
+                        self.productBox = MoleculeBox(products)
+                        return True
+                    #if not, the old set of molecules remain intact
+                    else:
+                        self.productBox = MoleculeBox(self.reactantBox.molecules + self.otherMolecules)
+                        return True
+                elif mode == "generate":
+                    #Return true if some new molecule was made during the course of the reaction
+                    for product in products:
+                        if sum([moleculeCompare(product, reactant) for reactant in self.reactantBox.molecules])==0:
+                            self.productBox = MoleculeBox(products)
+                            return True
+                    return False
                 else:
-                    self.productBox = MoleculeBox(self.reactantBox.molecules + self.otherMolecules)
-                    return True
+                    print "Invalid mode in react."
+                    raise StandardError
+                        
                 
         return False
         
@@ -163,13 +178,20 @@ def parseReagentsString(inpstring):
 def randomSynthesisProblemMake(mode = "Everything", steps = 10):
     #Mode controls the reagents that are legal, as well as the distribution of starting materials.
     reactions = [] #List of reactions that we want to keep
-    if mode == "Everything":
+    if mode == "AlkeneAlkyne":
+        molBoxes = []
+        for i in xrange(2):
+            molBoxes.append(MoleculeBox([randomGenerator.randomStart(alkyneProb=0.3,
+            BrProb=0.05, ClProb=0.05, OHProb=0.05,forceTerminalAlkyne = True)[0]]))
+        legalRxns = ALKENEALKYNE
+    elif mode == "Everything":
         molBoxes = []
         for i in xrange(2):
             molBoxes.append(MoleculeBox([randomGenerator.randomStart()[0]]))
-            #carbonCount.append(molBoxes[i].molecules[0].countElement('C'))
         legalRxns = REACTIONS
-        legalAddRxns = [reaction for reaction in ADDREACTIONS if (reaction in legalRxns)]
+    else:
+        print "Invalid mode in randomSynthesisProblemMake"
+    legalAddRxns = [reaction for reaction in ADDREACTIONS if (reaction in legalRxns)]
     #Add other modes here.
     if debug:
         print "Initial mol: "+str(smiles(molBoxes[0].molecules)) + ' , ' + str(smiles(molBoxes[1].molecules))
@@ -285,7 +307,7 @@ LIGHT=34
 #Second item of each tuple in this list:
     #a function of two variables, which takes in a list of molecules (x) and another list of molecules (o) and returns them reacted
 #These are listed roughly by precedence: earlier-listed reactions which qualify take precedence over later-listed ones.
-REACTIONS = (
+ALKENEALKYNE = (
 (((H2,),(PDC,)), (lambda x: lambda o: hydrogenate(x+o)), ()),
 (((HBR,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "Br")), ()),
 (((HF,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "F")), ()),
@@ -324,13 +346,13 @@ REACTIONS = (
 (((NAOH,), (H2O2,)), (lambda x: lambda o: hydroborate2(x+o)), ()),
 (((OSO4,), (NMO,), (ACETONE, H2O)), (lambda x: lambda o: dihydroxylate(x+o)), ()),
 (((O3,),(CH2CL2,),(ME2S,ZN)), (lambda x: lambda o: ozonolyse(x+o)), ()),
-(((NA,), (NH3,)), (lambda x: lambda o: sodiumAmmonia(x+o)), ()),
-(((LINDLAR,), (H2,)), (lambda x: lambda o: lindlar(x+o)), ()),
+(((NA,), (NH3,)), (lambda x: lambda o: sodiumAmmonia(x+o)), ()),-
+(((LINDLAR,), (H2,)), (lambda x: lambda o: lindlar(x+o)), ()),-
 (((NANH2,), (NH3,)), (lambda x: lambda o: alkyneDeprotonate(x+o)), ()),
 ((), (lambda x: lambda o: acetylideAdd(x, o)),('add'))
 )
 
-
+REACTIONS = ALKENEALKYNE
 
 ADDREACTIONS = [reaction for reaction in REACTIONS if ('add' in reaction[2])]
 
@@ -379,4 +401,9 @@ EQV1: ("1 equiv.", ("1", "eq", "one")),
 HEAT: ("Heat", ("heat", "delta", "hot", "warm")),
 LIGHT: ("Light", ("hv", "light", "bright", "nu", "v", "hnu"))
 }
+
+
+#Debugging
+if __name__ == "__main__":
+    print randomSynthesisProblemMake(mode="AlkeneAlkyne")
 

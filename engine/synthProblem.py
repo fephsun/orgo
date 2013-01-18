@@ -188,15 +188,17 @@ def parseReagentsString(inpstring):
     
     return outp
             
-def randomSynthesisProblemMake(mode = "Everything", steps = 10):
+def randomSynthesisProblemMake(mode = "Everything", steps = 10, maxLength = 30):
     #Mode controls the reagents that are legal, as well as the distribution of starting materials.
+    
     reactions = [] #List of reactions that we want to keep
+    
+    #Each mode sets up its legal reactions and its starting materials.
     if mode == "AlkeneAlkyne":
         molBoxes = []
         for i in xrange(2):
-        #MoleculeBox([randomGenerator.randomStart(alkyneProb=0.3,
-        #    BrProb=0.05, ClProb=0.05, OHProb=0.05,forceTerminalAlkyne = True)[0]])
-            molBoxes.append(MoleculeBox([reactionsModule.propyne]))
+            molBoxes.append(MoleculeBox([randomGenerator.randomStart(endProb=0.23, alkyneProb=0.4, alkeneProb=0.4,
+            BrProb=0.05, ClProb=0.05, OHProb=0.05,forceTerminalAlkyne = True)[0]]))
         legalRxns = ALKENEALKYNE
     elif mode == "Everything":
         molBoxes = []
@@ -205,15 +207,46 @@ def randomSynthesisProblemMake(mode = "Everything", steps = 10):
         legalRxns = REACTIONS
     else:
         print "Invalid mode in randomSynthesisProblemMake"
-    legalAddRxns = [reaction for reaction in ADDREACTIONS if (reaction in legalRxns)]
-    #Add other modes here.
-    if debug:
-        print "Initial mol: "+str(smiles(molBoxes[0].molecules)) + ' , ' + str(smiles(molBoxes[1].molecules))
     
-    goodSteps = 0    #Number of successful steps taken.
-    for attemptNo in xrange(steps):
-        newMolBoxes = []
+    #Generate a list of legal addition (molecule-molecule bonding) reactions
+    legalAddRxns = [reaction for reaction in legalRxns if 'add' in reaction[2]]
+    #Give reactions marked "interesting" more emphasis, by cloning them.
+    #Does anyone have a better idea for doing this?
+    newLegalRxns = []
+    for reaction in legalRxns:
+        if 'interesting' in reaction[2]:
+            newLegalRxns += [reaction]*5    #Change to increase/lessen emphasis
+        else:
+            newLegalRxns.append(reaction)
+    legalRxns = newLegalRxns
+
+    if debug:
+        print "Initial mol:"
         for molBox in molBoxes:
+            print smiles(molBox.molecules)
+    
+    #Try to react a bunch of times.
+    for attemptNo in xrange(steps):
+        #Tests for prematurely ending the generation process.
+        if sum([len(molBox.molecules) for molBox in molBoxes]) > 4:
+            if debug:
+                print "Too many molecules!"
+            return None
+        for molBox in molBoxes:
+            for molecule in molBox.molecules:
+                if len(molecule.atoms) > maxLength:
+                    if debug:
+                        print "Molecule too large!"
+                    return None
+        newMolBoxes = []
+        
+        #Go through each molecule, and attempt a random reaction.
+        for molBox in molBoxes:
+            #There's a small chance of skipping. - Maybe delete, idk?
+            if random.random() < .2:
+                newMolBoxes.append(molBox)
+                continue
+            #Otherwise, come up with a random reaction, and try it out.
             reagents, rxnFunction, ignore = legalRxns[random.randint(0, len(legalRxns)-1)]
             if debug:
                 print "Trying step: " + str(reagents)
@@ -224,19 +257,20 @@ def randomSynthesisProblemMake(mode = "Everything", steps = 10):
                 #A good reaction.
                 newMolBoxes.append(currentRxn.productBox)
                 reactions.append(currentRxn)
-                goodSteps += 1
                 if debug:
-                    print "Result: " +str(smiles(currentRxn.productBox.molecules))
-                    print "I think there are: " +str(len(molBox.molecules))
+                    print "Result of successful reaction: " +str(smiles(currentRxn.productBox.molecules))
+
             else:
+                #Not a good reaction - that's OK, keep going
                 newMolBoxes.append(molBox)
+                
         #Now, try to fuse molecules?
         reagents, rxnFunction, ignore = legalAddRxns[random.randint(0, len(legalAddRxns)-1)]
         if debug:
             print "Trying fusion: "+str(reagents)
         molBoxes = []
         if len(newMolBoxes) == 1:
-            #No point in trying to fuse molecules if you only have one.
+            #No point in trying to fuse molecules if you only have one molecule to begin with.
             molBoxes = newMolBoxes
             continue
         for i in xrange(len(newMolBoxes)):
@@ -260,9 +294,12 @@ def randomSynthesisProblemMake(mode = "Everything", steps = 10):
                         molBoxes = newMolBoxes + [currentRxn.productBox]
                         if debug:
                             print "Result: " +str(smiles(currentRxn.productBox.molecules))
+                            print molBoxes
+                            raw_input()
         if len(molBoxes) == 0:
             #Didn't fuse any molecules.  Oh well.
             molBoxes = newMolBoxes
+    #TODO: should return a SynthesisProblem object, once this class is fleshed out.
     return reactions
                             
 
@@ -322,54 +359,58 @@ LIGHT=34
 #Second item of each tuple in this list:
     #a function of two variables, which takes in a list of molecules (x) and another list of molecules (o) and returns them reacted
 #These are listed roughly by precedence: earlier-listed reactions which qualify take precedence over later-listed ones.
-ALKENEALKYNE = (
-(((H2,),(PDC,)), (lambda x: lambda o: hydrogenate(x+o)), ()),
-(((HBR,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "Br")), ()),
-(((HF,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "F")), ()),
-(((HI,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "I")), ()),
-(((HCL,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "Cl")), ()),
-(((BR2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "Br")), ()),
-(((F2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "F")), ()),
-(((I2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "I")), ()),
-(((CL2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "Cl")), ()),
-(((BR2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "Br")), ()),
-(((F2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "F")), ()),
-(((I2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "I")), ()),
-(((CL2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "Cl")), ()),
-(((HBR,), (ROOR,), (HEAT, LIGHT)), (lambda x: lambda o: radicalhydrohalogenate(x+o, "Br")), ()),
-(((RCO3H,), (CH2CL2,)), (lambda x: lambda o: epoxidate(x+o)), ()),
-(((H2SO4,), (H2O,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")))), ()),
-(((H2SO4,), (ETOH,)), (lambda x: lambda o: acidhydrate(x+o, ethanol)), ()),
-(((H2SO4,),), (lambda x: lambda o: acidhydrate(x, o)), ()),
-(((H2SO4,), (H2O,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")), True)), ()),
-(((H2SO4,), (ETOH,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, ethanol, True)), ()),
-(((H2SO4,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x, o, True)), ('add')),
-(((BR2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "Br")),()),
-(((BR2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "Br")), ()),
-(((BR2,),), (lambda x: lambda o: halohydrate(x, o, "Br")), ()),
-(((I2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "I")),()),
-(((I2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "I")), ()),
-(((I2,),), (lambda x: lambda o: halohydrate(x, o, "I")), ()),
-(((F2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "F")), ()),
-(((F2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "F")), ()),
-(((F2,),), (lambda x: lambda o: halohydrate(x, o, "F")), ()),
-(((CL2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "Cl")),()),
-(((CL2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "Cl")), ()),
-(((CL2,),), (lambda x: lambda o: halohydrate(x, o, "Cl")), ()),
-(((BH3,), (THF,), (NAOH,), (H2O2,)), (lambda x: lambda o: hydroborate(x+o)), ()),
-(((BH3,), (THF,)), (lambda x: lambda o: hydroborate1(x+o)), ()),
-(((NAOH,), (H2O2,)), (lambda x: lambda o: hydroborate2(x+o)), ()),
-(((OSO4,), (NMO,), (ACETONE, H2O)), (lambda x: lambda o: dihydroxylate(x+o)), ()),
-(((O3,),(CH2CL2,),(ME2S,ZN)), (lambda x: lambda o: ozonolyse(x+o)), ()),
-(((NA,), (NH3,)), (lambda x: lambda o: sodiumAmmonia(x+o)), ()),
-(((LINDLAR,), (H2,)), (lambda x: lambda o: lindlar(x+o)), ()),
-(((NANH2,), (NH3,)), (lambda x: lambda o: alkyneDeprotonate(x+o)), ()),
-((), (lambda x: lambda o: acetylideAdd(x, o)),('add'))
+REACTIONS = (
+(((H2,),(PDC,)), (lambda x: lambda o: hydrogenate(x+o)), ('aa')),
+(((HBR,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "Br")), ('aa')),
+(((HF,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "F")), ('aa')),
+(((HI,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "I")), ('aa')),
+(((HCL,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "Cl")), ('aa')),
+(((BR2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "Br")), ('aa')),
+(((F2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "F")), ('aa')),
+(((I2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "I")), ('aa')),
+(((CL2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "Cl")), ('aa')),
+(((BR2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "Br")), ('aa')),
+(((F2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "F")), ('aa')),
+(((I2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "I")), ('aa')),
+(((CL2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "Cl")), ('aa')),
+(((HBR,), (ROOR,), (HEAT, LIGHT)), (lambda x: lambda o: radicalhydrohalogenate(x+o, "Br")), ('aa','interesting')),
+(((RCO3H,), (CH2CL2,)), (lambda x: lambda o: epoxidate(x+o)), ('aa')),
+(((H2SO4,), (H2O,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")), True)), ('aa')),
+(((H2SO4,), (ETOH,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, ethanol, True)), ('aa','illegal')),
+(((H2SO4,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x, o, True)), ('aa','add')),
+(((H2SO4,), (H2O,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")))), ('aa','interesting')),
+(((H2SO4,), (ETOH,)), (lambda x: lambda o: acidhydrate(x+o, ethanol)), ('aa', 'illegal')),
+(((H2SO4,),), (lambda x: lambda o: acidhydrate(x, o)), ('aa')),
+(((BR2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "Br")),('aa')),
+(((BR2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "Br")), ('aa','illegal')),
+(((BR2,),), (lambda x: lambda o: halohydrate(x, o, "Br")), ('aa')),
+(((I2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "I")),('aa')),
+(((I2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "I")), ('aa','illegal')),
+(((I2,),), (lambda x: lambda o: halohydrate(x, o, "I")), ('aa')),
+(((F2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "F")), ('aa')),
+(((F2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "F")), ('aa','illegal')),
+(((F2,),), (lambda x: lambda o: halohydrate(x, o, "F")), ('aa')),
+(((CL2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "Cl")),('aa')),
+(((CL2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "Cl")), ('aa','illegal')),
+(((CL2,),), (lambda x: lambda o: halohydrate(x, o, "Cl")), ('aa')),
+(((BH3,), (THF,), (NAOH,), (H2O2,)), (lambda x: lambda o: hydroborate(x+o)), ('aa','interesting')),
+(((BH3,), (THF,)), (lambda x: lambda o: hydroborate1(x+o)), ('aa')),
+(((NAOH,), (H2O2,)), (lambda x: lambda o: hydroborate2(x+o)), ('aa')),
+(((OSO4,), (NMO,), (ACETONE, H2O)), (lambda x: lambda o: dihydroxylate(x+o)), ('aa','interesting')),
+(((O3,),(CH2CL2,),(ME2S,ZN)), (lambda x: lambda o: ozonolyse(x+o)), ('aa')),
+(((NA,), (NH3,)), (lambda x: lambda o: sodiumAmmonia(x+o)), ('aa')),
+(((LINDLAR,), (H2,)), (lambda x: lambda o: lindlar(x+o)), ('aa')),
+(((NANH2,), (NH3,)), (lambda x: lambda o: alkyneDeprotonate(x+o)), ('aa')),
+((), (lambda x: lambda o: acetylideAdd(x, o)),('aa'))
 )
 
-REACTIONS = ALKENEALKYNE
+SYNTHONLY = [
+(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(alkyneDeprotonate(x), o)),('aa','add','interesting')),
+(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(x, alkyneDeprotonate(o))),('aa','add','interesting'))
+]
 
-ADDREACTIONS = [reaction for reaction in REACTIONS if ('add' in reaction[2])]
+FORSYNTH = [reaction for reaction in REACTIONS if not ('illegal' in reaction[2])] + SYNTHONLY
+ALKENEALKYNE = [reaction for reaction in FORSYNTH if ('aa' in reaction[2])]
 
 
 #This dictionary is for understanding what people type in.

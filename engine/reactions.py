@@ -1,4 +1,5 @@
 from helperFunctions import *
+import itertools
 
 def removeDuplicates(moleculeList):
     if not isinstance(moleculeList, list):
@@ -239,6 +240,204 @@ def epoxidate(molecules):
         oxygen = Atom("O")
         return epoxAdd(molecule, place[0], place[1], oxygen, oxygen)
     return react(molecules, findPlace, reactAtPlace)
+    
+'''
+E2 Elimination by tert-butoxide KOC(CH3)3
+Removes halide (and a hydrogen on an adjacent carbon) to make a C=C double bond.
+If multiple hydrogens can be removed, use Zaitsev's Rule to pick one:
+    1) Pick hydrogen that results in more substituted C=C bond.
+    2) Bulky, carbon groups trans.
+In rings, hydrogen must be anti-periplanar to halide.
+'''
+def tertButoxide(molecules):
+    halogens = ['F', 'Cl', 'Br', 'I']
+#    def findPlace(molecule):
+#        #Returns a carbon with a halogen, followed by a carbon with the most suitable H.
+#        for carbon1 in molecule.atoms:
+#            if carbon1.element != 'C':
+#                continue
+#            localHalogens = []
+#            for neighbor in carbon1.neighbors:
+#                if (neighbor.element in halogens):
+#                    localHalogens.append(neighbor)
+#            if localHalogens == []:
+#                continue
+#            #Has to be a carbon, no double or triple bonds, at most 3 things bonded.
+#            #We don't want to make allenes; and carbonyls have funky behavior that we haven't
+#            #considered yet.
+#            neighborCs = [neighbor for neighbor in carbon1.neighbors.keys() if (neighbor.element == 'C'
+#                and 2 not in neighbor.neighbors.values() and 3 not in neighbor.neighbors.values() and
+#                len(neighbor.neighbors) <= 3)]
+#            if len(neighborCs) == 0:
+#                continue
+#            #Sort neighbors in order by Zaitsev's Rule
+#            neighborCs.sort(key = lambda n: len(n.neighbors), reverse = True)
+#            places = []
+#            subNumber = len(neighborCs[0].neighbors)
+#            return [(carbon1, x) for x in neighborCs if len(x.neighbors) == subNumber]
+
+#    def reactAtPlace(molecule, places):
+#        #Reminder: places[x][0] is the carbon with the halogen, places[x][1] is the carbon with the hydrogen.
+#        #I know it's not necessarily Cl, but that's easier to type than "halogen".
+#        out = []
+#        for place in places:
+#            #molecule, (ClCarbon, HCarbon) = listClone(molecule, place)
+#            Cls = [neighbor for neighbor in place[0].neighbors if (neighor.element in halogens)]
+#            if isInRing(place[0], place[1]) == None:
+#                #Not in ring
+#                for Cl in Cls:
+#                    #Make a copy.
+#                    Xmolecule, (ClCarbon, HCarbon, XCl) = listClone(molecule, place+[Cl])
+#                    if hasattr(HCarbon, "chiralA") and hasattr(ClCarbon, "chiralA"):
+#                        #Chiral.  We need to consider anti-periplanar.
+#                        #Looking down from the Cl to the other carbon,
+#                        ClsubA, ClsubB = ClCarbon.chiralRingList(XCl, HCarbon)
+#                        #Looking up from the H to the first carbon,
+#                        HsubB, HsubA = HCarbon.chiralRingList(None, ClCarbon)
+#                        #Remove chirality, remove XCl, change bond order
+#                        ClCarbon.eliminateChiral()
+#                        HCarbon.eliminateChiral()
+#                        Xmolecule.removeAtom(XCl)
+#                        Xmolecule.changeBond(ClCarbon, HCarbon, 2)
+#                        #Add CTstereo
+#                        ClCarbon.newCTCenter(HCarbon, ClsubA, ClsubB)
+#                        HCarbon.newCTCenter(ClCarbon, ClsubA, ClsubB)
+#                        out.append(Xmolecule)
+#                    else:
+#                        #No ring, achiral.
+#                        #
+
+    def findPlace(molecule):
+        #Returns a carbon with a halogen, followed by a carbon with the most suitable H.
+        for carbon1 in molecule.atoms:
+            if carbon1.element != 'C':
+                continue
+            localHalogens = []
+            for neighbor in carbon1.neighbors:
+                if (neighbor.element in halogens):
+                    localHalogens.append(neighbor)
+            if localHalogens == []:
+                continue
+            #Has to be a carbon, no double or triple bonds, at most 3 things bonded.
+            #We don't want to make allenes; and carbonyls have funky behavior that we haven't
+            #considered yet.
+            neighborCs = [neighbor for neighbor in carbon1.neighbors.keys() if (neighbor.element == 'C'
+                and 2 not in neighbor.neighbors.values() and 3 not in neighbor.neighbors.values() and
+                len(neighbor.neighbors) <= 3)]
+            if len(neighborCs) == 0:
+                continue
+            #Screw it, let's just try all of them.  Whee, itertools!
+            return itertools.product([carbon1], neighborCs, localHalogens)
+    
+    def reactAtPlace(molecule, bigListOfPlaces):
+        candidates = []
+        for things in bigListOfPlaces:
+            Xmolecule, (ClCarbon, HCarbon, Cl) = listClone(molecule, things)
+            if hasattr(HCarbon, "chiralA") and hasattr(ClCarbon, "chiralA"):
+                #Chiral.  We need to consider anti-periplanar.
+                #Looking down from the Cl to the other carbon,
+                ClsubA, ClsubB = ClCarbon.chiralRingList(Cl, HCarbon)
+                #Looking up from the H to the first carbon,
+                HsubB, HsubA = HCarbon.chiralRingList(None, ClCarbon)
+                #Rings?
+                ringList = isInRing(ClCarbon, HCarbon)
+                if ringList != None:
+                    #The ring carbons must be cis.
+                    #ringList: [HCarbon, ..., ClCarbon]
+                    if (ClsubA == ringList[-2] and HsubB == ringList[1]) or\
+                       (ClsubB == ringList[-2] and HsubA == ringList[1]):
+                        pass
+                    else:
+                        continue
+                #Remove chirality, remove XCl, change bond order
+                ClCarbon.eliminateChiral()
+                HCarbon.eliminateChiral()
+                Xmolecule.removeAtom(Cl)
+                Xmolecule.changeBond(ClCarbon, HCarbon, 2)
+                #Add CTstereo
+                ClCarbon.newCTCenter(HCarbon, ClsubA, ClsubB)
+                HCarbon.newCTCenter(ClCarbon, ClsubA, ClsubB)
+                candidates.append((Xmolecule, HCarbon, ClCarbon))
+            else:
+                #No chirality.
+                #May as well set up the double bond now.
+                ClCarbon.eliminateChiral()
+                HCarbon.eliminateChiral()
+                Xmolecule.removeAtom(Cl)
+                Xmolecule.changeBond(ClCarbon, HCarbon, 2)
+                #Rings?
+                ringList = isInRing(ClCarbon, HCarbon)
+                if ringList != None:
+                    #Make rings cis.
+                    ClsubA = ringList[-2]
+                    ClsubB = None
+                    for neighbor in ClCarbon.neighbors:
+                        if neighbor != ClsubA and neighbor != HCarbon:
+                            ClsubB = neighbor
+                    HsubB = ringList[1]
+                    HsubA = None
+                    for neighbor in HCarbon.neighbors:
+                        if neighbor != HsubB and neighbor != ClCarbon:
+                            HsubA = neighbor
+                    ClCarbon.newCTCenter(HCarbon, ClsubA, ClsubB)
+                    HCarbon.newCTCenter(ClCarbon, HsubA, HsubB)
+                    candidates.append((Xmolecule, HCarbon, ClCarbon))
+                else:
+                    #No rings.  Make both cases.
+                    Clsubs = []
+                    for neighbor in ClCarbon.neighbors:
+                        if neighbor != HCarbon:
+                            Clsubs.append(neighbor)
+                    while len(Clsubs) < 2:
+                        Clsubs.append(None)
+                    Hsubs = []
+                    for neighbor in HCarbon.neighbors:
+                        if neighbor != ClCarbon:
+                            Hsubs.append(neighbor)
+                    while len(Hsubs) < 2:
+                        Hsubs.append(None)
+                    Clsubs2 = [[],[]]
+                    Hsubs2 = [[],[]]
+                    #Does each carbon have exactly one other substituent?  If so, cis/trans stereochem
+                    #becomes important.
+                    if len(ClCarbon.neighbors) == 2 and len(HCarbon.neighbors) == 2:
+                        #Return only the trans molecule.
+                        ClCarbon.newCTCenter(HCarbon, Clsubs[0], Clsubs[1])
+                        HCarbon.newCTCenter(ClCarbon, Hsubs[0], Hsubs[1])
+                        candidates.append((Xmolecule, HCarbon, ClCarbon))
+                    else:
+                        Xmolecule2, (ClCarbon2, HCarbon2, Clsubs2[0], Clsubs2[1], Hsubs2[0], Hsubs2[1]) =\
+                            listClone(Xmolecule, (ClCarbon, HCarbon, Clsubs[0], Clsubs[1], Hsubs[0], Hsubs[1]))
+                        ClCarbon.newCTCenter(HCarbon, Clsubs[0], Clsubs[1])
+                        HCarbon.newCTCenter(ClCarbon, Hsubs[0], Hsubs[1])
+                        ClCarbon2.newCTCenter(HCarbon2, Clsubs2[0], Clsubs2[1])
+                        HCarbon2.newCTCenter(ClCarbon2, Hsubs2[0], Hsubs2[1])
+                        candidates.append((Xmolecule, HCarbon, ClCarbon))
+                        candidates.append((Xmolecule2, HCarbon2, ClCarbon2))
+        #Now, prune the products
+        #Find the most substituted products, and keep only those.
+        maxSub = 0
+        for molecule, c1, c2 in candidates:
+            maxSub = max(maxSub, len(c1.neighbors)+len(c2.neighbors))
+        maxSubCandidates = []
+        for molecule, c1, c2 in candidates:
+            if len(c1.neighbors)+len(c2.neighbors) == maxSub:
+                maxSubCandidates.append(molecule)
+        return maxSubCandidates
+
+    return react(molecules, findPlace, reactAtPlace)
+    
+def listClone(molecule, atomList):
+    #Returns properly-connected deepcopies of molecule and list of atoms.
+    Xmolecule = copy.deepcopy(molecule)
+    newAtomList = []
+    for atom in atomList:
+        if atom == None:
+            newAtomList.append(None)
+        else:
+            newAtomList.append(Xmolecule.atoms[molecule.atoms.index(atom)])
+    return Xmolecule, newAtomList
+          
 
 
 """
@@ -259,11 +458,6 @@ For alkynes to react, usually also mention "HgSO4 accels."
 
 def acidhydrate(molecules, others, alkynesOk = False):
 
-    if debug:
-        print "Acid hydrating: "
-        print smiles(molecules)
-        print smiles(others)
-        print alkynesOk
 
     def findPlaces1(molecule):
         if alkynesOk:
@@ -609,33 +803,90 @@ def acetylideAdd(molecules, others):
     def findPlaces2(molecule):
         #findHalogenCarbons(molecule)
         places = []
+        countedOxygens = []
         for atom in molecule.atoms:
+            #Primary alkyl halides
             if atom.element == "C" and len(list(atom.neighbors))==2 and (True in [(other.element in HALOGENS) for other in list(atom.neighbors)]):
                 places += [atom]
+            #Epoxides
+            if atom.element == 'C':
+                for neighbor in atom.neighbors:
+                    if neighbor.element == 'O' and neighbor not in countedOxygens:
+                        for otherN in atom.neighbors:
+                            if otherN in neighbor.neighbors.keys():
+                                #carbon, other carbon, oxygen
+                                places += [(atom, otherN, neighbor)]
+                                countedOxygens.append(neighbor)
+                
         return places
 
     #Place 1 is a negatively charged carbon atom
-    #Place 2 is a carbon connected to at least one halogen
+    #Place 2 is a carbon connected to at least one halogen, or an epoxide tuple
     def reactAtPlaces(molecule1, molecule2, place1, place2):
-        #Duplicate inputs
         (molecule1, place1, unused0, unused1, unused2, unused3, unused4)=\
                duplicateInputs(molecule1, place1, place1, None, None, None, None)
-        (molecule2, place2, unused0, unused1, unused2, unused3, unused4)=\
-               duplicateInputs(molecule2, place2, place2, None, None, None, None)
-        #Remove negative charge
-        place1.charge = 0
-        #Find halogen
-        halogen = None
-        for atom in list(place2.neighbors):
-            if atom.element in HALOGENS:
-                halogen = atom
-        if halogen == None:
-            print "Error: your HalogenCarbons method isn't working as intended"
-            raise StandardError
-        #Remove halogen
-        molecule2.removeAtom(halogen)
-        #Add a single bond between the two carbons
-        molecule1.addMolecule(molecule2, place2, place1, 1)
+        if isinstance(place2, tuple):
+            #Epoxide.  I just realized that this can also be implemented with antiAdd, but oh well.
+            #Do some object acrobatics to make proper deepcopies.
+            oxIndex = molecule2.atoms.index(place2[2])
+            (molecule2, carbon, otherCarbon, unused0, unused1, unused3, unused2) =\
+                duplicateInputs(molecule2, place2[0], place2[1], None, None, None, None)
+            oxygen = molecule2.atoms[oxIndex]
+            mkvPairs = markovnikov(carbon, otherCarbon)
+            if len(mkvPairs) == 2:
+                (Xmolecule1, Xplace1, unused0, unused1, unused2, unused3, unused4)=\
+                    duplicateInputs(molecule1, place1, place1, None, None, None, None)
+                (Xmolecule2, addingC, alcoholC, unused0, unused1, unused3, unused2) =\
+                    duplicateInputs(molecule2, mkvPairs[1][0], mkvPairs[1][1], None, None, None, None)
+                Xoxygen = Xmolecule2.atoms[oxIndex]
+                #I apoplogize for the rather confusing naming - ran out of good name ideas.
+                stuff = ((molecule1, place1, molecule2, mkvPairs[0][0], mkvPairs[0][1], oxygen),
+                     (Xmolecule1, Xplace1, Xmolecule2, addingC, alcoholC, Xoxygen))
+            else:
+                stuff = ((molecule1, place1, molecule2, mkvPairs[0][0], mkvPairs[0][1], oxygen))
+
+            for (aceMol, aceAtom, epxMol, addC, alcC, oxygen) in stuff:
+                #Break the epoxide bond.
+                epxMol.changeBond(addC, oxygen, 0)
+                #Remove epoxide stereochem!
+                viewFromOx = addC.chiralCWlist(oxygen)
+                addC.eliminateChiral()
+                #alcC keeps its stereochemistry
+                #Add the acetylene to the more substituted carbon.
+                aceAtom.charge = 0
+                epxMol.addMolecule(aceMol, aceAtom, addC, 1)
+                #Add new stereochemistry - inversion.
+                addC.newChiralCenter(aceAtom, (viewFromOx[0], viewFromOx[2], viewFromOx[1]))
+            if len(mkvPairs) == 2:
+                if moleculeCompare(molecule2, Xmolecule2):
+                    return [molecule2]
+                else:
+                    return [molecule2, Xmolecule2]
+            else:
+                return [molecule2]
+         
+        else:
+            #Alkyl halide
+            #Duplicate inputs
+            (molecule1, place1, unused0, unused1, unused2, unused3, unused4)=\
+                   duplicateInputs(molecule1, place1, place1, None, None, None, None)
+            (molecule2, place2, unused0, unused1, unused2, unused3, unused4)=\
+                   duplicateInputs(molecule2, place2, place2, None, None, None, None)
+           
+            #Remove negative charge
+            place1.charge = 0
+            #Find halogen
+            halogen = None
+            for atom in list(place2.neighbors):
+                if atom.element in HALOGENS:
+                    halogen = atom
+            if halogen == None:
+                print "Error: your HalogenCarbons method isn't working as intended"
+                raise StandardError
+            #Remove halogen
+            molecule2.removeAtom(halogen)
+            #Add a single bond between the two carbons
+            molecule1.addMolecule(molecule2, place2, place1, 1)
         
         return [molecule1]
         
@@ -649,159 +900,14 @@ def acetylideAdd(molecules, others):
 
 
 
-#Makes     C-C-C<C
-#          |   |
-#        O-C=C-N
-
-#Makes     C-C-C>C
-#          |   |
-#        O-C=C-N
-c1 = Atom("C")
-mol = Molecule(c1)
-c2 = Atom("C")
-n1 = Atom("N")
-mol.addAtom(c2, c1, 2)
-mol.addAtom(n1, c2, 1)
-o1 = Atom("O")
-mol.addAtom(o1, c1, 1)
-
-c3 = Atom("C")
-mol.addAtom(c3, n1, 1)
-c4 = Atom("C")
-c5 = Atom("C")
-mol.addAtom(c4, c3, 1)
-mol.addAtom(c5, c3, 1)
-c6 = Atom("C")
-mol.addAtom(c6, c5, 1)
-mol.addBond(c6, c1, 1)
-c3.newChiralCenter(n1, (c4, None, c5))
-c1.newCTCenter(c2, o1, c6)
-c2.newCTCenter(c1, n1, None)
 
 
-
-#Makes C\   /Cl
-#        C=C
-#     Cl/   \Br
-c10 = Atom("C")
-CTmol = Molecule(c10)
-c11 = Atom("C")
-CTmol.addAtom(c11, c10, 2)
-c12 = Atom("C")
-CTmol.addAtom(c12, c10, 1)
-cL1 = Atom("Cl")
-CTmol.addAtom(cL1, c10, 1)
-cL2 = Atom("Cl")
-CTmol.addAtom(cL2, c11, 1)
-br10 = Atom("Br")
-CTmol.addAtom(br10, c11, 1)
-c10.newCTCenter(c11, cL1, c12)
-c11.newCTCenter(c10, cL2, br10)
-
-#Makes C\   /Br
-#        C=C
-#     C1/   \Cl
-c15 = Atom("C")
-CTmol2 = Molecule(c15)
-c16 = Atom("C")
-CTmol2.addAtom(c16, c15, 2)
-c17 = Atom("C")
-CTmol2.addAtom(c17, c15, 1)
-cL5 = Atom("Cl")
-CTmol2.addAtom(cL5, c15, 1)
-cL6 = Atom("Cl")
-CTmol2.addAtom(cL6, c16, 1)
-br15 = Atom("Br")
-CTmol2.addAtom(br15, c16, 1)
-c15.newCTCenter(c16, cL5, c17)
-c16.newCTCenter(c15, br15, cL6)
-
-#Makes  C\ /C-C
-#         C
-#      Br/ \H
-c20 = Atom("C")
-chiralMol1 = Molecule(c20)
-c23 = Atom("C")
-chiralMol1.addAtom(c23, c20, 1)
-br20 = Atom("Br")
-chiralMol1.addAtom(br20, c20, 1)
-c21 = Atom("C")
-chiralMol1.addAtom(c21, c20, 1)
-c22 = Atom("C")
-chiralMol1.addAtom(c22, c21, 1)
-c20.newChiralCenter(c21, (None, br20, c23))
-
-c30 = Atom("C")
-chiralMol2 = Molecule(c30)
-c33 = Atom("C")
-chiralMol2.addAtom(c33, c30, 1)
-br30 = Atom("Br")
-chiralMol2.addAtom(br30, c30, 1)
-c31 = Atom("C")
-chiralMol2.addAtom(c31, c30, 1)
-c32 = Atom("C")
-chiralMol2.addAtom(c32, c31, 1)
-c30.newChiralCenter(c31, (None, c33, br30))
-
-#Makes C/C=C/C
-c40 = Atom("C")
-c41 = Atom("C")
-mol4 = Molecule(c40)
-mol4.addAtom(c41, c40, 2)
-c42 = Atom("C")
-c43 = Atom("C")
-mol4.addAtom(c42, c40, 1)
-mol4.addAtom(c43, c41, 1)
-c40.newCTCenter(c41, c42, None)
-c41.newCTCenter(c40, c43, None)
-
-#Makes Br/Br\C=C
-c45 = Atom("C")
-c46 = Atom("C")
-mol4alt = Molecule(c45)
-mol4alt.addAtom(c46, c45, 2)
-br40 = Atom("Br")
-br41 = Atom("Br")
-mol4alt.addAtom(br41, c45, 1)
-mol4alt.addAtom(br40, c45, 1)
-c45.newCTCenter(c46, br41, br40)
-c46.newCTCenter(c45, None, None)
-
-#        c50
-#Makes C-C<Cl
-#     /   \
-#   C<C   C>Br c51
-#      \C/
-c50 = Atom("C")
-c51 = Atom("C")
-c52 = Atom("C")
-c53 = Atom("C")
-c54 = Atom("C")
-cycPentMol = Molecule(c50)
-cycPentMol.addAtom(c51, c50, 1)
-cycPentMol.addAtom(c52, c51, 1)
-cycPentMol.addAtom(c53, c52, 1)
-cycPentMol.addAtom(c54, c53, 1)
-cycPentMol.addBond(c54, c50, 1)
-cl50 = Atom("Cl")
-cycPentMol.addAtom(cl50, c50, 1)
-c50.newChiralCenter(c54, (cl50, c51, None))
-br50 = Atom("Br")
-cycPentMol.addAtom(br50, c51, 1)
-c51.newChiralCenter(c50, (c52, br50, None))
-c55 = Atom("C")
-cycPentMol.addAtom(c55, c53, 1)
-c53.newChiralCenter(c52, (c55, None, c54))
-
-#Makes C-C#C-C
-c60 = Atom("C")
-c61 = Atom("C")
-c62 = Atom("C")
-c63 = Atom("C")
-propyne = Molecule(c60)
-propyne.addAtom(c61, c60, 3)
-propyne.addAtom(c62, c61, 1)
-propyne.addAtom(c63, c60, 1)
+#DO NOT DELETE. This is referred to by code in other files.
+#Makes C-OH, methanol.
+c72 = Atom("C")
+o73 = Atom("O")
+methanol = Molecule(c72)
+methanol.addAtom(o73, c72, 1)
 
 #DO NOT DELETE. This is referred to by code in other files.
 #Makes C-C-OH, ethanol.
@@ -812,28 +918,209 @@ ethanol = Molecule(c64)
 ethanol.addAtom(c65, c64, 1)
 ethanol.addAtom(o66, c64, 1)
 
-#Makes C#C
-c67 = Atom("C")
-c68 = Atom("C")
-ethylene = Molecule(c67)
-ethylene.addAtom(c68, c67, 3)
 
-#Makes C-C-Br
-c69 = Atom("C")
-br70 = Atom("Br")
-c71 = Atom("C")
-bromoethane = Molecule(c69)
-bromoethane.addAtom(c71, c69, 1)
-bromoethane.addAtom(br70, c69, 1)
+if __name__ == '__main__':
+    #Makes     C-C-C<C
+    #          |   |
+    #        O-C=C-N
 
-#DO NOT DELETE. This is referred to by code in other files.
-#Makes C-OH, methanol.
-c72 = Atom("C")
-o73 = Atom("O")
-methanol = Molecule(c72)
-methanol.addAtom(o73, c72, 1)
+    #Makes     C-C-C>C
+    #          |   |
+    #        O-C=C-N
+    c1 = Atom("C")
+    mol = Molecule(c1)
+    c2 = Atom("C")
+    n1 = Atom("N")
+    mol.addAtom(c2, c1, 2)
+    mol.addAtom(n1, c2, 1)
+    o1 = Atom("O")
+    mol.addAtom(o1, c1, 1)
+
+    c3 = Atom("C")
+    mol.addAtom(c3, n1, 1)
+    c4 = Atom("C")
+    c5 = Atom("C")
+    mol.addAtom(c4, c3, 1)
+    mol.addAtom(c5, c3, 1)
+    c6 = Atom("C")
+    mol.addAtom(c6, c5, 1)
+    mol.addBond(c6, c1, 1)
+    c3.newChiralCenter(n1, (c4, None, c5))
+    c1.newCTCenter(c2, o1, c6)
+    c2.newCTCenter(c1, n1, None)
 
 
 
+    #Makes C\   /Cl
+    #        C=C
+    #     Cl/   \Br
+    c10 = Atom("C")
+    CTmol = Molecule(c10)
+    c11 = Atom("C")
+    CTmol.addAtom(c11, c10, 2)
+    c12 = Atom("C")
+    CTmol.addAtom(c12, c10, 1)
+    cL1 = Atom("Cl")
+    CTmol.addAtom(cL1, c10, 1)
+    cL2 = Atom("Cl")
+    CTmol.addAtom(cL2, c11, 1)
+    br10 = Atom("Br")
+    CTmol.addAtom(br10, c11, 1)
+    c10.newCTCenter(c11, cL1, c12)
+    c11.newCTCenter(c10, cL2, br10)
+
+    #Makes C\   /Br
+    #        C=C
+    #     C1/   \Cl
+    c15 = Atom("C")
+    CTmol2 = Molecule(c15)
+    c16 = Atom("C")
+    CTmol2.addAtom(c16, c15, 2)
+    c17 = Atom("C")
+    CTmol2.addAtom(c17, c15, 1)
+    cL5 = Atom("Cl")
+    CTmol2.addAtom(cL5, c15, 1)
+    cL6 = Atom("Cl")
+    CTmol2.addAtom(cL6, c16, 1)
+    br15 = Atom("Br")
+    CTmol2.addAtom(br15, c16, 1)
+    c15.newCTCenter(c16, cL5, c17)
+    c16.newCTCenter(c15, br15, cL6)
+
+    #Makes  C\ /C-C
+    #         C
+    #      Br/ \H
+    c20 = Atom("C")
+    chiralMol1 = Molecule(c20)
+    c23 = Atom("C")
+    chiralMol1.addAtom(c23, c20, 1)
+    br20 = Atom("Br")
+    chiralMol1.addAtom(br20, c20, 1)
+    c21 = Atom("C")
+    chiralMol1.addAtom(c21, c20, 1)
+    c22 = Atom("C")
+    chiralMol1.addAtom(c22, c21, 1)
+    c20.newChiralCenter(c21, (None, br20, c23))
+
+    c30 = Atom("C")
+    chiralMol2 = Molecule(c30)
+    c33 = Atom("C")
+    chiralMol2.addAtom(c33, c30, 1)
+    br30 = Atom("Br")
+    chiralMol2.addAtom(br30, c30, 1)
+    c31 = Atom("C")
+    chiralMol2.addAtom(c31, c30, 1)
+    c32 = Atom("C")
+    chiralMol2.addAtom(c32, c31, 1)
+    c30.newChiralCenter(c31, (None, c33, br30))
+
+    #Makes C/C=C/C
+    c40 = Atom("C")
+    c41 = Atom("C")
+    mol4 = Molecule(c40)
+    mol4.addAtom(c41, c40, 2)
+    c42 = Atom("C")
+    c43 = Atom("C")
+    mol4.addAtom(c42, c40, 1)
+    mol4.addAtom(c43, c41, 1)
+    c40.newCTCenter(c41, c42, None)
+    c41.newCTCenter(c40, c43, None)
+
+    #Makes Br/Br\C=C
+    c45 = Atom("C")
+    c46 = Atom("C")
+    mol4alt = Molecule(c45)
+    mol4alt.addAtom(c46, c45, 2)
+    br40 = Atom("Br")
+    br41 = Atom("Br")
+    mol4alt.addAtom(br41, c45, 1)
+    mol4alt.addAtom(br40, c45, 1)
+    c45.newCTCenter(c46, br41, br40)
+    c46.newCTCenter(c45, None, None)
+
+    #        c50
+    #Makes C-C<Cl
+    #     /   \
+    #   C<C   C>Br c51
+    #      \C/
+    c50 = Atom("C")
+    c51 = Atom("C")
+    c52 = Atom("C")
+    c53 = Atom("C")
+    c54 = Atom("C")
+    cycPentMol = Molecule(c50)
+    cycPentMol.addAtom(c51, c50, 1)
+    cycPentMol.addAtom(c52, c51, 1)
+    cycPentMol.addAtom(c53, c52, 1)
+    cycPentMol.addAtom(c54, c53, 1)
+    cycPentMol.addBond(c54, c50, 1)
+    cl50 = Atom("Cl")
+    cycPentMol.addAtom(cl50, c50, 1)
+    c50.newChiralCenter(c54, (cl50, c51, None))
+    br50 = Atom("Br")
+    cycPentMol.addAtom(br50, c51, 1)
+    c51.newChiralCenter(c50, (c52, br50, None))
+    c55 = Atom("C")
+    cycPentMol.addAtom(c55, c53, 1)
+    c53.newChiralCenter(c52, (c55, None, c54))
+
+    #Makes C-C#C-C
+    c60 = Atom("C")
+    c61 = Atom("C")
+    c62 = Atom("C")
+    c63 = Atom("C")
+    propyne = Molecule(c60)
+    propyne.addAtom(c61, c60, 3)
+    propyne.addAtom(c62, c61, 1)
+    propyne.addAtom(c63, c60, 1)
+
+    #Makes C#C
+    c67 = Atom("C")
+    c68 = Atom("C")
+    ethylene = Molecule(c67)
+    ethylene.addAtom(c68, c67, 3)
+
+    #Makes C-C-Br
+    c69 = Atom("C")
+    br70 = Atom("Br")
+    c71 = Atom("C")
+    bromoethane = Molecule(c69)
+    bromoethane.addAtom(c71, c69, 1)
+    bromoethane.addAtom(br70, c69, 1)
+
+    #       F
+    #Makes CCC
+    #       CC
+    c80 = Atom("C")
+    c81 = Atom("C")
+    c82 = Atom("C")
+    c83 = Atom("C")
+    c84 = Atom("C")
+    c85 = Atom("C")
+    c86 = Atom("C")
+    c87 = Atom("C")
+    c88 = Atom("C")
+    c89 = Atom("C")
+    f80 = Atom("F")
+    f81 = Atom("F")
+    ringTest1 = Molecule(c80) #Tail
+    ringTest1.addAtom(c81, c80, 1)
+    ringTest1.addAtom(c82, c81, 1)
+    ringTest1.addAtom(c83, c82, 1)
+    ringTest1.addAtom(c84, c83, 1)
+    ringTest1.addBond(c84, c81, 1)
+    ringTest1.addAtom(f80, c81, 1)
+    c81.newChiralCenter(c80, (c82, c84, f80))
+
+    ringTest2 = Molecule(c85) #Ring
+    ringTest2.addAtom(c86, c85, 1) #Tail
+    ringTest2.addAtom(c87, c85, 1)
+    ringTest2.addAtom(c88, c87, 1)
+    ringTest2.addAtom(c89, c88, 1)
+    ringTest2.addBond(c89, c85, 1)
+    ringTest2.addAtom(f81, c85, 1)
+    c85.newChiralCenter(c86, (c89, c87, f81))
+    print tertButoxide([chiralMol1])
+    
 
 

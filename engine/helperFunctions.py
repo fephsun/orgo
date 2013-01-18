@@ -322,8 +322,12 @@ def neighborCompare(a,b, compareDict):
                     bCW.append(neighbor.element)
             OKFlag = False
             for i in xrange(3):
+                #Find the correct alignment of neighbors of a to neighbors of b
+                if OKFlag:
+                    break
                 if aCW == shift(bCW, i):
                     OKFlag = True
+                    #The elements are correct, but is the actual mapping consistant?
                     for j in xrange(3):
                         if a.chiralCWlist(aNeighborSet[randThing])[j] == None:
                             continue
@@ -351,14 +355,27 @@ def neighborCompare(a,b, compareDict):
 def shift(l, n):
     return l[n:] + l[:n]
 
-def noOfAtoms(string):
-    #Helper function.  Given a SMILES string, return the number of atoms.
-    #Not used, as of Jan 11, 2013
-    out = 0
-    for char in string:
-        if char.isupper():
-            out += 1
-    return out
+def isInRing(start, current, last=None, alreadyVisited=[]):
+    #Tests whether ADJACENT Atoms start and current are in the same ring.
+    #Only works on adjacent atoms!
+    #If so, returns a list of elements in the ring in connected order, starting (current, ..., start)
+    #If not, returns None
+    #Do a depth-first search.
+    if last == None:
+        #Initialization only.
+        last = start
+    if start == current:
+        return [current]
+    if current in alreadyVisited:
+        return None
+    for nextNeighbor in current.neighbors:
+        if nextNeighbor == last:
+            #Don't go where we've already been.
+            continue
+        x = isInRing(start, nextNeighbor, current, alreadyVisited + [current])
+        if x!= None:
+            return [current] + x
+    return None
 
 def markovnikov(a, b):
     #a and b are two carbon atoms.  Function tuple of all possible markovnikov
@@ -488,8 +505,13 @@ def findHydroxyls(molecule):
     for atom in molecule.atoms:
         if not (atom.element == 'O'):
             continue
-        if len(list(atom.neighbors)) <= 1: #it's a hydroxyl or water, so return it
+        if len(list(atom.neighbors)) == 0: #water
             output += [atom]
+        elif len(list(atom.neighbors)) == 1: #it's a hydroxyl?
+            if atom.neighbors.values()[0] == 1: #single bonds only!  No ketones!
+                output += [atom]
+            else:
+                continue
         elif len(list(atom.neighbors)) == 2: #it's an ether, don't return it
             continue
         else:

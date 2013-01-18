@@ -609,33 +609,90 @@ def acetylideAdd(molecules, others):
     def findPlaces2(molecule):
         #findHalogenCarbons(molecule)
         places = []
+        countedOxygens = []
         for atom in molecule.atoms:
+            #Primary alkyl halides
             if atom.element == "C" and len(list(atom.neighbors))==2 and (True in [(other.element in HALOGENS) for other in list(atom.neighbors)]):
                 places += [atom]
+            #Epoxides
+            if atom.element == 'C':
+                for neighbor in atom.neighbors:
+                    if neighbor.element == 'O' and neighbor not in countedOxygens:
+                        for otherN in atom.neighbors:
+                            if otherN in neighbor.neighbors.keys():
+                                #carbon, other carbon, oxygen
+                                places += [(atom, otherN, neighbor)]
+                                countedOxygens.append(neighbor)
+                
         return places
 
     #Place 1 is a negatively charged carbon atom
-    #Place 2 is a carbon connected to at least one halogen
+    #Place 2 is a carbon connected to at least one halogen, or an epoxide tuple
     def reactAtPlaces(molecule1, molecule2, place1, place2):
-        #Duplicate inputs
         (molecule1, place1, unused0, unused1, unused2, unused3, unused4)=\
                duplicateInputs(molecule1, place1, place1, None, None, None, None)
-        (molecule2, place2, unused0, unused1, unused2, unused3, unused4)=\
-               duplicateInputs(molecule2, place2, place2, None, None, None, None)
-        #Remove negative charge
-        place1.charge = 0
-        #Find halogen
-        halogen = None
-        for atom in list(place2.neighbors):
-            if atom.element in HALOGENS:
-                halogen = atom
-        if halogen == None:
-            print "Error: your HalogenCarbons method isn't working as intended"
-            raise StandardError
-        #Remove halogen
-        molecule2.removeAtom(halogen)
-        #Add a single bond between the two carbons
-        molecule1.addMolecule(molecule2, place2, place1, 1)
+        if isinstance(place2, tuple):
+            #Epoxide.
+            #Do some object acrobatics to make proper deepcopies.
+            oxIndex = molecule2.atoms.index(place2[2])
+            (molecule2, carbon, otherCarbon, unused0, unused1, unused3, unused2) =\
+                duplicateInputs(molecule2, place2[0], place2[1], None, None, None, None)
+            oxygen = molecule2.atoms[oxIndex]
+            mkvPairs = markovnikov(carbon, otherCarbon)
+            if len(mkvPairs) == 2:
+                (Xmolecule1, Xplace1, unused0, unused1, unused2, unused3, unused4)=\
+                    duplicateInputs(molecule1, place1, place1, None, None, None, None)
+                (Xmolecule2, addingC, alcoholC, unused0, unused1, unused3, unused2) =\
+                    duplicateInputs(molecule2, mkvPairs[1][0], mkvPairs[1][1], None, None, None, None)
+                Xoxygen = Xmolecule2.atoms[oxIndex]
+                #I apoplogize for the rather confusing naming - ran out of good name ideas.
+                stuff = ((molecule1, place1, molecule2, mkvPairs[0][0], mkvPairs[0][1], oxygen),
+                     (Xmolecule1, Xplace1, Xmolecule2, addingC, alcoholC, Xoxygen))
+            else:
+                stuff = ((molecule1, place1, molecule2, mkvPairs[0][0], mkvPairs[0][1], oxygen))
+
+            for (aceMol, aceAtom, epxMol, addC, alcC, oxygen) in stuff:
+                #Break the epoxide bond.
+                epxMol.changeBond(addC, oxygen, 0)
+                #Remove epoxide stereochem!
+                viewFromOx = addC.chiralCWlist(oxygen)
+                addC.eliminateChiral()
+                #alcC keeps its stereochemistry
+                #Add the acetylene to the more substituted carbon.
+                aceAtom.charge = 0
+                epxMol.addMolecule(aceMol, aceAtom, addC, 1)
+                #Add new stereochemistry - inversion.
+                addC.newChiralCenter(aceAtom, (viewFromOx[0], viewFromOx[2], viewFromOx[1]))
+            if len(mkvPairs) == 2:
+                if moleculeCompare(molecule2, Xmolecule2):
+                    return [molecule2]
+                else:
+                    return [molecule2, Xmolecule2]
+            else:
+                return [molecule2]
+         
+        else:
+            #Alkyl halide
+            #Duplicate inputs
+            (molecule1, place1, unused0, unused1, unused2, unused3, unused4)=\
+                   duplicateInputs(molecule1, place1, place1, None, None, None, None)
+            (molecule2, place2, unused0, unused1, unused2, unused3, unused4)=\
+                   duplicateInputs(molecule2, place2, place2, None, None, None, None)
+           
+            #Remove negative charge
+            place1.charge = 0
+            #Find halogen
+            halogen = None
+            for atom in list(place2.neighbors):
+                if atom.element in HALOGENS:
+                    halogen = atom
+            if halogen == None:
+                print "Error: your HalogenCarbons method isn't working as intended"
+                raise StandardError
+            #Remove halogen
+            molecule2.removeAtom(halogen)
+            #Add a single bond between the two carbons
+            molecule1.addMolecule(molecule2, place2, place1, 1)
         
         return [molecule1]
         
@@ -833,7 +890,10 @@ o73 = Atom("O")
 methanol = Molecule(c72)
 methanol.addAtom(o73, c72, 1)
 
-#print halohydrate([mol4alt], ethanol, "Br")
+if __name__ == '__main__':
+    acet = alkyneDeprotonate([ethylene])
+    epox = epoxidate([mol4])
+    print smiles(acetylideAdd(epox, acet))
 
 
 

@@ -42,6 +42,8 @@ class SynthesisProblemModel(models.Model):
     reagentModels = PickledObjectField()
     reactionStepModels = PickledObjectField()
     solution = PickledObjectField()
+    target = ForeignKey(MoleculeBoxModel)
+    
     
     #Call SynthesisProblemModel.create(parentSynthesisProblem) to create a SynthesisProblemModel representing parentSynthesisProblem
     #parentSynthesisProblem is an instance of SynthesisProblem
@@ -52,15 +54,12 @@ class SynthesisProblemModel(models.Model):
         #Pickle all the things
         
         
-        
-
-        self.startingMaterials = startingMaterials
-        self.finalProduct = finalProduct
-        self.steps = [] #to be a list of reactionSteps
-        self.reagentsMade = [] #for the sidebar
-        self.solution = solution
-        self.isSolved = False
-
+        #Attributes found in SynthesisProblem:
+        #self.startingBoxes = []                 #a list of instances of MoleculeBox
+        #self.finalProduct = None                #an instance of MoleculeBox
+        #self.steps = []                         #a list of instances of ReactionStep, in any order
+        #self.reagentsMade = []                  #a list of instances of ReagentBox, for the sidebar
+        #self.solution = solution                #an instance of SynthesisSolution
     
 
 """
@@ -111,6 +110,8 @@ Contains: HTML representation
 class ReactionStepModel(models.Model):    
     problemModel = ForeignKey('SynthesisProblemModel')
     reactionStep = PickledObjectField()
+    reactantBox = ForeignKey('MoleculeBoxModel')
+    productBox = ForeignKey('MoleculeBoxModel')
     html = TextField()
     
     #Call ReactionStepModel.create(parentSynthesisProblemModel, reactionStepObject) to create a ReactionStepModel representing reactionStepObject

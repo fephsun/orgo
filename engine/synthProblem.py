@@ -21,14 +21,14 @@ import string
 
     #Can add: reagents to reaction-steps, reagents to molecule-boxes, reaction-steps to molecule-boxes, molecule-boxes to reaction-steps.
 class SynthesisProblem:
-    def __init__(self, startingMaterials, finalProduct, solution):
-        self.
-        self.startingMaterials = startingMaterials
-        self.finalProduct = finalProduct
-        self.steps = [] #to be a list of reactionSteps
-        self.reagentsMade = [] #for the sidebar
-        self.solution = solution
-
+    def __init__(self, startingMaterialBoxes, finalProduct, solution):
+    
+        #All of these variables must be set at some point or another.
+        self.startingBoxes = []                 #a list of instances of MoleculeBox
+        self.finalProduct = None                #an instance of MoleculeBox
+        self.steps = []                         #a list of instances of ReactionStep, in any order
+        self.reagentsMade = []                  #a list of instances of ReagentBox, for the sidebar
+        self.solution = solution                #an instance of SynthesisSolution
 
 
 #SynthesisSolution class
@@ -149,7 +149,7 @@ def parseReagentsString(inpstring):
     string = inpstring.lower()
     outp = {}
     
-    if (inpstring == ""):
+    if (string == ""):
         for reagent in list(REAGENTS):
             outp[reagent] = False
         return outp
@@ -163,16 +163,28 @@ def parseReagentsString(inpstring):
     #hacky
     #Make sure you don't count substrings if you're counting things they're part of.
     if outp[CH2CL2]:
-        if (inpstring.count("h2") - inpstring.count("ch2cl2")) == 0:
+        if (string.count("h2") - string.count("ch2cl2")) == 0:
             outp[H2] = False
-        if (inpstring.count("cl2") - inpstring.count("ch2cl2")) == 0:
+        if (string.count("cl2") - string.count("ch2cl2")) == 0:
             outp[CL2] = False
     if outp[NANH2]:
-        if (inpstring.count("na") - inpstring.count("nanh2")) == 0:
+        if (string.count("na") - string.count("nanh2")) == 0:
             outp[NA] = False
     if outp[NAOH]:
-        if (inpstring.count("na") - inpstring.count("naoh")) == 0:
+        if (string.count("na") - string.count("naoh")) == 0:
             outp[NA] = False
+    if outp[HF]:
+        if (string.count("hydrogen fluoride") - string.count("hydrogen")) == 0:
+            outp[H2] = False
+    if outp[HCL]:
+        if (string.count("hydrogen chloride") - string.count("hydrogen")) == 0:
+            outp[H2] = False
+    if outp[HI]:
+        if (string.count("hydrogen iodide") - string.count("hydrogen")) == 0:
+            outp[H2] = False
+    if outp[HBR]:
+        if (string.count("hydrogen bromide") - string.count("hydrogen")) == 0:
+            outp[H2] = False
     
     return outp
             
@@ -368,6 +380,7 @@ ADDREACTIONS = [reaction for reaction in REACTIONS if ('add' in reaction[2])]
 
 #When adding a new reagent, also be sure to update REACTIONS, to add a value for the constant,
 #and to update the section flagged "hacky" in the methods above.
+#Also update the drop-down field in the frontend with the new typeable values.
 REAGENTS = {
 H2: ("H<sub>2</sub>",("H2", "Hydrogen")),
 PDC: ("Pd|C", ("PdC", "Pd/C", "Pd|C", "Pd C", "palladium")),
@@ -384,7 +397,7 @@ I2: ("I<sub>2</sub>", ("Iodine", "I2")),
 ROOR: ("ROOR", ("ROOR", "tBuOOtBu", "Peroxide", "Tert-butyl peroxide", "Di-tert-butyl peroxide")),
 RCO3H: ("RCO3H",("mCPBA", "PhCO3H", "RCO3H")),
 H2SO4: ("H<sub>2</sub>SO<sub>4</sub>", ("H2SO4", "Sulfuric acid")),
-H2O: ("H<sub>2</sub>O", ("H2O", "Water", "Dihydrogen monoxide", "HOH")),
+H2O: ("H<sub>2</sub>O", ("H2O", "Water", "Dihydrogen monoxide", "HOH", "H20")),
 HGSO4: ("HgSO<sub>4</sub> accels.", ("HgSO4", "Hg2+", "Mercury sulfate")),
 BH3: ("BH<sub>3</sub>", ("BH3", "Borane")),
 THF: ("THF", ("THF", "Tetrahydrofuran")),

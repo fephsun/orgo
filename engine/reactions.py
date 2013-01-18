@@ -833,7 +833,7 @@ o73 = Atom("O")
 methanol = Molecule(c72)
 methanol.addAtom(o73, c72, 1)
 
-#print halohydrate([mol4alt], ethanol, "Br")
+
 
 
 

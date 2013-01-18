@@ -40,4 +40,9 @@ setInterval(function() {
     <input type="submit" value="Submit" class="btn"/>
 </form>
 
+<h2> Generate a problem </h2>
+<form action = "/orgo/api/problemInterface/" method="post" class="form-horizontal">{% csrf_token %}
+    <input type="submit" value="Generate!" class="btn"/>
+</form>
+
 </html>

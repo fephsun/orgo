@@ -63,3 +63,16 @@ def loggedInHome(request):
 ###Can delete; this is me learning Django
 def renderSmiles(request, molecule):
     return render(request, 'loggedin.html', {'item1': serverRender.render(str(molecule.smiles))})
+
+    
+    
+def renderProblem(request):
+    start = MoleculeBox([ethylene])
+    target = MoleculeBox([bromoethane])
+    reagentBox = ReagentBox("H2 cat Lindlar")
+    reactionStep = ReactionStep(start)
+    reactionStep.addReagent(reagentBox)
+    reactionSteps = [reactionStep]
+    sidebarReagents = [reagentBox]
+    problemSolution = SynthesisSolution([reactionStep, ReactionStep(reactionStep.productBox).addReagent(ReagentBox("HBr in CH2Cl2"))])
+    return render(request, 'problemInterface.html', {})

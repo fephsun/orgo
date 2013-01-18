@@ -176,7 +176,7 @@ def parseReagentsString(inpstring):
     
     return outp
             
-def randomSynthesisProblemMake(mode = "Everything", steps = 10, maxLength = 20):
+def randomSynthesisProblemMake(mode = "Everything", steps = 10, maxLength = 30):
     #Mode controls the reagents that are legal, as well as the distribution of starting materials.
     
     reactions = [] #List of reactions that we want to keep
@@ -184,9 +184,9 @@ def randomSynthesisProblemMake(mode = "Everything", steps = 10, maxLength = 20):
     #Each mode sets up its legal reactions and its starting materials.
     if mode == "AlkeneAlkyne":
         molBoxes = []
-        for i in xrange(1):
-            molBoxes.append(MoleculeBox([randomGenerator.randomStart(endProb=0.23, alkyneProb=0.3, alkeneProb=0.3,
-            BrProb=0.05, ClProb=0.05, OHProb=0.05,forceTerminalAlkyne = False)[0]]))
+        for i in xrange(2):
+            molBoxes.append(MoleculeBox([randomGenerator.randomStart(endProb=0.23, alkyneProb=0.4, alkeneProb=0.4,
+            BrProb=0.05, ClProb=0.05, OHProb=0.05,forceTerminalAlkyne = True)[0]]))
         legalRxns = ALKENEALKYNE
     elif mode == "Everything":
         molBoxes = []

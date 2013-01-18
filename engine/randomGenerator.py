@@ -1,7 +1,7 @@
 from helperFunctions import *
 import random
 
-def randomStart(endProb=0.3, maxBranchLength=8,
+def randomStart(endProb=0.3, maxBranchLength=15,
                 alkyneProb=0.2, alkeneProb=0.4,
                 BrProb=0.1, ClProb=0.1, OHProb=0.1, BranchProb=0.05,
                 forceTerminalAlkyne = False):

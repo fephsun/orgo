@@ -492,8 +492,13 @@ def findHydroxyls(molecule):
     for atom in molecule.atoms:
         if not (atom.element == 'O'):
             continue
-        if len(list(atom.neighbors)) <= 1: #it's a hydroxyl or water, so return it
+        if len(list(atom.neighbors)) == 0: #water
             output += [atom]
+        elif len(list(atom.neighbors)) == 1: #it's a hydroxyl?
+            if atom.neighbors.values()[0] == 1: #single bonds only!  No ketones!
+                output += [atom]
+            else:
+                continue
         elif len(list(atom.neighbors)) == 2: #it's an ether, don't return it
             continue
         else:

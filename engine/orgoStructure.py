@@ -121,6 +121,40 @@ class Atom:
             print reference
             print self.chiralA, self.chiralB, self.chiralC, self.chiralD
             raise StandardError
+    
+    def chiralRingList(self, inport, outport):
+        #Returns which substituent is up, followed by which one is down,
+        #in a ring context.
+        if inport == self.chiralA:
+            if outport == self.chiralB:
+                return                  (self.chiralC, self.chiralD)
+            if outport == self.chiralC:
+                return                  (self.chiralB, self.chiralD)
+            if outport == self.chiralD:
+                return                  (self.chiralB, self.chiralC)
+        elif inport == self.chiralB:
+            if outport == self.chiralA:
+                return                  (self.chiralD, self.chiralC)
+            if outport == self.chiralC:
+                return                  (self.chiralA, self.chiralD)
+            if outport == self.chiralD:
+                return                  (self.chiralA, self.chiralC)
+        elif inport == self.chiralC:
+            if outport == self.chiralA:
+                return                  (self.chiralD, self.chiralB)
+            if outport == self.chiralB:
+                return                  (self.chiralD, self.chiralA)
+            if outport == self.chiralD:
+                return                  (self.chiralB, self.chiralA)
+        elif inport == self.chiralD:
+            if outport == self.chiralA:
+                return                  (self.chiralC, self.chiralB)
+            if outport == self.chiralB:
+                return                  (self.chiralC, self.chiralA)
+            if outport == self.chiralC:
+                return                  (self.chiralA, self.chiralB)
+                
+        raise StandardError
         
     def newCTCenter(self, otherC, a, b):
         #CTCenters (cis-trans centers) must come in pairs.  Both of the
@@ -155,6 +189,8 @@ class Atom:
             if self.neighbors[neighbor] == 2 and neighbor.element == 'C':
                 return neighbor
         return None
+        
+
 
 
 def smiles(molecule):

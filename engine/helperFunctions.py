@@ -322,8 +322,12 @@ def neighborCompare(a,b, compareDict):
                     bCW.append(neighbor.element)
             OKFlag = False
             for i in xrange(3):
+                #Find the correct alignment of neighbors of a to neighbors of b
+                if OKFlag:
+                    break
                 if aCW == shift(bCW, i):
                     OKFlag = True
+                    #The elements are correct, but is the actual mapping consistant?
                     for j in xrange(3):
                         if a.chiralCWlist(aNeighborSet[randThing])[j] == None:
                             continue

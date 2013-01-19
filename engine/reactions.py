@@ -32,11 +32,12 @@ def react(molecules, findPlace, reactAtPlace):
             if place != None:
                 molecules.remove(molecule)
                 x = reactAtPlace(molecule, place)
+                    
                 if not isinstance(x, list):
                     x = [x]
                 molecules += x
                 if debug:
-                    print "Added: "+str(x)
+                    print molecules
     
     if debug:
         print "Results: "
@@ -251,63 +252,11 @@ In rings, hydrogen must be anti-periplanar to halide.
 '''
 def tertButoxide(molecules):
     halogens = ['F', 'Cl', 'Br', 'I']
-#    def findPlace(molecule):
-#        #Returns a carbon with a halogen, followed by a carbon with the most suitable H.
-#        for carbon1 in molecule.atoms:
-#            if carbon1.element != 'C':
-#                continue
-#            localHalogens = []
-#            for neighbor in carbon1.neighbors:
-#                if (neighbor.element in halogens):
-#                    localHalogens.append(neighbor)
-#            if localHalogens == []:
-#                continue
-#            #Has to be a carbon, no double or triple bonds, at most 3 things bonded.
-#            #We don't want to make allenes; and carbonyls have funky behavior that we haven't
-#            #considered yet.
-#            neighborCs = [neighbor for neighbor in carbon1.neighbors.keys() if (neighbor.element == 'C'
-#                and 2 not in neighbor.neighbors.values() and 3 not in neighbor.neighbors.values() and
-#                len(neighbor.neighbors) <= 3)]
-#            if len(neighborCs) == 0:
-#                continue
-#            #Sort neighbors in order by Zaitsev's Rule
-#            neighborCs.sort(key = lambda n: len(n.neighbors), reverse = True)
-#            places = []
-#            subNumber = len(neighborCs[0].neighbors)
-#            return [(carbon1, x) for x in neighborCs if len(x.neighbors) == subNumber]
-
-#    def reactAtPlace(molecule, places):
-#        #Reminder: places[x][0] is the carbon with the halogen, places[x][1] is the carbon with the hydrogen.
-#        #I know it's not necessarily Cl, but that's easier to type than "halogen".
-#        out = []
-#        for place in places:
-#            #molecule, (ClCarbon, HCarbon) = listClone(molecule, place)
-#            Cls = [neighbor for neighbor in place[0].neighbors if (neighor.element in halogens)]
-#            if isInRing(place[0], place[1]) == None:
-#                #Not in ring
-#                for Cl in Cls:
-#                    #Make a copy.
-#                    Xmolecule, (ClCarbon, HCarbon, XCl) = listClone(molecule, place+[Cl])
-#                    if hasattr(HCarbon, "chiralA") and hasattr(ClCarbon, "chiralA"):
-#                        #Chiral.  We need to consider anti-periplanar.
-#                        #Looking down from the Cl to the other carbon,
-#                        ClsubA, ClsubB = ClCarbon.chiralRingList(XCl, HCarbon)
-#                        #Looking up from the H to the first carbon,
-#                        HsubB, HsubA = HCarbon.chiralRingList(None, ClCarbon)
-#                        #Remove chirality, remove XCl, change bond order
-#                        ClCarbon.eliminateChiral()
-#                        HCarbon.eliminateChiral()
-#                        Xmolecule.removeAtom(XCl)
-#                        Xmolecule.changeBond(ClCarbon, HCarbon, 2)
-#                        #Add CTstereo
-#                        ClCarbon.newCTCenter(HCarbon, ClsubA, ClsubB)
-#                        HCarbon.newCTCenter(ClCarbon, ClsubA, ClsubB)
-#                        out.append(Xmolecule)
-#                    else:
-#                        #No ring, achiral.
-#                        #
+    if debug:
+        print "Applying tertButoxide"
 
     def findPlace(molecule):
+        ans = [] #Used only for complete mode
         #Returns a carbon with a halogen, followed by a carbon with the most suitable H.
         for carbon1 in molecule.atoms:
             if carbon1.element != 'C':
@@ -327,7 +276,9 @@ def tertButoxide(molecules):
             if len(neighborCs) == 0:
                 continue
             #Screw it, let's just try all of them.  Whee, itertools!
-            return itertools.product([carbon1], neighborCs, localHalogens)
+            ans += [itertools.product([carbon1], neighborCs, localHalogens)]
+        
+        return ans
     
     def reactAtPlace(molecule, bigListOfPlaces):
         candidates = []
@@ -355,8 +306,11 @@ def tertButoxide(molecules):
                 Xmolecule.removeAtom(Cl)
                 Xmolecule.changeBond(ClCarbon, HCarbon, 2)
                 #Add CTstereo
-                ClCarbon.newCTCenter(HCarbon, ClsubA, ClsubB)
-                HCarbon.newCTCenter(ClCarbon, ClsubA, ClsubB)
+                try:
+                    ClCarbon.newCTCenter(HCarbon, ClsubA, ClsubB)
+                    HCarbon.newCTCenter(ClCarbon, HsubA, HsubB)
+                except AlleneError:
+                    continue
                 candidates.append((Xmolecule, HCarbon, ClCarbon))
             else:
                 #No chirality.
@@ -379,8 +333,11 @@ def tertButoxide(molecules):
                     for neighbor in HCarbon.neighbors:
                         if neighbor != HsubB and neighbor != ClCarbon:
                             HsubA = neighbor
-                    ClCarbon.newCTCenter(HCarbon, ClsubA, ClsubB)
-                    HCarbon.newCTCenter(ClCarbon, HsubA, HsubB)
+                    try:
+                        ClCarbon.newCTCenter(HCarbon, ClsubA, ClsubB)
+                        HCarbon.newCTCenter(ClCarbon, HsubA, HsubB)
+                    except AlleneError:
+                        continue
                     candidates.append((Xmolecule, HCarbon, ClCarbon))
                 else:
                     #No rings.  Make both cases.
@@ -402,30 +359,67 @@ def tertButoxide(molecules):
                     #becomes important.
                     if len(ClCarbon.neighbors) == 2 and len(HCarbon.neighbors) == 2:
                         #Return only the trans molecule.
-                        ClCarbon.newCTCenter(HCarbon, Clsubs[0], Clsubs[1])
-                        HCarbon.newCTCenter(ClCarbon, Hsubs[0], Hsubs[1])
+                        try:
+                            ClCarbon.newCTCenter(HCarbon, Clsubs[0], Clsubs[1])
+                            HCarbon.newCTCenter(ClCarbon, Hsubs[0], Hsubs[1])
+                        except AlleneError:
+                            continue
                         candidates.append((Xmolecule, HCarbon, ClCarbon))
                     else:
                         Xmolecule2, (ClCarbon2, HCarbon2, Clsubs2[0], Clsubs2[1], Hsubs2[0], Hsubs2[1]) =\
                             listClone(Xmolecule, (ClCarbon, HCarbon, Clsubs[0], Clsubs[1], Hsubs[0], Hsubs[1]))
-                        ClCarbon.newCTCenter(HCarbon, Clsubs[0], Clsubs[1])
-                        HCarbon.newCTCenter(ClCarbon, Hsubs[0], Hsubs[1])
-                        ClCarbon2.newCTCenter(HCarbon2, Clsubs2[0], Clsubs2[1])
-                        HCarbon2.newCTCenter(ClCarbon2, Hsubs2[0], Hsubs2[1])
-                        candidates.append((Xmolecule, HCarbon, ClCarbon))
-                        candidates.append((Xmolecule2, HCarbon2, ClCarbon2))
+                        try:
+                            ClCarbon.newCTCenter(HCarbon, Clsubs[0], Clsubs[1])
+                            HCarbon.newCTCenter(ClCarbon, Hsubs[0], Hsubs[1])
+                            candidates.append((Xmolecule, HCarbon, ClCarbon))
+                        except AlleneError:
+                            pass
+                        try:
+                            ClCarbon2.newCTCenter(HCarbon2, Clsubs2[1], Clsubs2[0])
+                            HCarbon2.newCTCenter(ClCarbon2, Hsubs2[0], Hsubs2[1])
+                            candidates.append((Xmolecule2, HCarbon2, ClCarbon2))
+                        except AlleneError:
+                            pass
+
         #Now, prune the products
         #Find the most substituted products, and keep only those.
         maxSub = 0
-        for molecule, c1, c2 in candidates:
+        for Xmolecule, c1, c2 in candidates:
             maxSub = max(maxSub, len(c1.neighbors)+len(c2.neighbors))
         maxSubCandidates = []
-        for molecule, c1, c2 in candidates:
+        for Xmolecule, c1, c2 in candidates:
             if len(c1.neighbors)+len(c2.neighbors) == maxSub:
-                maxSubCandidates.append(molecule)
+                maxSubCandidates.append(Xmolecule)
         return maxSubCandidates
 
-    return react(molecules, findPlace, reactAtPlace)
+        
+    def complete(molecules):
+        #Complete testing.
+        out = []
+        #Note to self: do not modify molecules.  You need it for returning at the end.
+        for molecule in molecules:
+            places = findPlace(molecule)
+            if places == []:
+                out += [molecule]
+                continue
+            for place in places:
+                ans = reactAtPlace(molecule, place)
+                if debug:
+                    for thing in ans:
+                        verify(thing)
+                if ans == []:
+                    out += [molecule]
+                else:
+                    out += ans
+        if out==molecules:
+            return molecules
+        return complete(removeDuplicates(out))
+    if debug:
+        a = complete(molecules)
+        print "Result of tBut: " +str(smiles(a))
+        return a
+    return complete(molecules)
+    
     
 def listClone(molecule, atomList):
     #Returns properly-connected deepcopies of molecule and list of atoms.
@@ -1120,7 +1114,7 @@ if __name__ == '__main__':
     ringTest2.addBond(c89, c85, 1)
     ringTest2.addAtom(f81, c85, 1)
     c85.newChiralCenter(c86, (c89, c87, f81))
-    print tertButoxide([chiralMol1])
+    print smiles(tertButoxide([cycPentMol]))
 
 
 

@@ -307,8 +307,34 @@ def randomSynthesisProblemMake(mode = "Everything", steps = 20, maxLength = 30):
     #TODO: should return a SynthesisProblem object, once this class is fleshed out.
     return reactions
                             
-
-
+def generateNameReactantProblem(mode="AlkeneAlkyne"):
+    #Endless loop, for now.  Maybe have some sort of give-up condition?
+    while True:
+        if mode=="AlkeneAlkyne":
+            start = randomGenerator.randomStart(endProb=0.3, maxBranchLength=10,
+                    alkyneProb=0.3, alkeneProb=0.3,
+                    BrProb=0.05, ClProb=0.05, OHProb=0.05)[0]
+            legalRxns = ALKENEALKYNE
+        
+        if debug:
+            print "Starting material: " +str(smiles(start))
+        reactantBox = MoleculeBox([start])
+        #Try up to 10 times to make a reaction.
+        for attemptNo in xrange(10):
+            reagents, rxnFunction, ignore = legalRxns[random.randint(0, len(legalRxns)-1)]
+            if debug:
+                print "Trying step: " + str(reagents)
+            currentRxn = ReactionStep(reactantBox)
+            for reagent in reagents:
+                currentRxn.hasReagents[reagent[0]] = True
+            if currentRxn.react() and len(currentRxn.productBox.molecules)<3:
+                #A good reaction.
+                return currentRxn
+                if debug:
+                    print "Result of successful reaction: " +str(smiles(currentRxn.productBox.molecules))
+            else:
+                #Try again.
+                pass     
 
 
 
@@ -470,5 +496,5 @@ KOCCH33: (("tert-butoxide", "KOC(CH3)3"))
 
 #Debugging
 if __name__ == "__main__":
-    print randomSynthesisProblemMake(mode="AlkeneAlkyne")
+    print generateNameReactantProblem(mode="AlkeneAlkyne")
 

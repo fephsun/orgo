@@ -1,0 +1,82 @@
+
+    body {
+        background-color: #000000;
+    }
+    #offscreen {
+        background-color: #000000;
+    }
+    .ui-autocomplete {
+        max-height: 100px;
+        overflow-y: auto;
+        /* prevent horizontal scrollbar */
+        overflow-x: hidden;
+    }
+    * html .ui-autocomplete {
+        height: 100px;
+    }
+    .molecule {
+        width: 200px;
+        height: 200px; 
+        padding: 0px; 
+        float: left; 
+        margin-top:10px; 
+        margin-bottom:10px; 
+        margin-right:10px; 
+        margin-left:10px; 
+        background-color:#000000;  
+    }
+    ul {
+        list-style-type:none;
+    }
+    .reaction { 
+        width: 150px; 
+        height: 50px; 
+        padding: 5px; 
+        float: left; 
+        margin-top:85px; 
+        margin-bottom:75px; 
+        margin-right:10px; 
+        margin-left:10px; 
+        background-color:#FFFFFF;
+    }
+    #logo {
+        margin-top: 10px;
+        margin-left:10px;
+        float:left;
+    }
+    .reagent {
+        margin-left:auto;
+        width: 165px; 
+        height: 50px; 
+        padding: 5px; 
+        float:left; 
+        margin-top:5px; 
+        margin-bottom:5px; 
+        margin-right:auto; 
+        background-color:#FFFFFF;
+    }
+    #reagentTyper {
+        margin-left:auto;
+        margin-right:auto;
+        width: 200px;
+    }
+    #reagentTyperBox {
+        width: 200px;
+    }
+    #addReagent {
+        width: 200px;
+    }
+    #target {
+        width: 200px;
+        margin-top: 10px;
+        margin-right:auto;
+        margin-left:auto;
+        margin-bottom:10px;
+        background-color:#5555FF;
+    }
+    #topbar   { width: 1210px; height: 95px; padding: 0px; margin-top:10px; margin-bottom:10px; margin-left:auto; margin-right:auto; background-color:#FF5555;}
+    #main     { width: 1210px; height: 700px; padding: 0px; margin-top:0px; margin-bottom:0px; margin-left:auto; margin-right:auto; background-color:#000000; }
+    #rightbar { width: 250px; height: 700px; padding: 0px; float:left; margin-top:0px; margin-bottom:0px; margin-left:10px; margin-right:0px; background-color:#5555FF; overflow:auto;}
+    #leftbar  { width: 950px; height: 700px; padding: 0px; float:left; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; background-color:#55FF55; overflow:auto;}
+
+    

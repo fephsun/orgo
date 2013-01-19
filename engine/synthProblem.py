@@ -307,7 +307,7 @@ def randomSynthesisProblemMake(mode = "Everything", steps = 20, maxLength = 30):
     #TODO: should return a SynthesisProblem object, once this class is fleshed out.
     return reactions
                             
-def generateNameReactantProblem(mode="AlkeneAlkyne"):
+def generateNameReagentProblem(mode="AlkeneAlkyne"):
     #Endless loop, for now.  Maybe have some sort of give-up condition?
     while True:
         if mode=="AlkeneAlkyne":

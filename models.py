@@ -29,6 +29,24 @@ class PickledObjectField(models.Field):
         return 'text'
 
         
+"""
+MoleculeBoxModel
+Contains: foreignkey to a SynthesisProblemModel
+Contains: pickled moleculebox
+Contains: SVG representation
+"""
+class MoleculeBoxModel(models.Model):
+    problemModel = models.ForeignKey('SynthesisProblemModel')
+    moleculeBox = PickledObjectField()
+    svg = models.TextField()
+    
+    #Call MoleculeBoxModel.create(parentSynthesisProblemModel, moleculeBoxObject) to create a MoleculeBoxModel representing moleculeBoxObject
+    #moleculeBoxObject is an instance of MoleculeBox
+    #parentSynthesisProblemModel is an instance of SynthesisProblemModel
+    @classmethod
+    def create(cls, parentSynthesisProblemModel, moleculeBoxObject):
+        x = cls(MoleculeBox = moleculeBoxObject, problemModel = parentSynthesisProblemModel, svg = moleculeBoxObject.stringList())
+        return x
         
 """
 SynthesisProblemModel
@@ -42,7 +60,7 @@ class SynthesisProblemModel(models.Model):
     reagentModels = PickledObjectField()
     reactionStepModels = PickledObjectField()
     solution = PickledObjectField()
-    target = ForeignKey(MoleculeBoxModel)
+    target = models.ForeignKey(MoleculeBoxModel)
     
     
     #Call SynthesisProblemModel.create(parentSynthesisProblem) to create a SynthesisProblemModel representing parentSynthesisProblem
@@ -60,26 +78,10 @@ class SynthesisProblemModel(models.Model):
         #self.steps = []                         #a list of instances of ReactionStep, in any order
         #self.reagentsMade = []                  #a list of instances of ReagentBox, for the sidebar
         #self.solution = solution                #an instance of SynthesisSolution
+        pass
     
 
-"""
-MoleculeBoxModel
-Contains: foreignkey to a SynthesisProblemModel
-Contains: pickled moleculebox
-Contains: SVG representation
-"""
-class MoleculeBoxModel(models.Model):
-    problemModel = ForeignKey('SynthesisProblemModel')
-    moleculeBox = PickledObjectField()
-    svg = TextField()
-    
-    #Call MoleculeBoxModel.create(parentSynthesisProblemModel, moleculeBoxObject) to create a MoleculeBoxModel representing moleculeBoxObject
-    #moleculeBoxObject is an instance of MoleculeBox
-    #parentSynthesisProblemModel is an instance of SynthesisProblemModel
-    @classmethod
-    def create(cls, parentSynthesisProblemModel, moleculeBoxObject):
-        x = cls(MoleculeBox = moleculeBoxObject, problemModel = parentSynthesisProblemModel, svg = moleculeBoxObject.stringList())
-        return x
+
 
 """
 ReagentModel
@@ -87,10 +89,10 @@ Contains: foreignkey to a SynthesisProblemModel
 Contains: pickled reagentbox
 Contains: its own HTML representation
 """
-class ReagentModel(models.Model)
-    problemModel = ForeignKey('SynthesisProblemModel')
+class ReagentModel(models.Model):
+    problemModel = models.ForeignKey('SynthesisProblemModel')
     reagentBox = PickledObjectField()
-    html = TextField()
+    html = models.TextField()
     
     #Call ReagentModel.create(parentSynthesisProblemModel, reagentBoxObject) to create a ReagentModel representing reagentBoxObject
     #reagentBoxObject is an instance of ReagentBox
@@ -108,11 +110,11 @@ Contains: pickled reactionstep
 Contains: HTML representation
 """
 class ReactionStepModel(models.Model):    
-    problemModel = ForeignKey('SynthesisProblemModel')
+    problemModel = models.ForeignKey('SynthesisProblemModel')
     reactionStep = PickledObjectField()
-    reactantBox = ForeignKey('MoleculeBoxModel')
-    productBox = ForeignKey('MoleculeBoxModel')
-    html = TextField()
+    reactantBox = models.ForeignKey('MoleculeBoxModel')
+    productBox = models.ForeignKey('MoleculeBoxModel')
+    html = models.TextField()
     
     #Call ReactionStepModel.create(parentSynthesisProblemModel, reactionStepObject) to create a ReactionStepModel representing reactionStepObject
     #reactionStepObject is an instance of ReactionStep

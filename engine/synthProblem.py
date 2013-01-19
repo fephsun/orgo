@@ -4,6 +4,7 @@ import random
 import orgoStructure
 import reactions as reactionsModule
 import string
+import serverRender
 
 #Synthesis problem class
     #List of starting materials
@@ -133,8 +134,8 @@ class MoleculeBox:
     def stringList(self):
         outp = ""
         for mol in self.molecules:
-            outp += smiles(mol) + " "
-        return outp
+            outp += smiles(mol)[0] + " "
+        return serverRender.render(outp)
         
 #ReagentBox class
 #Represents a draggable box containing some quantity of different reagents

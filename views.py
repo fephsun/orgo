@@ -74,10 +74,23 @@ def renderSmiles(request, molecule):
     ##Eventually: also pass in synthesis solutions, somehow
     ##Eventually: how does the frontend know which synthesis problem it's working on?
 def renderProblem(request):
+    #Makes C#C
+    c67 = Atom("C")
+    c68 = Atom("C")
+    ethylene = Molecule(c67)
+    ethylene.addAtom(c68, c67, 3)
 
+    #Makes C-C-Br
+    c69 = Atom("C")
+    br70 = Atom("Br")
+    c71 = Atom("C")
+    bromoethane = Molecule(c69)
+    bromoethane.addAtom(c71, c69, 1)
+    bromoethane.addAtom(br70, c69, 1)
+    
     ##Replace this temporary code with a randomly generated synthesis problem, eventually
-    start = [MoleculeBox([reactions.ethylene])]
-    target = MoleculeBox([reactions.bromoethane])
+    start = [MoleculeBox([ethylene])]
+    target = MoleculeBox([bromoethane])
     #reactionStep = ReactionStep(start)
     #reactionStep.addReagent(parseReagentString("H2 cat Lindlar"))
     #reactionSteps = [reactionStep]

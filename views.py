@@ -76,15 +76,15 @@ def renderSmiles(request, molecule):
 def renderProblem(request):
 
     ##Replace this temporary code with a randomly generated synthesis problem, eventually
-    #starts = [MoleculeBox([ethylene])]
-    #target = MoleculeBox([bromoethane])
+    start = [MoleculeBox([reactions.ethylene])]
+    target = MoleculeBox([reactions.bromoethane])
     #reactionStep = ReactionStep(start)
     #reactionStep.addReagent(parseReagentString("H2 cat Lindlar"))
     #reactionSteps = [reactionStep]
     #problemSolution = SynthesisSolution([reactionStep, ReactionStep(reactionStep.productBox).addReagent(parseReagentString("HBr in CH2Cl2"))])
     
     
-    return render(request, 'problemInterface.html', {})
+    return render(request, 'problemInterface.html', {"TargetMolecule":moleculeBoxHtml(target), "StartMolecule":moleculeBoxHtml(start)})
     
     
 def renderNameReagent(request):
@@ -131,5 +131,5 @@ def reactionStepHtml(reactionStep):
         if reactionStep.hasReagents[reagent]:
             html += REAGENTS[reagent][0] + ", "
             
-    return "<div class = \"reaction\" class = \"ui-widget-content\">"+(html[:-2])+"<img src=\"arrow.bmp\"/></div>"
+    return "<div class = \"reaction\" class = \"ui-widget-content\">"+(html[:-2])+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></div>"
     

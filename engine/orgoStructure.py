@@ -3,6 +3,12 @@ hydrogen = "H"
 
 debugSmiles = False
 
+class AlleneError(Exception):
+    #Raised when we try to make an allene.  Tells higher functions that
+    #the reaction we just attempted should not be allowed.  (Even if it
+    #is technically chemically feasible.)
+    pass
+
 class Molecule:
     
     def __init__(self, firstAtom):
@@ -160,6 +166,9 @@ class Atom:
         #CTCenters (cis-trans centers) must come in pairs.  Both of the
         #carbons across the double bond must have a CTCenter.  Atom a is
         #directly clockwise from otherC.  Atom b is directly counterclockwise.
+        if hasattr(self, 'CTa'):
+            print "-----allene error-----"
+            raise AlleneError
         self.CTotherC = otherC
         self.CTa = a
         self.CTb = b

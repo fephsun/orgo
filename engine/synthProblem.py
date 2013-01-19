@@ -192,7 +192,7 @@ def parseReagentsString(inpstring):
     
     return outp
             
-def randomSynthesisProblemMake(mode = "Everything", steps = 10, maxLength = 30):
+def randomSynthesisProblemMake(mode = "Everything", steps = 20, maxLength = 30):
     #Mode controls the reagents that are legal, as well as the distribution of starting materials.
     
     reactions = [] #List of reactions that we want to keep
@@ -200,9 +200,10 @@ def randomSynthesisProblemMake(mode = "Everything", steps = 10, maxLength = 30):
     #Each mode sets up its legal reactions and its starting materials.
     if mode == "AlkeneAlkyne":
         molBoxes = []
-        for i in xrange(2):
-            molBoxes.append(MoleculeBox([randomGenerator.randomStart(endProb=0.23, alkyneProb=0.4, alkeneProb=0.4,
-            BrProb=0.05, ClProb=0.05, OHProb=0.05,forceTerminalAlkyne = True)[0]]))
+        for i in xrange(1):
+            molBoxes.append(MoleculeBox([randomGenerator.randomStart(endProb=0.3, maxBranchLength=10,
+            alkyneProb=0.1, alkeneProb=0.1,
+            BrProb=0.1, ClProb=0.1, OHProb=0.05)[0]]))
         legalRxns = ALKENEALKYNE
     elif mode == "Everything":
         molBoxes = []
@@ -219,7 +220,7 @@ def randomSynthesisProblemMake(mode = "Everything", steps = 10, maxLength = 30):
     newLegalRxns = []
     for reaction in legalRxns:
         if 'interesting' in reaction[2]:
-            newLegalRxns += [reaction]*5    #Change to increase/lessen emphasis
+            newLegalRxns += [reaction]*10    #Change to increase/lessen emphasis
         else:
             newLegalRxns.append(reaction)
     legalRxns = newLegalRxns
@@ -348,6 +349,7 @@ NANH2=31
 EQV1=32
 HEAT=33
 LIGHT=34
+KOCCH33 = 35
 
 
 
@@ -377,12 +379,12 @@ REACTIONS = (
 (((F2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "F")), ('aa')),
 (((I2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "I")), ('aa')),
 (((CL2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "Cl")), ('aa')),
-(((HBR,), (ROOR,), (HEAT, LIGHT)), (lambda x: lambda o: radicalhydrohalogenate(x+o, "Br")), ('aa','interesting')),
+(((HBR,), (ROOR,), (HEAT, LIGHT)), (lambda x: lambda o: radicalhydrohalogenate(x+o, "Br")), ('aa')),
 (((RCO3H,), (CH2CL2,)), (lambda x: lambda o: epoxidate(x+o)), ('aa')),
 (((H2SO4,), (H2O,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")), True)), ('aa')),
 (((H2SO4,), (ETOH,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, ethanol, True)), ('aa','illegal')),
 (((H2SO4,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x, o, True)), ('aa','add')),
-(((H2SO4,), (H2O,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")))), ('aa','interesting')),
+(((H2SO4,), (H2O,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")))), ('aa')),
 (((H2SO4,), (ETOH,)), (lambda x: lambda o: acidhydrate(x+o, ethanol)), ('aa', 'illegal')),
 (((H2SO4,),), (lambda x: lambda o: acidhydrate(x, o)), ('aa')),
 (((BR2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "Br")),('aa')),
@@ -397,20 +399,21 @@ REACTIONS = (
 (((CL2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "Cl")),('aa')),
 (((CL2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "Cl")), ('aa','illegal')),
 (((CL2,),), (lambda x: lambda o: halohydrate(x, o, "Cl")), ('aa')),
-(((BH3,), (THF,), (NAOH,), (H2O2,)), (lambda x: lambda o: hydroborate(x+o)), ('aa','interesting')),
+(((BH3,), (THF,), (NAOH,), (H2O2,)), (lambda x: lambda o: hydroborate(x+o)), ('aa')),
 (((BH3,), (THF,)), (lambda x: lambda o: hydroborate1(x+o)), ('aa')),
 (((NAOH,), (H2O2,)), (lambda x: lambda o: hydroborate2(x+o)), ('aa')),
-(((OSO4,), (NMO,), (ACETONE, H2O)), (lambda x: lambda o: dihydroxylate(x+o)), ('aa','interesting')),
+(((OSO4,), (NMO,), (ACETONE, H2O)), (lambda x: lambda o: dihydroxylate(x+o)), ('aa')),
 (((O3,),(CH2CL2,),(ME2S,ZN)), (lambda x: lambda o: ozonolyse(x+o)), ('aa')),
 (((NA,), (NH3,)), (lambda x: lambda o: sodiumAmmonia(x+o)), ('aa')),
 (((LINDLAR,), (H2,)), (lambda x: lambda o: lindlar(x+o)), ('aa')),
 (((NANH2,), (NH3,)), (lambda x: lambda o: alkyneDeprotonate(x+o)), ('aa')),
+(((KOCCH33,),), (lambda x: lambda o: tertButoxide(x+o)), ('aa', 'interesting')),
 ((), (lambda x: lambda o: acetylideAdd(x, o)),('aa'))
 )
 
 SYNTHONLY = [
-(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(alkyneDeprotonate(x), o)),('aa','add','interesting')),
-(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(x, alkyneDeprotonate(o))),('aa','add','interesting'))
+(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(alkyneDeprotonate(x), o)),('aa','add')),
+(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(x, alkyneDeprotonate(o))),('aa','add'))
 ]
 
 FORSYNTH = [reaction for reaction in REACTIONS if not ('illegal' in reaction[2])] + SYNTHONLY
@@ -460,7 +463,8 @@ NH3: ("NH<sub>3 (L)</sub>", ("NH3", "Ammonia")),
 NANH2: ("NaNH<sub>2</sub>", ("Sodium amide", "Sodamide", "NaNH2", "Amide")),
 EQV1: ("1 equiv.", ("1", "eq", "one")),
 HEAT: ("Heat", ("heat", "delta", "hot", "warm")),
-LIGHT: ("Light", ("hv", "light", "bright", "nu", "v", "hnu"))
+LIGHT: ("Light", ("hv", "light", "bright", "nu", "v", "hnu")),
+KOCCH33: (("tert-butoxide", "KOC(CH3)3"))
 }
 
 

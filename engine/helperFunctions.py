@@ -199,9 +199,6 @@ def allTripleAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addt
     
 
 def moleculeCompare(a, b, compareDict = None, expanded = []):
-    outFile = file('errorDump.txt', 'w')
-    cPickle.dump(a, outFile)
-    outFile.close()
     #Determines whether two molecules are isomorphic.  In the worst case
     #(two molecules with the same atoms), this procedure does not run in
     #polynomial time, so be careful.
@@ -292,18 +289,18 @@ def neighborCompare(a,b, compareDict):
                 break
             temp[aNeighborSet[i]] = b.neighbors.keys()[i]
         if chiralFlag and OKFlag:
-            if not(set(a.neighbors.keys()) <= set((a.chiralA, a.chiralB, a.chiralC, a.chiralD))):
-                if debug:
-                    print "Error thing"
-                    for neighbor in a.neighbors.keys():
-                        if neighbor != None:
-                            print neighbor.element
-                    print "------"
-                    for ch in (a.chiralA, a.chiralB, a.chiralC, a.chiralD):
-                        if ch != None:
-                            print ch.element
-                    print "------"
-                    raise StandardError
+#            if not(set(a.neighbors.keys()) <= set((a.chiralA, a.chiralB, a.chiralC, a.chiralD))):
+#                if debug:
+#                    print "Error thing"
+#                    for neighbor in a.neighbors.keys():
+#                        if neighbor != None:
+#                            print neighbor.element
+#                    print "------"
+#                    for ch in (a.chiralA, a.chiralB, a.chiralC, a.chiralD):
+#                        if ch != None:
+#                            print ch.element
+#                    print "------"
+#                    raise StandardError
             #The following bit of code is still quite messy.  It tests whether the
             #hypothesized pairing follows the correct chirality.
             aCW = []
@@ -339,7 +336,7 @@ def neighborCompare(a,b, compareDict):
         if CTFlag and OKFlag:
             #Makes sure that the hypothesized pairing follows the correct
             #cis-trans relationship
-            if a.CTotherC in compareDict:
+            if a.CTotherC in compareDict and a.CTotherC.CTa in compareDict and a.CTotherC.CTb in compareDict:
                 # and a.CTotherC.CTa in compareDict
                 if ((b.CTa == temp[a.CTa]) !=
                    (b.CTotherC.CTa == compareDict[a.CTotherC.CTa])) or\
@@ -625,6 +622,29 @@ def splice(molecules):
             atom.flag = 0
             atom.parentAtom = 0
     return output
+    
+    
+def verify(molecule):
+    #Checks to make sure that the linkage and stereochem of each atom match.
+    for atom in molecule.atoms:
+        if hasattr(atom, 'chiralA'):
+            for neighbor in (atom.chiralA, atom.chiralB, atom.chiralC, atom.chiralD):
+                if neighbor == None:
+                    continue
+                if neighbor not in atom.neighbors.keys():
+                    print "-----Error - chirality broken A!-----"
+            for neighbor in atom.neighbors.keys():
+                if neighbor not in (atom.chiralA, atom.chiralB, atom.chiralC, atom.chiralD):
+                    print "-----Error - chirality broken B!-----"
+        if hasattr(atom, 'CTa'):
+            for neighbor in (atom.CTotherC, atom.CTa, atom.CTb):
+                if neighbor == None:
+                    continue
+                if neighbor not in atom.neighbors.keys():
+                    print "-----Error - CT broken A!-----"
+            for neighbor in atom.neighbors.keys():
+                if neighbor not in (atom.CTotherC, atom.CTa, atom.CTb):
+                    print "-----Error - CT broken B!-----"
 
 
 

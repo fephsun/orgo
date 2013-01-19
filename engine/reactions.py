@@ -1114,7 +1114,7 @@ if __name__ == '__main__':
     ringTest2.addBond(c89, c85, 1)
     ringTest2.addAtom(f81, c85, 1)
     c85.newChiralCenter(c86, (c89, c87, f81))
-    print smiles(tertButoxide([cycPentMol]))
 
+    print smiles(tertButoxide([cycPentMol]))
 
 

@@ -2,17 +2,425 @@
 <head>
   <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
   <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+  <script src="jquery-1.9.0.js"></script>
+  <script src="jquery-ui-1.10.0.custom.js"></script>
+  <script src="jquery-ui-1.10.0.custom.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="jquery-ui-1.10.0.custom.min.css">
+  <link rel="stylesheet" type="text/css" href="jquery-ui-1.10.0.custom.css">
+    <title>5.12 Synthesis Practice</title>
     <style>
-    #draggable { width: 100px; height: 100px; padding: 0.5em; float: left; margin: 10px 10px 10px 0; }
-    #droppable { width: 150px; height: 150px; padding: 0.5em; float: left; margin: 10px; }
+    body {
+        background-color: #000000;
+    }
+    #offscreen {
+        background-color: #000000;
+    }
+    .ui-autocomplete {
+        max-height: 100px;
+        overflow-y: auto;
+        /* prevent horizontal scrollbar */
+        overflow-x: hidden;
+    }
+    * html .ui-autocomplete {
+        height: 100px;
+    }
+    .molecule {
+        width: 200px;
+        height: 200px; 
+        padding: 0px; 
+        float: left; 
+        margin-top:10px; 
+        margin-bottom:10px; 
+        margin-right:10px; 
+        margin-left:10px; 
+        background-color:#000000;  
+    }
+    ul {
+        list-style-type:none;
+    }
+    .reaction { 
+        width: 150px; 
+        height: 50px; 
+        padding: 5px; 
+        float: left; 
+        margin-top:85px; 
+        margin-bottom:75px; 
+        margin-right:10px; 
+        margin-left:10px; 
+        background-color:#FFFFFF;
+    }
+    #logo {
+        margin-top: 10px;
+        margin-left:10px;
+        float:left;
+    }
+    .reagent {
+        margin-left:auto;
+        width: 165px; 
+        height: 50px; 
+        padding: 5px; 
+        float:left; 
+        margin-top:5px; 
+        margin-bottom:5px; 
+        margin-right:auto; 
+        background-color:#FFFFFF;
+    }
+    #reagentTyper {
+        margin-left:auto;
+        margin-right:auto;
+        width: 200px;
+    }
+    #reagentTyperBox {
+        width: 200px;
+    }
+    #addReagent {
+        width: 200px;
+    }
+    #target {
+        width: 200px;
+        margin-top: 10px;
+        margin-right:auto;
+        margin-left:auto;
+        margin-bottom:10px;
+        background-color:#5555FF;
+    }
+    #topbar   { width: 1210px; height: 95px; padding: 0px; margin-top:10px; margin-bottom:10px; margin-left:auto; margin-right:auto; background-color:#FF5555;}
+    #main     { width: 1210px; height: 700px; padding: 0px; margin-top:0px; margin-bottom:0px; margin-left:auto; margin-right:auto; background-color:#000000; }
+    #rightbar { width: 250px; height: 700px; padding: 0px; float:left; margin-top:0px; margin-bottom:0px; margin-left:10px; margin-right:0px; background-color:#5555FF; overflow:auto;}
+    #leftbar  { width: 950px; height: 700px; padding: 0px; float:left; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; background-color:#55FF55; overflow:auto;}
+
+    
     </style>
-  
+    <script>
+    
+        var jq = jQuery.noConflict();
+        
+        jq(document).ready(function() {
+            //For making molecules and reactions draggable
+            $( ".molecule" ).draggable({helper: "clone", revert:true, revertDuration: 100});
+            $( ".reaction" ).draggable({helper: "clone", revert:true, revertDuration: 100});
+            
+            $(".molecule").droppable({
+                drop: function(event, ui) {
+                    alert(ui.draggable.html());
+                }
+            });
+            
+            //
+            
+            
+            //For typing in autocompleted reagents
+            //Update this line by parsing the value of [item for sublist in [REAGENTS[x][1] for x in range(len(REAGENTS)+1) if not x==0] for item in sublist]   in synthProblem.py
+            var typeableReagents = ['H2', 'Hydrogen', 'Pd C catalyst', 'Pd/C catalyst', 'Pd|C catalyst', 'PdC catalyst', 'Palladium on carbon', 'EtOH', 'Ethanol', 'Ethyl alcohol', 'C2H5OH', 'HF', 'Hydrogen fluoride', 'Hydrofluoric acid', 'HBr', 'Hydrogen bromide', 'Hydrobromic acid', 'HCl', 'Hydrogen chloride', 'Hydrochloric acid', 'HI', 'Hydrogen iodide', 'Hydroiodic acid', 'CH2Cl2', 'Dichloromethane', 'Fluorine', 'F2', 'Bromine', 'Br2', 'Chlorine', 'Cl2', 'Iodine', 'I2', 'ROOR', 'tBuOOtBu', 'Peroxide', 'Tert-butyl peroxide', 'Di-tert-butyl peroxide', 'mCPBA', 'PhCO3H', 'RCO3H', 'H2SO4', 'Sulfuric acid', 'H2O', 'Water', 'Dihydrogen monoxide', 'HOH', 'HgSO4', 'Hg2+', 'Mercury sulfate', 'BH3', 'Borane', 'THF', 'Tetrahydrofuran', 'NaOH', 'Sodium hydroxide', 'Hydroxide', 'OH-', 'H2O2', 'Hydrogen Peroxide', 'OsO4', 'Osmium tetroxide', 'Osmium oxide', 'NMO', 'NMMO', 'N-Methylmorpholine N-oxide', 'Acetone', 'Propanone', '(CH3)2CO', 'Ozone', 'O3', 'Dimethyl sulfide', 'Methylthiomethane', 'Me2S', 'Zn', 'Zinc', 'Lindlar catalyst', 'Sodium', 'Na', 'NH3', 'Ammonia', 'Sodium amide', 'Sodamide', 'NaNH2', 'Amide', '1 equivalent', 'One equivalent', 'Heat', 'Hot', 'Warm', 'hv', 'Light'];
+            //For having an autocomplete box which can take in multiple values
+            function split( val ) {
+                return val.split( /,\s*/ );
+            }
+            function extractLast( term ) {
+                return split( term ).pop();
+            }
+            //Autocomplete box for reagents. Borrowed from jquery.
+            $( "#reagentTyperBox" ).bind( "keydown", function( event ) {
+                if ( event.keyCode === $.ui.keyCode.TAB && $( this ).data( "autocomplete" ).menu.active ) {
+                    event.preventDefault();
+                }
+            })
+            .autocomplete({
+                minLength: 0,
+                source: function( request, response ) {
+                    response( $.ui.autocomplete.filter(typeableReagents, extractLast( request.term ) ) );
+                },
+                focus: function() {
+                    return false;
+                },
+                select: function( event, ui ) {
+                    var terms = split( this.value );
+                    terms.pop();
+                    terms.push( ui.item.value );
+                    terms.push( "" );
+                    this.value = terms.join( ", " );
+                    return false;
+                }
+            });
+              
+            //For allowing reactions and molecules to be droppable
+            //IN PROGRESS
+            $("#main").droppable({
+                drop: function(event, ui) {
+                    $("#main p").html("");
+                }
+            });
+            
+            
+            //For reagents in the sidebar
+            $( "#reagentsHere" ).sortable();
+            $( "#reagentsHere" ).disableSelection();
+
+            
+            
+            
+            updateReagents = function() {
+                //Don't need to send anything back!
+                //Update the reagents present in the sidebar with a new reagent.
+                //Keep data about that reagent in currentReagents.
+                var reagentString = $("#reagentTyperBox").val();
+                
+
+                var reagentHTML = reagentStringToHtml(reagentString);    
+                if (reagentHTML != "") {
+                    $("#reagentsHere").append(reagentHTML);
+                }
+                //Store the reagents.
+                currentReagents[currentReagents.length] = reagentString;
+            }
+            
+        
+        //Create a sidebar reagent with the user input.
+        //Javascriptified from the parseReagentsString method of synthProblem.py
+        function reagentStringToHtml(reagentString) {    
+            REAGENTS = [
+                ["H<sub>2</sub>",["H2", "Hydrogen"]],
+                ["Pd|C", ["PdC", "Pd/C", "Pd|C", "Pd C", "palladium"]],
+                ["EtOH", ["EtOH", "Ethanol", "Ethyl alcohol", "C2H5OH"]],
+                ["HF", ["HF", "Hydrogen fluoride", "Hydrofluoric acid"]],
+                ["HBr", ["HBr", "Hydrogen bromide", "Hydrobromic acid"]],
+                ["HCl", ["HCl", "Hydrogen chloride", "Hydrochloric acid"]],
+                ["HI", ["HI", "Hydrogen iodide", "Hydroiodic acid"]],
+                ["CH<sub>2</sub>Cl<sub>2</sub>", ["CH2Cl2", "Dichloromethane"]],
+                ["F<sub>2</sub>", ["Fluorine", "F2"]],
+                ["Br<sub>2</sub>", ["Bromine", "Br2"]],
+                ["Cl<sub>2</sub>", ["Chlorine", "Cl2"]],
+                ["I<sub>2</sub>", ["Iodine", "I2"]],
+                ["ROOR", ["ROOR", "tBuOOtBu", "Peroxide", "Tert-butyl peroxide", "Di-tert-butyl peroxide"]],
+                ["RCO<sub>3</sub>H",["mCPBA", "PhCO3H", "RCO3H"]],
+                ["H<sub>2</sub>SO<sub>4</sub>", ["H2SO4", "Sulfuric acid"]],
+                ["H<sub>2</sub>O", ["H2O", "Water", "Dihydrogen monoxide", "HOH", "H20"]],
+                ["HgSO<sub>4</sub> accels.", ["HgSO4", "Hg2+", "Mercury sulfate"]],
+                ["BH<sub>3</sub>", ["BH3", "Borane"]],
+                ["THF", ["THF", "Tetrahydrofuran"]],
+                ["NaOH", ["NaOH", "Sodium hydroxide", "Hydroxide", "OH-"]],
+                ["H<sub>2</sub>O<sub>2</sub>", ["H2O2", "Hydrogen peroxide"]],
+                ["OsO<sub>4</sub>", ["oso4", "osmium tetroxide", "osmium oxide"]],
+                ["NMO", ["NMO", "NMMO", "N-Methylmorpholine N-oxide"]],
+                ["Acetone", ["Acetone", "Propanone", "[CH3)2CO"]],
+                ["O<sub>3</sub>", ["Ozone", "O3"]],
+                ["Me<sub>2</sub>S", ["Dimethyl sulfide", "Methylthiomethane", "Me2S"]],
+                ["Zn", ["Zn", "Zinc"]],
+                ["cat. Lindlar", ["Lindlar",]],
+                ["Na", ["Sodium", "Na"]],
+                ["NH<sub>3 (L)</sub>", ["NH3", "Ammonia"]],
+                ["NaNH<sub>2</sub>", ["Sodium amide", "Sodamide", "NaNH2", "Amide"]],
+                ["1 equiv.", ["1", "eq", "one"]],
+                ["Heat", ["heat", "delta", "hot", "warm"]],
+                ["Light", ["hv", "light", "bright", "nu", "v", "hnu"]]
+                ];
+            
+            string = reagentString.toLowerCase();
+            dictionary = {};
+            if (string == "") return "";
+            
+                
+            var html = "";
+            
+            for (var i=0; i<REAGENTS.length; i++) {
+                dictionary[REAGENTS[i][0]] = false;
+                for (var j=0; j<REAGENTS[i][1].length; j++) {
+                    var spelling = REAGENTS[i][1][j];
+                    if (string.indexOf(spelling.toLowerCase()) != -1)
+                        dictionary[REAGENTS[i][0]] = true;
+                }
+            }
+
+            //hacky
+            //Make sure you don't count substrings if you're counting things they're part of.
+            if (dictionary["CH<sub>2</sub>Cl<sub>2</sub>"]) {
+                if ((string.match(/h2/g).length - string.match(/ch2cl2/g).length) == 0)
+                    dictionary["H<sub>2</sub>"] = false;
+                if ((string.match(/cl2/g).length - string.match(/ch2cl2/g).length) == 0)
+                    dictionary["Cl<sub>2</sub>"] = false;
+            }
+            if (dictionary["NaNH<sub>2</sub>"]) {
+                if ((string.match(/na/g).length - string.match(/nanh2/g).length) == 0)
+                    dictionary["Na"] = false;
+            }
+            if (dictionary["NaOH"]) {
+                if ((string.match(/na/g).length - string.match(/naoh/g).length) == 0)
+                    dictionary["Na"] = false;
+            }
+            if (dictionary["HF"]) {
+                if ((string.match(/hydrogen fluoride/g).length - string.match(/hydrogen/g).length) == 0)
+                    dictionary["H<sub>2</sub>"] = false;
+            }
+            if (dictionary["HCl"]) {
+                if ((string.match(/hydrogen chloride/g).length - string.match(/hydrogen/g).length) == 0)
+                    dictionary["H<sub>2</sub>"] = false;
+            }
+            if (dictionary["HI"]) {
+                if ((string.match(/hydrogen iodide/g).length - string.match(/hydrogen/g).length) == 0)
+                    dictionary["H<sub>2</sub>"] = false;
+            }
+            if (dictionary["HBr"]) {
+                if ((string.match(/hydrogen bromide/g).length - string.match(/hydrogen/g).length) == 0)
+                    dictionary["H<sub>2</sub>"] = false;
+            }
+            if (dictionary["H<sub>2</sub>O"]) {
+                if ((string.match(/h2o/g).length + string.match(/h20/g).length - string.match(/h2/g).length) == 0)
+                    dictionary["Na"] = false;
+            }
+            if (dictionary["RCO<sub>3</sub>H"]) {
+                if ((string.match(/co3h/g).length - string.match(/o3/g).length) == 0)
+                    dictionary["O<sub>3</sub>"] = false;
+            }
+            
+            for (var i=0; i<REAGENTS.length; i++) {
+                if (dictionary[REAGENTS[i][0]]) {
+                    html += REAGENTS[i][0] + ", ";
+                }
+            }
+            
+            return "<li class=\"reagent\" class = \"ui-state-default\">"+(html.substr(0, html.length-2))+"<img src=\"arrow.bmp\"/></li>"
+        }
+      });
+      
+    var currentReagents = new Array();
+      
+    var updateReagents;
+    
+    
+    
+    </script>
   </head>
 
 
 
 <body>
 
+<div id = "offscreen">
+
+
+<div id="topbar">
+<img src = "logo.png" id = "logo"/>
+
+
+
+
+</div>
+
+<div id = "main">
+
+<div id = "leftbar">
+
+
+
+
+
+<div class = "molecule" class="ui-widget-content">
+<svg version="1.1" id="topsvg"
+xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+xmlns:cml="http://www.xml-cml.org/schema" x="0" y="0" width="200px" height="200px" viewBox="0 0 100 100">
+<rect x="0" y="0" width="100" height="100" fill="white"/>
+<text text-anchor="middle" font-size="6" fill ="black" font-family="sans-serif"
+x="50" y="98" ></text>
+<g transform="translate(0,0)">
+<svg width="100" height="100" x="0" y="0" viewBox="0 0 287.846 194.641"
+font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="2"  stroke-linecap="round">
+<line x1="236.6" y1="148.1" x2="213.2" y2="134.6" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="210.2" y1="134.6" x2="210.2" y2="94.6" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="216.2" y1="134.6" x2="216.2" y2="94.6" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="213.2" y1="94.6" x2="178.6" y2="74.6" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<polygon points="178.564065 74.641016 161.699963 53.431535 168.628166 49.431535 " stroke-width="2.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<line x1="178.6" y1="74.6" x2="192.1" y2="51.3" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="178.6" y1="74.6" x2="143.9" y2="94.6" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<polygon points="109.282032 74.641016 145.923048 91.176915 141.923048 98.105118 " stroke-width="2.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<line x1="109.3" y1="74.6" x2="74.6" y2="94.6" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="74.6" y1="94.6" x2="51.3" y2="81.1" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="109.3" y1="74.6" x2="95.8" y2="51.3" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="109.3" y1="74.6" x2="122.8" y2="51.3" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="213.2" y1="94.6" x2="236.6" y2="81.1" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<text x="243.846097" y="162.641016" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="16" >CH</text>
+<text x="267.846097" y="166.321016" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="13" >3</text>
+<text x="152.564065" y="48.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="16" >H</text>
+<text x="192.564065" y="48.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="16" >Cl</text>
+<text x="22.000000" y="82.641016" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="16" >HO</text>
+<text x="71.282032" y="48.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="16" >Br</text>
+<text x="123.282032" y="48.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="16" >Cl</text>
+<text x="241.846097" y="82.641016" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="16" >Br</text>
+</svg>
+</g>
+</svg>
+</div>
+
+
+<div class = "reaction" class = "ui-widget-content">
+H<sub>2</sub> cat. Lindlar
+<img src="arrow.bmp"/>
+</div>
+
+
+
+
+</div>
+
+<div id="rightbar">
+
+<div id = "target">
+<h2>Target Molecule:</h2>
+
+<svg version="1.1" id="topsvg"
+xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+xmlns:cml="http://www.xml-cml.org/schema" x="0" y="0" width="200px" height="200px" viewBox="0 0 100 100">
+<rect x="0" y="0" width="100" height="100" fill="white"/>
+<text text-anchor="middle" font-size="6" fill ="black" font-family="sans-serif"
+x="50" y="98" ></text>
+<g transform="translate(0,0)">
+<svg width="100" height="100" x="0" y="0" viewBox="0 0 287.846 194.641"
+font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="2"  stroke-linecap="round">
+<line x1="236.6" y1="148.1" x2="213.2" y2="134.6" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="210.2" y1="134.6" x2="210.2" y2="94.6" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="216.2" y1="134.6" x2="216.2" y2="94.6" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="213.2" y1="94.6" x2="178.6" y2="74.6" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<polygon points="178.564065 74.641016 161.699963 53.431535 168.628166 49.431535 " stroke-width="2.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<line x1="178.6" y1="74.6" x2="192.1" y2="51.3" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="178.6" y1="74.6" x2="143.9" y2="94.6" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<polygon points="109.282032 74.641016 145.923048 91.176915 141.923048 98.105118 " stroke-width="2.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" />
+<line x1="109.3" y1="74.6" x2="74.6" y2="94.6" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="74.6" y1="94.6" x2="51.3" y2="81.1" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="109.3" y1="74.6" x2="95.8" y2="51.3" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="109.3" y1="74.6" x2="122.8" y2="51.3" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<line x1="213.2" y1="94.6" x2="236.6" y2="81.1" stroke="rgb(0,0,0)"  stroke-width="2.0"/>
+<text x="243.846097" y="162.641016" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="16" >CH</text>
+<text x="267.846097" y="166.321016" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="13" >3</text>
+<text x="152.564065" y="48.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="16" >H</text>
+<text x="192.564065" y="48.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="16" >Cl</text>
+<text x="22.000000" y="82.641016" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="16" >HO</text>
+<text x="71.282032" y="48.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="16" >Br</text>
+<text x="123.282032" y="48.000000" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="16" >Cl</text>
+<text x="241.846097" y="82.641016" fill="rgb(0,0,0)"  stroke="rgb(0,0,0)" stroke-width="1" font-size="16" >Br</text>
+</svg>
+</g>
+</svg>
+</div>
+
+<br />
+<br />
+<br />
+
+<div class="ui-widget" id="reagentTyper">
+<button type="button" onclick="updateReagents()" id = "addReagent">Add Reagent</button>
+<input id = "reagentTyperBox" />
+</div>
+
+
+<ul id="reagentsHere">
+<li class="reagent" >H<sub>2</sub> cat. Pd/C
+<img src="arrow.bmp"/></li>
+</ul>
+
+</div>
+
+</div>
+
+</div>
 
 </body>
 

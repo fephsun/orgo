@@ -134,7 +134,7 @@ def moleculesAndReactionsHtml(startingMaterials, reactionSteps):
 
 def moleculeBoxHtml(moleculeBox):
     html = "<div class = \"molecule\" class=\"ui-widget-content\">"
-    html += serverRender.render(str(moleculeBox.stringList()))
+    html += serverRender.render(moleculeBox.stringList())
     html += "</div>"
     return html
     

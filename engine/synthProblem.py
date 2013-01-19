@@ -129,10 +129,12 @@ class MoleculeBox:
     def __init__(self, moleculesList):
         self.molecules = moleculesList
 
-    #Returns a list of smiles of the molecules contained in this box.
+    #Returns a string of smiles of the molecules contained in this box, separated by spaces.
     def stringList(self):
-        return [smiles(mol) for mol in self.molecules]
-        
+        outp = ""
+        for mol in self.molecules:
+            outp += smiles(mol) + " "
+        return outp
         
 #ReagentBox class
 #Represents a draggable box containing some quantity of different reagents

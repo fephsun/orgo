@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     url(r'^api/problemInterface/$', 'orgo.views.renderProblem', name='renderProblem'),    
     url(r'^api/outpsmiles/$', 'orgo.views.outpSmiles', name='outpSmiles'),  ###Can delete; this is me learning Django  
     url(r'^homeMoleculeChanger/$', 'orgo.views.homeMoleculeChanger', name='homeMoleculeChanger'),
+    url(r'^namereagent/$', 'orgo.views.renderNameReagent', name='renderNameReagent'),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),

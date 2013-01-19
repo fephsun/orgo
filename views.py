@@ -87,6 +87,16 @@ def renderProblem(request):
     return render(request, 'problemInterface.html', {})
     
     
+def renderNameReagent(request):
+    problem = generateNameReagentProblem()
+    profile = request.user.profile
+    step = models.ReactionStepModel.create(problem)
+    step.save()
+    profile.currentNameReagentProblem = step
+    profile.save()
+    return render(request, 'problemInterface.html', {})
+    
+    
     
 ##Make this have a shiny flowchart layout once that becomes possible.
 def moleculesAndReactionsHtml(startingMaterials, reactionSteps):

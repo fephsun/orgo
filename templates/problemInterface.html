@@ -20,9 +20,11 @@
 <div id="topbar">
 <img src = "http://felixsun.scripts.mit.edu/orgo/static/logo.png" id = "logo"/>
 
-<form action = "/orgo/namereagent/" method="post" class="form-horizontal" class="box">{% csrf_token %}
+<div class="box" id="generateProblemBox">
+<form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
     <input type="submit" value="Generate a new problem" class="btn"/>
 </form>
+</div>
 
 <div class="box" id="namebox">
 Welcome, {{Name}}

@@ -89,7 +89,7 @@ def renderProblem(request):
     bromoethane.addAtom(br70, c69, 1)
     
     ##Replace this temporary code with a randomly generated synthesis problem, eventually
-    start = [MoleculeBox([ethylene])]
+    start = MoleculeBox([ethylene])
     target = MoleculeBox([bromoethane])
     #reactionStep = ReactionStep(start)
     #reactionStep.addReagent(parseReagentString("H2 cat Lindlar"))

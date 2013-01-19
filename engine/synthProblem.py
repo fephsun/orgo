@@ -133,7 +133,7 @@ class MoleculeBox:
     def stringList(self):
         outp = ""
         for mol in self.molecules:
-            outp += smiles(mol) + " "
+            outp += smiles(mol)[0] + " "
         return outp
         
 #ReagentBox class
@@ -492,7 +492,7 @@ NANH2: ("NaNH<sub>2</sub>", ("Sodium amide", "Sodamide", "NaNH2", "Amide")),
 EQV1: ("1 equiv.", ("1", "eq", "one")),
 HEAT: ("Heat", ("heat", "delta", "hot", "warm")),
 LIGHT: ("Light", ("hv", "light", "bright", "nu", "v", "hnu")),
-KOCCH33: (("tert-butoxide", "KOC(CH3)3"))
+KOCCH33: ("KOtBu", ("tert-butoxide", "KOC(CH3)3"))
 }
 
 

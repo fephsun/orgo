@@ -199,9 +199,6 @@ def allTripleAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addt
     
 
 def moleculeCompare(a, b, compareDict = None, expanded = []):
-    outFile = file('errorDump.txt', 'w')
-    cPickle.dump(a, outFile)
-    outFile.close()
     #Determines whether two molecules are isomorphic.  In the worst case
     #(two molecules with the same atoms), this procedure does not run in
     #polynomial time, so be careful.
@@ -339,7 +336,7 @@ def neighborCompare(a,b, compareDict):
         if CTFlag and OKFlag:
             #Makes sure that the hypothesized pairing follows the correct
             #cis-trans relationship
-            if a.CTotherC in compareDict:
+            if a.CTotherC in compareDict and a.CTotherC.CTa in compareDict and a.CTotherC.CTb in compareDict:
                 # and a.CTotherC.CTa in compareDict
                 if ((b.CTa == temp[a.CTa]) !=
                    (b.CTotherC.CTa == compareDict[a.CTotherC.CTa])) or\

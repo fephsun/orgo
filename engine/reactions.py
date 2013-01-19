@@ -310,6 +310,7 @@ def tertButoxide(molecules):
                     ClCarbon.newCTCenter(HCarbon, ClsubA, ClsubB)
                     HCarbon.newCTCenter(ClCarbon, HsubA, HsubB)
                 except AlleneError:
+                    print "Allene error in chiral"
                     continue
                 candidates.append((Xmolecule, HCarbon, ClCarbon))
             else:
@@ -337,6 +338,7 @@ def tertButoxide(molecules):
                         ClCarbon.newCTCenter(HCarbon, ClsubA, ClsubB)
                         HCarbon.newCTCenter(ClCarbon, HsubA, HsubB)
                     except AlleneError:
+                        print "Allene error in ring, no chiral"
                         continue
                     candidates.append((Xmolecule, HCarbon, ClCarbon))
                 else:
@@ -363,6 +365,7 @@ def tertButoxide(molecules):
                             ClCarbon.newCTCenter(HCarbon, Clsubs[0], Clsubs[1])
                             HCarbon.newCTCenter(ClCarbon, Hsubs[0], Hsubs[1])
                         except AlleneError:
+                            print "Allene error in noring"
                             continue
                         candidates.append((Xmolecule, HCarbon, ClCarbon))
                     else:
@@ -373,13 +376,13 @@ def tertButoxide(molecules):
                             HCarbon.newCTCenter(ClCarbon, Hsubs[0], Hsubs[1])
                             candidates.append((Xmolecule, HCarbon, ClCarbon))
                         except AlleneError:
-                            pass
+                            print "Allene error in noringc/t"
                         try:
                             ClCarbon2.newCTCenter(HCarbon2, Clsubs2[1], Clsubs2[0])
                             HCarbon2.newCTCenter(ClCarbon2, Hsubs2[0], Hsubs2[1])
                             candidates.append((Xmolecule2, HCarbon2, ClCarbon2))
                         except AlleneError:
-                            pass
+                            print "Allene error in noringc/t"
 
         #Now, prune the products
         #Find the most substituted products, and keep only those.
@@ -390,10 +393,12 @@ def tertButoxide(molecules):
         for Xmolecule, c1, c2 in candidates:
             if len(c1.neighbors)+len(c2.neighbors) == maxSub:
                 maxSubCandidates.append(Xmolecule)
+        print maxSubCandidates
         return maxSubCandidates
 
         
     def complete(molecules):
+        print "New recurse"
         #Complete testing.
         out = []
         #Note to self: do not modify molecules.  You need it for returning at the end.
@@ -402,17 +407,22 @@ def tertButoxide(molecules):
             if places == []:
                 out += [molecule]
                 continue
+            thisOut = []
             for place in places:
                 ans = reactAtPlace(molecule, place)
                 if debug:
                     for thing in ans:
                         verify(thing)
-                if ans == []:
-                    out += [molecule]
-                else:
-                    out += ans
+                thisOut+=ans
+            if thisOut == []:
+                out += [molecule]
+            else:
+                out += thisOut
         if out==molecules:
             return molecules
+        else:
+            print out
+            print molecules
         return complete(removeDuplicates(out))
     if debug:
         a = complete(molecules)

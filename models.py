@@ -33,13 +33,12 @@ class PickledObjectField(models.Field):
 """
 SynthesisProblemModel
 Contains: pickled list of molecule-models by unique ID
-Contains: pickled list of reagent-models by unique ID
 Contains: pickled list of reaction-step-models by unique ID
 Contains: pickled synthesis problem solution
+Contains: ForeignKey to the final product the synthesis should produce
 """
 class SynthesisProblemModel(models.Model):
     moleculeModels = PickledObjectField()
-    reagentModels = PickledObjectField()
     reactionStepModels = PickledObjectField()
     solution = PickledObjectField()
     target = ForeignKey(MoleculeBoxModel)
@@ -49,7 +48,7 @@ class SynthesisProblemModel(models.Model):
     #parentSynthesisProblem is an instance of SynthesisProblem
     @classmethod
     def create(cls, parentSynthesisProblem):
-        #Make models for each of the moleculeboxes, reagentboxes, and reactionsteps
+        #Make models for each of the moleculeboxes and reactionsteps
         #Make lists of their ids
         #Pickle all the things
         
@@ -58,7 +57,6 @@ class SynthesisProblemModel(models.Model):
         #self.startingBoxes = []                 #a list of instances of MoleculeBox
         #self.finalProduct = None                #an instance of MoleculeBox
         #self.steps = []                         #a list of instances of ReactionStep, in any order
-        #self.reagentsMade = []                  #a list of instances of ReagentBox, for the sidebar
         #self.solution = solution                #an instance of SynthesisSolution
     
 
@@ -81,24 +79,6 @@ class MoleculeBoxModel(models.Model):
         x = cls(MoleculeBox = moleculeBoxObject, problemModel = parentSynthesisProblemModel, svg = moleculeBoxObject.stringList())
         return x
 
-"""
-ReagentModel
-Contains: foreignkey to a SynthesisProblemModel
-Contains: pickled reagentbox
-Contains: its own HTML representation
-"""
-class ReagentModel(models.Model)
-    problemModel = ForeignKey('SynthesisProblemModel')
-    reagentBox = PickledObjectField()
-    html = TextField()
-    
-    #Call ReagentModel.create(parentSynthesisProblemModel, reagentBoxObject) to create a ReagentModel representing reagentBoxObject
-    #reagentBoxObject is an instance of ReagentBox
-    #parentSynthesisProblemModel is an instance of SynthesisProblemModel
-    @classmethod
-    def create(cls, parentSynthesisProblemModel, reagentBoxObject):
-        x = cls(reagentBox = reagentBoxObject, problemModel = parentSynthesisProblemModel, html = reagentBoxObject.stringList())
-        return x
     
     
 """

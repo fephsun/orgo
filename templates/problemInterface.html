@@ -20,7 +20,7 @@
 <div id="topbar">
 <img src = "http://felixsun.scripts.mit.edu/orgo/static/logo.png" id = "logo"/>
 
-<form action = "/orgo/api/problemInterface/" method="post" class="form-horizontal">{% csrf_token %}
+<form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
     <input type="submit" value="Generate a new problem" class="btn"/>
 </form>
 
@@ -40,7 +40,7 @@ Welcome, {{Name}}
 
 
 
-<div id = "startingMolecule">
+<div id = "startingMolecule" class = "molecule">
 {{ReactantMolecule|safe}}
 </div>
 

@@ -27,7 +27,6 @@ class SynthesisProblem:
         self.startingBoxes = []                 #a list of instances of MoleculeBox
         self.finalProduct = None                #an instance of MoleculeBox
         self.steps = []                         #a list of instances of ReactionStep, in any order
-        self.reagentsMade = []                  #a list of instances of ReagentBox, for the sidebar
         self.solution = solution                #an instance of SynthesisSolution
 
 
@@ -55,11 +54,16 @@ class ReactionStep:
         self.hasReagents = parseReagentsString("")
     
     #Add more reagents.
-    def addReagent(self, reagentBox): #reagentList is a list of reagent boxes
+    def addReagent(self, reagentDict):
         for reagent in list(REAGENTS):
             if reagentBox.hasReagents[reagent]:
                 self.hasReagents[reagent] = True
         return self.react()
+    #def addReagent(self, reagentBox): #reagentList is a list of reagent boxes
+    #    for reagent in list(REAGENTS):
+    #        if reagentBox.hasReagents[reagent]:
+    #            self.hasReagents[reagent] = True
+    #    return self.react()
           
     def addMolecule(self, moleculeBox):
         self.otherMoleculeBoxes += [moleculeBox]
@@ -133,14 +137,14 @@ class MoleculeBox:
 #ReagentBox class
 #Represents a draggable box containing some quantity of different reagents
     #List of reagents (as strings) contained in it
-class ReagentBox:
-    def __init__(self, reagentsString):
-        self.reagentsString = reagentsString #a string of raw user input
-        self.hasReagents = parseReagentsString(reagentsString) #a dictionary
-        
-    #Returns a list of the reagents contained in this reaction step as HTML-printable strings.
-    def stringList(self):
-        return [REAGENTS[reagent][0] for reagent in list(self.hasReagents) if self.hasReagents[reagent]] 
+#class ReagentBox:
+#    def __init__(self, reagentsString):
+#        self.reagentsString = reagentsString #a string of raw user input
+#        self.hasReagents = parseReagentsString(reagentsString) #a dictionary
+#        
+#    #Returns a list of the reagents contained in this reaction step as HTML-printable strings.
+#    def stringList(self):
+#        return [REAGENTS[reagent][0] for reagent in list(self.hasReagents) if self.hasReagents[reagent]] 
  
       
 #Enter a string, such as "H2 cat Pd|C"
@@ -439,7 +443,7 @@ BR2: ("Br<sub>2</sub>", ("Bromine", "Br2")),
 CL2: ("Cl<sub>2</sub>", ("Chlorine", "Cl2")),
 I2: ("I<sub>2</sub>", ("Iodine", "I2")),
 ROOR: ("ROOR", ("ROOR", "tBuOOtBu", "Peroxide", "Tert-butyl peroxide", "Di-tert-butyl peroxide")),
-RCO3H: ("RCO3H",("mCPBA", "PhCO3H", "RCO3H")),
+RCO3H: ("RCO<sub>3</sub>H",("mCPBA", "PhCO3H", "RCO3H")),
 H2SO4: ("H<sub>2</sub>SO<sub>4</sub>", ("H2SO4", "Sulfuric acid")),
 H2O: ("H<sub>2</sub>O", ("H2O", "Water", "Dihydrogen monoxide", "HOH", "H20")),
 HGSO4: ("HgSO<sub>4</sub> accels.", ("HgSO4", "Hg2+", "Mercury sulfate")),

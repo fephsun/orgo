@@ -51,13 +51,12 @@ class MoleculeBoxModel(models.Model):
 """
 SynthesisProblemModel
 Contains: pickled list of molecule-models by unique ID
-Contains: pickled list of reagent-models by unique ID
 Contains: pickled list of reaction-step-models by unique ID
 Contains: pickled synthesis problem solution
+Contains: ForeignKey to the final product the synthesis should produce
 """
 class SynthesisProblemModel(models.Model):
     moleculeModels = PickledObjectField()
-    reagentModels = PickledObjectField()
     reactionStepModels = PickledObjectField()
     solution = PickledObjectField()
     target = models.ForeignKey(MoleculeBoxModel)
@@ -67,7 +66,7 @@ class SynthesisProblemModel(models.Model):
     #parentSynthesisProblem is an instance of SynthesisProblem
     @classmethod
     def create(cls, parentSynthesisProblem):
-        #Make models for each of the moleculeboxes, reagentboxes, and reactionsteps
+        #Make models for each of the moleculeboxes and reactionsteps
         #Make lists of their ids
         #Pickle all the things
         
@@ -76,10 +75,10 @@ class SynthesisProblemModel(models.Model):
         #self.startingBoxes = []                 #a list of instances of MoleculeBox
         #self.finalProduct = None                #an instance of MoleculeBox
         #self.steps = []                         #a list of instances of ReactionStep, in any order
-        #self.reagentsMade = []                  #a list of instances of ReagentBox, for the sidebar
         #self.solution = solution                #an instance of SynthesisSolution
         pass
     
+
 
 
 
@@ -101,6 +100,8 @@ class ReagentModel(models.Model):
     def create(cls, parentSynthesisProblemModel, reagentBoxObject):
         x = cls(reagentBox = reagentBoxObject, problemModel = parentSynthesisProblemModel, html = reagentBoxObject.stringList())
         return x
+
+
     
     
 """

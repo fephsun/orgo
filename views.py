@@ -76,12 +76,12 @@ def renderSmiles(request, molecule):
 def renderProblem(request):
 
     ##Replace this temporary code with a randomly generated synthesis problem, eventually
-    starts = [MoleculeBox([ethylene])]
-    target = MoleculeBox([bromoethane])
-    reactionStep = ReactionStep(start)
-    reactionStep.addReagent(parseReagentString("H2 cat Lindlar"))
-    reactionSteps = [reactionStep]
-    problemSolution = SynthesisSolution([reactionStep, ReactionStep(reactionStep.productBox).addReagent(parseReagentString("HBr in CH2Cl2"))])
+    #starts = [MoleculeBox([ethylene])]
+    #target = MoleculeBox([bromoethane])
+    #reactionStep = ReactionStep(start)
+    #reactionStep.addReagent(parseReagentString("H2 cat Lindlar"))
+    #reactionSteps = [reactionStep]
+    #problemSolution = SynthesisSolution([reactionStep, ReactionStep(reactionStep.productBox).addReagent(parseReagentString("HBr in CH2Cl2"))])
     
     
     return render(request, 'problemInterface.html', {})

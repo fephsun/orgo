@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import patterns, include, url 
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf import settings
 
@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     url(r'^api/signup/$', 'orgo.views.signUp', name='signUp'),
 #    url(r'^api/home/$', 'orgo.views.returnToLoggedInHome', name='returnToLoggedInHome'),
     url(r'^api/login/$', 'orgo.views.logIn', name='logIn'),
+    url(r'^api/returnReagentHtml/', 'orgo.synthProblem.returnReagentHtml', name='returnReagentHtml'),
     url(r'^logout/$', 'orgo.views.logOut', name='logOut'),
     url(r'^api/problemInterface/$', 'orgo.views.renderProblem', name='renderProblem'),    
     url(r'^api/checkSingleStepReaction/$', 'orgo.views.checkNameReagent', name='checkNameReagent'),    

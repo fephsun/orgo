@@ -25,7 +25,7 @@ setInterval(function() {
     {{logInForm.as_p}}
     <input type="submit" value="Submit" class="btn"/>
 </form>
-{{debug}}
+{{debug|safe}}
 
 <h2> Sign Up </h2>
 <form action="/orgo/api/signup/" method="post" class="form-horizontal">{% csrf_token %}
@@ -34,7 +34,7 @@ setInterval(function() {
 </form>
 
 <!--Can delete; this is me learning Django-->
-<h2> Something or another </h2>
+<!--<h2> Something or another </h2>
 <form action = "/orgo/api/outpsmiles/" method="post" class="form-horizontal">{% csrf_token %}
     {{outpSmilesForm.as_p}}
     <input type="submit" value="Submit" class="btn"/>
@@ -43,6 +43,6 @@ setInterval(function() {
 <h2> Generate a problem </h2>
 <form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
     <input type="submit" value="Generate!" class="btn"/>
-</form>
+</form>-->
 
 </html>

@@ -133,7 +133,7 @@ def renderOldNameReagent(request):
     
 @login_required
 def renderNameReagent(request):
-    problem = generateNameReagentProblem()
+    problem = generateNameReagentProblem(AlkeneAlkyneMode)
     profile = request.user.profile
     step = models.ReactionStepModel.create(problem)
     step.save()
@@ -164,6 +164,8 @@ def checkNameReagent(request):
             responseData["product"] = products
         else:
             responseData["product"] = products.stringList()
+        #If we have the correct answer, free up some database space by deleting this stuff.
+        
         return HttpResponse(json.dumps(responseData))
 
  

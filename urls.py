@@ -10,6 +10,7 @@ urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'orgo.views.home', name='home'),
     url(r'^api/signup/$', 'orgo.views.signUp', name='signUp'),
+    url(r'^api/home/$', 'orgo.views.returnToLoggedInHome', name='returnToLoggedInHome'),
     url(r'^api/login/$', 'orgo.views.logIn', name='logIn'),
     url(r'^logout/$', 'orgo.views.logOut', name='logOut'),
     url(r'^api/problemInterface/$', 'orgo.views.renderProblem', name='renderProblem'),    

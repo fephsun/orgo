@@ -46,9 +46,16 @@ def logIn(request):
             return loggedInHome(request)
     return home(request, debug = "Invalid login, sorry.")
     
+
 def logOut(request):
     logout(request)
     return home(request)
+
+
+@login_required
+def returnToLoggedInHome(request):
+    return loggedInHome(request)
+    
 
 ###Can delete; this is me learning Django
 def outpSmiles(request):
@@ -151,15 +158,6 @@ def checkNameReagent(request):
             responseData["product"] = products.stringList()
         return HttpResponse(json.dumps(responseData))
 
-                        
-    
-    
-    
-def checkSingleStepReaction(request):
-    #Should figure out what the current starting material and final material are of the user's current single-step problem.
-    #Should return a JSON object containing: whether or not the problem is right; the SVG of the molecule produced by the reaction.
-    #The data in request will include a "reagents" field containing a string of reagents the user entered and dragged onto the starting material.
-    return 
  
     
 ##Make this have a shiny flowchart layout once that becomes possible.

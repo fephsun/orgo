@@ -41,9 +41,9 @@ def logIn(request):
             return loggedInHome(request)
     return home(request, debug = "Invalid login, sorry.")
     
-@login_required
-def returnToLoggedInHome(request):
-    return loggedInHome(request)
+#@login_required
+#def returnToLoggedInHome(request):
+#    return loggedInHome(request)
     
 ###Can delete; this is me learning Django
 def outpSmiles(request):

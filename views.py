@@ -16,7 +16,8 @@ from orgo.engine.synthProblem import *
 
 def home(request, debug = ""):
     #Home page.
-    logout(request)
+    if request.user.is_authenticated():
+        return loggedInHome(request)
     outSmiles = reactions.smiles(randomGenerator.randomStart()[0])
     svg = serverRender.render(outSmiles)
     return render(request, 'index.html', {'molecule': svg, 'signUpForm': models.mySignUpForm,
@@ -26,7 +27,9 @@ def signUp(request):
     if request.method == 'POST':
         form = models.mySignUpForm(request.POST)
         if form.is_valid():
-            newUser = form.save()
+            form.save()
+            newUser = authenticate(username = form.cleaned_data['username'], 
+                password = form.cleaned_data['password1'])
             login(request, newUser)
             return loggedInHome(request)
         else:
@@ -42,6 +45,10 @@ def logIn(request):
             login(request, user)
             return loggedInHome(request)
     return home(request, debug = "Invalid login, sorry.")
+    
+def logOut(request):
+    logout(request)
+    return home(request)
 
 ###Can delete; this is me learning Django
 def outpSmiles(request):
@@ -103,7 +110,7 @@ def renderSmiles(request, molecule):
 ##    return render(request, 'problemInterface.html', {"TargetMolecule":moleculeBoxHtml(target), "StartMolecule":moleculeBoxHtml(start)})
     
     
-    
+@login_required    
 def renderOldNameReagent(request):
     profile = request.user.profile
     step = profile.currentNameReagentProblem

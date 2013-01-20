@@ -139,8 +139,14 @@ class ReactionStepModel(models.Model):
         
 class mySignUpForm(UserCreationForm):
     #Just like the default user registration form, except with an email blank.
-    #Hey look, one line of code!
-    email = forms.EmailField()
+    email = forms.EmailField(required = True)
+    def save(self, commit=True):
+        user = super(UserCreationForm, self).save(commit = False)
+        user.set_password(self.cleaned_data["password1"])
+        user.email = self.cleaned_data["email"]
+        if commit:
+            user.save()
+        return user
 
     
 ###Can delete; this is me learning Django

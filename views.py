@@ -133,8 +133,11 @@ def renderOldNameReagent(request):
     
 @login_required
 def renderNameReagent(request):
+    #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
     try:
-        request.user.profile.currentNameReagentProblem.delete()
+        prodBox = request.user.profile.currentNameReagentProblem.productBox
+        request.user.profile.currentNameReagentProblem.reactantBox.delete()
+        prodBox.delete()
     except:
         pass
     problem = generateNameReagentProblem(AlkeneAlkyneMode)

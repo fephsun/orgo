@@ -195,8 +195,8 @@ def moleculeBoxHtml(moleculeBox):
     html = "<div class = \"molecule\" class=\"ui-widget-content\"  >"
     html += serverRender.render(moleculeBox.stringList())
     html += "</div>"
-    return html
-    
+    return html   
+ 
 def reactionStepHtml(reactionStep):
     html = ""
     for reagent in list(REAGENTS):
@@ -205,3 +205,15 @@ def reactionStepHtml(reactionStep):
             
     return "<div class = \"reaction\" class = \"ui-widget-content\">"+(html[:-2])+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></div>"
     
+def makeReagentHtml(request):
+    try:
+        reagentString = request.reagentString
+        dict = parseReagentsString(reagentString)
+        html = ""
+        for reagent in list(dict):
+            if dict[reagent]:
+                html += REAGENTS[reagent][0] + ", "
+        htmlOutput =  "<li class=\"reagent\" class = \"ui-state-default\" reagentString = \""+reagentString+"\">"+html[:-2]+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></li>"
+        return HttpResponse(htmlOutput)
+    except:
+        return HttpResponse("Error!")

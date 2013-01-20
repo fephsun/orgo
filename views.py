@@ -1,6 +1,7 @@
 # Create your views here.
 from django.shortcuts import render
 from django.contrib.auth import *
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -15,7 +16,8 @@ from orgo.engine.synthProblem import *
 
 def home(request, debug = ""):
     #Home page.
-    logout(request)
+    if request.user.is_authenticated():
+        return loggedInHome(request)
     outSmiles = reactions.smiles(randomGenerator.randomStart()[0])
     svg = serverRender.render(outSmiles)
     return render(request, 'index.html', {'molecule': svg, 'signUpForm': models.mySignUpForm,
@@ -26,6 +28,9 @@ def signUp(request):
         form = models.mySignUpForm(request.POST)
         if form.is_valid():
             form.save()
+            newUser = authenticate(username = form.cleaned_data['username'], 
+                password = form.cleaned_data['password1'])
+            login(request, newUser)
             return loggedInHome(request)
         else:
             return home(request, debug = "<font color=\"FF0000\">Bad account info, please try again.</font>")
@@ -41,10 +46,23 @@ def logIn(request):
             return loggedInHome(request)
     return home(request, debug = "<font color=\"FF0000\">Invalid login, sorry.</font>")
     
+
+
+def logOut(request):
+    logout(request)
+    return home(request)
+
+
+
+
+
+
 #@login_required
 #def returnToLoggedInHome(request):
 #    return loggedInHome(request)
+
     
+
 ###Can delete; this is me learning Django
 def outpSmiles(request):
     if request.method == 'POST':
@@ -105,7 +123,7 @@ def renderSmiles(request, molecule):
 ##    return render(request, 'problemInterface.html', {"TargetMolecule":moleculeBoxHtml(target), "StartMolecule":moleculeBoxHtml(start)})
     
     
-    
+@login_required    
 def renderOldNameReagent(request):
     profile = request.user.profile
     step = profile.currentNameReagentProblem
@@ -113,7 +131,7 @@ def renderOldNameReagent(request):
         return renderNameReagent(request)
     return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg, "TargetMolecule": step.productBox.svg, "Name": request.user.username})
     
-    
+@login_required
 def renderNameReagent(request):
     problem = generateNameReagentProblem()
     profile = request.user.profile

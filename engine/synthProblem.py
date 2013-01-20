@@ -174,22 +174,7 @@ class MoleculeBox:
  
  
  
-def returnReagentHtml(request):
 
-    try:
-        reagentString = request.reagentString
-        dict = parseReagentsString(reagentString)
-        html = ""
-    
-        for reagent in list(dict):
-            if dict[reagent]:
-                html += REAGENTS[reagent][0] + ", "
-                
-        htmlOutput =  "<li class=\"reagent\" class = \"ui-state-default\" reagentString = \""+reagentString+"\">"+html[:-2]+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></li>"
-
-        return HttpResponse(htmlOutput)
-    except:
-        return HttpResponse("Error!")
      
 #Enter a string, such as "H2 cat Pd|C"
 #Returns a dictionary, such as {"H2":True, "PDC":True, "ETOH":False, ...}

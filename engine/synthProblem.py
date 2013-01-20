@@ -310,7 +310,7 @@ def parseReagentsString(inpstring):
         if (string.count("h2o2") - string.count("h2")) == 0:
             outp[H2] = False
         if (string.count("h2o2") - string.count("h2o")) == 0:
-            outp[H2] = False
+            outp[H2O] = False
        
     return outp
             

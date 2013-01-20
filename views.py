@@ -133,6 +133,10 @@ def renderOldNameReagent(request):
     
 @login_required
 def renderNameReagent(request):
+    try:
+        request.user.profile.currentNameReagentProblem.delete()
+    except:
+        pass
     problem = generateNameReagentProblem(AlkeneAlkyneMode)
     profile = request.user.profile
     step = models.ReactionStepModel.create(problem)
@@ -152,12 +156,7 @@ def checkNameReagent(request):
         target = request.user.profile.currentNameReagentProblem.productBox.moleculeBox
         testStep = ReactionStep(reactant)
         testStep.hasReagents = reagentsDict
-        try:
-            correct, products = testStep.checkStep(target)
-        except:
-            tb = traceback.format_exc()
-            correct = True
-            products = str(tb)
+        correct, products = testStep.checkStep(target)
         responseData = dict()
         responseData["success"] = correct
         if isinstance(products, str):
@@ -166,9 +165,7 @@ def checkNameReagent(request):
             responseData["product"] = products.stringList()
         #If we have the correct answer, free up some database space by deleting this stuff.
         if correct == True:
-            request.user.profile.currentNameReagentProblem.reactantBox.delete()
-            request.user.profile.currentNameReagentProblem.productBox.delete()
-            request.user.profile.currentNameReagentProblem.delete()
+            pass
             #Later: update analytics.
             
         return HttpResponse(json.dumps(responseData))

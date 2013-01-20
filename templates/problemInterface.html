@@ -20,6 +20,14 @@
 <div id="topbar">
 <img src = "http://felixsun.scripts.mit.edu/orgo/static/logo.png" id = "logo"/>
 
+<!--Eventually, these will be css-ified into fancy menu things-->
+<p>
+<a href="/orgo/namereagent/"> Generate a new problem </a>
+
+<a href="/orgo/" style="padding-left:20px"> Return to home </a>
+</p>
+
+<!--
 <div class="box" id="generateProblemBox">
 <form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
     <input type="submit" value="Generate a new problem" class="btn"/>
@@ -29,7 +37,7 @@
     <input type="submit" value="Return to home" class="btn"/>
 </form>
 </div>
-
+-->
 <div class="box" id="namebox">
 Welcome, {{Name}}
 </div>

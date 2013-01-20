@@ -61,10 +61,10 @@ Contains: pickled synthesis problem solution
 Contains: ForeignKey to the final product the synthesis should produce
 """
 class SynthesisProblemModel(models.Model):
-    moleculeModels = PickledObjectField()
-    reactionStepModels = PickledObjectField()
-    solution = PickledObjectField()
-    target = models.ForeignKey(MoleculeBoxModel)
+#    moleculeModels = PickledObjectField()
+#    reactionStepModels = PickledObjectField()
+#    solution = PickledObjectField()
+#    target = models.ForeignKey(MoleculeBoxModel)
     
     
     #Call SynthesisProblemModel.create(parentSynthesisProblem) to create a SynthesisProblemModel representing parentSynthesisProblem

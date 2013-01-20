@@ -213,7 +213,7 @@ def reactionStepHtml(reactionStep):
 @csrf_exempt
 def makeReagentHtml(request):
     try:
-        reagentString = request.reagentString
+        reagentString = request.POST['reagentString']
         dict = parseReagentsString(reagentString)
         html = ""
         for reagent in list(dict):

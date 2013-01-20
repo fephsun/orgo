@@ -214,4 +214,5 @@ def makeReagentHtml(request):
         htmlOutput =  "<li class=\"reagent\" class = \"ui-state-default\" reagentString = \""+reagentString+"\">"+html[:-2]+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></li>"
         return HttpResponse(htmlOutput)
     except:
-        return HttpResponse("Error!")
+        tb = traceback.format_exc()
+        return HttpResponse(str(tb))

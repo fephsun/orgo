@@ -33,7 +33,7 @@ def signUp(request):
             login(request, newUser)
             return loggedInHome(request)
         else:
-            return home(request, debug = "span style=\"color:FF0000\">Bad account info, please try again.</span>")
+            return home(request, debug = "<span style=\"color:FF0000\">Bad account info, please try again.</span>")
             
 def logIn(request):
     if request.method == 'POST':

@@ -1,6 +1,7 @@
 # Create your views here.
 from django.shortcuts import render
 from django.contrib.auth import *
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -25,7 +26,8 @@ def signUp(request):
     if request.method == 'POST':
         form = models.mySignUpForm(request.POST)
         if form.is_valid():
-            form.save()
+            newUser = form.save()
+            login(request, newUser)
             return loggedInHome(request)
         else:
             return home(request, debug = "Bad account info, please try again.")
@@ -102,7 +104,7 @@ def renderProblem(request):
     
     return render(request, 'problemInterface.html', {"TargetMolecule":moleculeBoxHtml(target), "StartMolecule":moleculeBoxHtml(start)})
     
-    
+@login_required
 def renderNameReagent(request):
     problem = generateNameReagentProblem()
     profile = request.user.profile

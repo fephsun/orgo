@@ -166,7 +166,11 @@ def checkNameReagent(request):
             responseData["product"] = products.stringList()
         #If we have the correct answer, free up some database space by deleting this stuff.
         if correct == True:
-            pass
+            request.user.profile.currentNameReagentProblem.reactantBox.delete()
+            request.user.profile.currentNameReagentProblem.productBox.delete()
+            request.user.profile.currentNameReagentProblem.delete()
+            #Later: update analytics.
+            
         return HttpResponse(json.dumps(responseData))
 
  

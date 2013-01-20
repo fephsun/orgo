@@ -78,31 +78,36 @@ def renderSmiles(request, molecule):
     ##Need to fix addReagent method so as to get rid of reagentBoxes altogether
     ##Eventually: also pass in synthesis solutions, somehow
     ##Eventually: how does the frontend know which synthesis problem it's working on?
-def renderProblem(request):
-    #Makes C#C
-    c67 = Atom("C")
-    c68 = Atom("C")
-    ethylene = Molecule(c67)
-    ethylene.addAtom(c68, c67, 3)
-
-    #Makes C-C-Br
-    c69 = Atom("C")
-    br70 = Atom("Br")
-    c71 = Atom("C")
-    bromoethane = Molecule(c69)
-    bromoethane.addAtom(c71, c69, 1)
-    bromoethane.addAtom(br70, c69, 1)
+##def renderProblem(request):
+##    #Makes C#C
+##    c67 = Atom("C")
+##    c68 = Atom("C")
+##    ethylene = Molecule(c67)
+##    ethylene.addAtom(c68, c67, 3)
+##
+##    #Makes C-C-Br
+##    c69 = Atom("C")
+##    br70 = Atom("Br")
+##    c71 = Atom("C")
+##    bromoethane = Molecule(c69)
+##    bromoethane.addAtom(c71, c69, 1)
+##    bromoethane.addAtom(br70, c69, 1)
+##    
+##    ##Replace this temporary code with a randomly generated synthesis problem, eventually
+##    start = MoleculeBox([ethylene])
+##    target = MoleculeBox([bromoethane])
+##    #reactionStep = ReactionStep(start)
+##    #reactionStep.addReagent(parseReagentString("H2 cat Lindlar"))
+##    #reactionSteps = [reactionStep]
+##    #problemSolution = SynthesisSolution([reactionStep, ReactionStep(reactionStep.productBox).addReagent(parseReagentString("HBr in CH2Cl2"))])  
+##    return render(request, 'problemInterface.html', {"TargetMolecule":moleculeBoxHtml(target), "StartMolecule":moleculeBoxHtml(start)})
     
-    ##Replace this temporary code with a randomly generated synthesis problem, eventually
-    start = MoleculeBox([ethylene])
-    target = MoleculeBox([bromoethane])
-    #reactionStep = ReactionStep(start)
-    #reactionStep.addReagent(parseReagentString("H2 cat Lindlar"))
-    #reactionSteps = [reactionStep]
-    #problemSolution = SynthesisSolution([reactionStep, ReactionStep(reactionStep.productBox).addReagent(parseReagentString("HBr in CH2Cl2"))])
     
     
-    return render(request, 'problemInterface.html', {"TargetMolecule":moleculeBoxHtml(target), "StartMolecule":moleculeBoxHtml(start)})
+def renderOldNameReagent(request):
+    profile = request.user.profile
+    step = profile.currentNameReagentProblem
+    return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg, "TargetMolecule": step.productBox.svg, "Name": request.user.username})
     
 @login_required
 def renderNameReagent(request):

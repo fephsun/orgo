@@ -133,7 +133,7 @@ def renderOldNameReagent(request):
     
 @login_required
 def renderNameReagent(request):
-    problem = generateNameReagentProblem()
+    problem = generateNameReagentProblem(AlkeneAlkyneMode)
     profile = request.user.profile
     step = models.ReactionStepModel.create(problem)
     step.save()
@@ -164,6 +164,9 @@ def checkNameReagent(request):
             responseData["product"] = products
         else:
             responseData["product"] = products.stringList()
+        #If we have the correct answer, free up some database space by deleting this stuff.
+        if correct == True:
+            pass
         return HttpResponse(json.dumps(responseData))
 
  
@@ -202,7 +205,8 @@ def reactionStepHtml(reactionStep):
             html += REAGENTS[reagent][0] + ", "
             
     return "<div class = \"reaction\" class = \"ui-widget-content\">"+(html[:-2])+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></div>"
-    
+
+@csrf_exempt
 def makeReagentHtml(request):
     try:
         reagentString = request.reagentString

@@ -33,7 +33,7 @@ def signUp(request):
             login(request, newUser)
             return loggedInHome(request)
         else:
-            return home(request, debug = "<font color=\"FF0000\">Bad account info, please try again.</font>")
+            return home(request, debug = "span style=\"color:FF0000\">Bad account info, please try again.</span>")
             
 def logIn(request):
     if request.method == 'POST':
@@ -44,7 +44,7 @@ def logIn(request):
         if user != None:
             login(request, user)
             return loggedInHome(request)
-    return home(request, debug = "<font color=\"FF0000\">Invalid login, sorry.</font>")
+    return home(request, debug = "<span style=\"color:FF0000\">Invalid login, sorry.</span>")
     
 
 

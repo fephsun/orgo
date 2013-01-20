@@ -121,6 +121,29 @@ class ReactionStep:
     #Returns a list of the reagents contained in this reaction step as HTML-printable strings.
     def stringList(self):
         return [REAGENTS[reagent][0] for reagent in list(self.hasReagents) if self.hasReagents[reagent]] 
+    
+    
+    def checkStep(self, target):
+        #Takes in a molBox (target) and checks if its own products are identical to those in target.
+        #Regardless of identical-ness, returns its own products as well.
+        if self.react(mode="check"):
+            #Does each product correspond to exactly one target?
+            if len(self.productBox.molecules) != len(target.molecules):
+                return (False, self.productBox)
+            for output in self.productBox.molecules:
+                OK = False
+                for tar in target.molecules:
+                    if moleculeCompare(output, tar):
+                        OK = True
+                        target.molecules.remove(tar)
+                        break
+                    #If by this point, we haven't found a match, return False.
+                if not OK:
+                    return (False, self.productBox)
+            #Reached the end of molecule list - must have perfect match.
+            return (True, self.productBox)
+        #The input was ill-formatted.
+        return (False, self.productBox)
 
 
 #MoleculeBox class
@@ -134,7 +157,7 @@ class MoleculeBox:
     def stringList(self):
         outp = ""
         for mol in self.molecules:
-            outp += smiles(mol)[0] + " "
+            outp += smiles(mol) + "."
         return serverRender.render(outp)
         
 #ReagentBox class
@@ -499,5 +522,5 @@ KOCCH33: ("KOtBu", ("tert-butoxide", "KOC(CH3)3"))
 
 #Debugging
 if __name__ == "__main__":
-    print generateNameReactantProblem(mode="AlkeneAlkyne")
+    print generateNameReagentProblem()
 

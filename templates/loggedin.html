@@ -1,6 +1,16 @@
 <html>
 <h2> Welcome, {{name}} </h2>
-
-{{item1|safe}}
+ {{item1|safe}}
+ 
+  <h2> Resume an old problem </h2>
+<form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
+    <input type="submit" value="Go!" class="btn"/>
+</form>
+ 
+ 
+ <h2> Generate a problem </h2>
+<form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
+    <input type="submit" value="Go!" class="btn"/>
+</form>
 
 </html>

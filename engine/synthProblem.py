@@ -514,7 +514,7 @@ KOCCH33 = 35
     #a function of two variables, which takes in a list of molecules (x) and another list of molecules (o) and returns them reacted
 #These are listed roughly by precedence: earlier-listed reactions which qualify take precedence over later-listed ones.
 REACTIONS = (
-(((H2,),(PDC,)), (lambda x: lambda o: hydrogenate(x+o)), ('aa')),
+(((H2,),(PDC,),(ETOH,)), (lambda x: lambda o: hydrogenate(x+o)), ('aa')),
 (((HBR,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "Br")), ('aa')),
 (((HF,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "F")), ('aa')),
 (((HI,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "I")), ('aa')),
@@ -612,7 +612,7 @@ NANH2: ("NaNH<sub>2</sub>", ("Sodium amide", "Sodamide", "NaNH2", "Amide")),
 EQV1: ("1 equiv.", ("1", "eq", "one")),
 HEAT: ("Heat", ("heat", "delta", "hot", "warm")),
 LIGHT: ("Light", ("hv", "light", "hnu")),
-KOCCH33: ("KOtBu", ("tert-butoxide", "KOC(CH3)3"))
+KOCCH33: ("KOtBu", ("tert-butoxide", "KOC(CH3)3", "OC(CH3)3", "potassium tert-butoxide", "KOtBu"))
 }
 
 

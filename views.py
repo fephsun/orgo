@@ -47,14 +47,20 @@ def logIn(request):
     return home(request, debug = "Invalid login, sorry.")
     
 
+
 def logOut(request):
     logout(request)
     return home(request)
 
 
-@login_required
-def returnToLoggedInHome(request):
-    return loggedInHome(request)
+
+
+
+
+#@login_required
+#def returnToLoggedInHome(request):
+#    return loggedInHome(request)
+
     
 
 ###Can delete; this is me learning Django

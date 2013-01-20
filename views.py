@@ -28,7 +28,7 @@ def signUp(request):
             form.save()
             return loggedInHome(request)
         else:
-            return home(request, debug = "Bad account info, please try again.")
+            return home(request, debug = "<font color=\"FF0000\">Bad account info, please try again.</font>")
             
 def logIn(request):
     if request.method == 'POST':
@@ -39,7 +39,7 @@ def logIn(request):
         if user != None:
             login(request, user)
             return loggedInHome(request)
-    return home(request, debug = "Invalid login, sorry.")
+    return home(request, debug = "<font color=\"FF0000\">Invalid login, sorry.</font>")
     
 #@login_required
 #def returnToLoggedInHome(request):
@@ -109,6 +109,8 @@ def renderSmiles(request, molecule):
 def renderOldNameReagent(request):
     profile = request.user.profile
     step = profile.currentNameReagentProblem
+    if step == None:
+        return renderNameReagent(request)
     return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg, "TargetMolecule": step.productBox.svg, "Name": request.user.username})
     
     

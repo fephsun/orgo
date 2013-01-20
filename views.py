@@ -4,9 +4,12 @@ from django.contrib.auth import *
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+import json
+import traceback
 import orgo.engine.serverRender as serverRender
 import orgo.engine.reactions as reactions
 import orgo.engine.randomGenerator as randomGenerator
+import orgo.engine.orgoStructure as orgoStructure
 import orgo.models as models
 from orgo.engine.synthProblem import *
 
@@ -107,8 +110,34 @@ def renderNameReagent(request):
     step.save()
     profile.currentNameReagentProblem = step
     profile.save()
-    return render(request, 'problemInterface.html', {})
-    
+    return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg, "TargetMolecule": step.productBox.svg, "Name": request.user.username})
+    #return render(request, 'problemInterface.html', {"ReactantMolecule": orgoStructure.smiles(problem.reactantBox.molecules), "TargetMolecule": orgoStructure.smiles(problem.productBox.molecules), "Name": request.user.username})
+
+@csrf_exempt
+def checkNameReagent(request):
+    #Takes in a list of reagents that the user guessed.
+    #Returns whether that list is correct, plus the actual product, if that list is incorrect.
+    if request.method == 'POST':
+        reagentsDict = parseReagentsString(request.POST['reagents'])
+        reactant = request.user.profile.currentNameReagentProblem.reactantBox.moleculeBox
+        target = request.user.profile.currentNameReagentProblem.productBox.moleculeBox
+        testStep = ReactionStep(reactant)
+        testStep.hasReagents = reagentsDict
+        try:
+            correct, products = testStep.checkStep(target)
+        except:
+            tb = traceback.format_exc()
+            correct = True
+            products = str(tb)
+        responseData = dict()
+        responseData["success"] = correct
+        if isinstance(products, str):
+            responseData["product"] = products
+        else:
+            responseData["product"] = products.stringList()
+        return HttpResponse(json.dumps(responseData))
+
+                        
     
     
     

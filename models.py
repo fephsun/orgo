@@ -16,9 +16,12 @@ class PickledObjectField(models.Field):
     
     #Loads a saved molecule pickle-thing to Python
     def to_python(self, value):
-        if isinstance(value, orgoStructure.Molecule):
-            return value
-        return cPickle.loads(value)
+        if isinstance(value, unicode):
+            if len(value) == 0:
+                return None
+            return cPickle.loads(str(value))
+        return value
+
     
     #Pickles a molecule in preparation for database storage
     def get_prep_value(self, value):
@@ -36,17 +39,19 @@ Contains: pickled moleculebox
 Contains: SVG representation
 """
 class MoleculeBoxModel(models.Model):
-    problemModel = models.ForeignKey('SynthesisProblemModel')
+    problemModel = models.ForeignKey('SynthesisProblemModel', null=True)
     moleculeBox = PickledObjectField()
     svg = models.TextField()
     
-    #Call MoleculeBoxModel.create(parentSynthesisProblemModel, moleculeBoxObject) to create a MoleculeBoxModel representing moleculeBoxObject
+    #Call MoleculeBoxModel.create(paXrentSynthesisProblemModel, moleculeBoxObject) to create a MoleculeBoxModel representing moleculeBoxObject
     #moleculeBoxObject is an instance of MoleculeBox
     #parentSynthesisProblemModel is an instance of SynthesisProblemModel
     @classmethod
-    def create(cls, parentSynthesisProblemModel, moleculeBoxObject):
-        x = cls(MoleculeBox = moleculeBoxObject, problemModel = parentSynthesisProblemModel, svg = moleculeBoxObject.stringList())
+    def create(cls, moleculeBoxObject, parentSynthesisProblemModel=None):
+        x = cls(moleculeBox = moleculeBoxObject, problemModel = parentSynthesisProblemModel, svg = moleculeBoxObject.stringList())
         return x
+
+    
         
 """
 SynthesisProblemModel
@@ -77,8 +82,6 @@ class SynthesisProblemModel(models.Model):
         #self.steps = []                         #a list of instances of ReactionStep, in any order
         #self.solution = solution                #an instance of SynthesisSolution
         pass
-    
-
 
 
 
@@ -111,18 +114,23 @@ Contains: pickled reactionstep
 Contains: HTML representation
 """
 class ReactionStepModel(models.Model):    
-    problemModel = models.ForeignKey('SynthesisProblemModel')
+    problemModel = models.ForeignKey('SynthesisProblemModel', null=True)
     reactionStep = PickledObjectField()
-    reactantBox = models.ForeignKey('MoleculeBoxModel')
-    productBox = models.ForeignKey('MoleculeBoxModel')
+    reactantBox = models.ForeignKey('MoleculeBoxModel', related_name='reactant')
+    productBox = models.ForeignKey('MoleculeBoxModel', related_name='product')
     html = models.TextField()
     
     #Call ReactionStepModel.create(parentSynthesisProblemModel, reactionStepObject) to create a ReactionStepModel representing reactionStepObject
     #reactionStepObject is an instance of ReactionStep
     #parentSynthesisProblemModel is an instance of SynthesisProblemModel
     @classmethod
-    def create(cls, parentSynthesisProblemModel, reactionStepObject):
-        x = cls(reactionStep = reactionStepObject, problemModel = parentSynthesisProblemModel, html = reactionStepObject.stringList())
+    def create(cls, reactionStepObject, parentSynthesisProblemModel=None):
+        reactantBox = MoleculeBoxModel.create(reactionStepObject.reactantBox)
+        reactantBox.save()
+        productBox = MoleculeBoxModel.create(reactionStepObject.productBox)
+        productBox.save()
+        x = cls(reactionStep = reactionStepObject, problemModel = parentSynthesisProblemModel, html = reactionStepObject.stringList(),
+            reactantBox = reactantBox, productBox = productBox)
         return x
 
     
@@ -151,9 +159,12 @@ class UserProfile(models.Model):
     #A user profile - saves all the important stuff about each user, including
     #reactions-in-progress, diagnostic stats, and default problem settings.
     #More to come.
+    
+    #Use user.profile to get this UserProfile.
     user = models.ForeignKey(User, unique=True)
+    currentNameReagentProblem = models.ForeignKey(ReactionStepModel, null=True)
     #savedProblem = models.ForeignKey(SynthesisProblemModel)
-
+    
 #Auto-make a UserProfile for each user when needed
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
     

@@ -1,6 +1,7 @@
 # standard import to get access to models.Model
 from django.db import models
 import orgo.engine.orgoStructure as orgoStructure
+from orgo.engine.synthProblem import *
 import cPickle
 import django.forms as forms
 from django.forms import ModelForm
@@ -173,7 +174,14 @@ class UserProfile(models.Model):
     
 #Auto-make a UserProfile for each user when needed
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
-    
-    
-    
+
+
+class ChooseReagentsForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(ChooseReagentsForm, self).__init__(*args, **kwargs)
+        for name, reactions in typeToReaction.items():
+            self.fields[name] = forms.BooleanField(label = name, initial = True, required = False)
+            
+
+
     

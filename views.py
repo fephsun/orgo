@@ -84,7 +84,7 @@ def homeMoleculeChanger(request):
 def loggedInHome(request):
     #Home page for those who have logged in.
     name = request.user.username
-    return render(request, 'loggedin.html', {'name': name})
+    return render(request, 'loggedin.html', {'name': name, 'ChooseReagentsForm':models.ChooseReagentsForm})
     
 ###Can delete; this is me learning Django
 def renderSmiles(request, molecule):
@@ -140,7 +140,18 @@ def renderNameReagent(request):
         prodBox.delete()
     except:
         pass
-    problem = generateNameReagentProblem(AlkeneAlkyneMode)
+    modes = []
+    if request.method == 'POST':
+        checkboxes = models.ChooseReagentsForm(request.POST)
+        if checkboxes.is_valid():
+            for name, reactions in typeToReaction.items():
+                if checkboxes.cleaned_data[name]:
+                    modes.append(name)
+    if modes == []:
+        #Error - at least one mode must be selected!
+        #TODO - add an error field to loggedInHome
+        return loggedInHome(request)
+    problem = generateNameReagentProblem(modes)
     profile = request.user.profile
     step = models.ReactionStepModel.create(problem)
     step.save()

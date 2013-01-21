@@ -81,10 +81,21 @@ def homeMoleculeChanger(request):
     return HttpResponse(svg)
             
 @login_required
-def loggedInHome(request, debug = None):
+def loggedInHome(request, debug = ""):
     #Home page for those who have logged in.
-    name = request.user.username
-    return render(request, 'loggedin.html', {'name': name, 'ChooseReagentsForm':models.ChooseReagentsForm, 'debug': debug})
+    profile = request.user.profile
+    #Set up the ChooseReagentsForm with the last choices the user made.
+    initialValuesDict = dict()
+    for name, reactions in typeToReaction.items():
+        try:
+            profile.savedReagentTypes.get(name=name)
+        except:
+            initialValuesDict[name] = False
+        else:
+            initialValuesDict[name] = True
+    return render(request, 'loggedin.html', {'name': request.user.username, 
+                                             'ChooseReagentsForm':models.ChooseReagentsForm(initial=initialValuesDict), 
+                                             'debug': debug})
     
 ###Can delete; this is me learning Django
 def renderSmiles(request, molecule):
@@ -166,8 +177,7 @@ def renderNameReagent(request):
             modes.append(reagentTypeInstance.name)
     if modes == []:
         #Error - at least one mode must be selected!
-        #TODO - add an error field to loggedInHome
-        return loggedInHome(request, debug = str(profile.savedReagentTypes.all()))
+        return loggedInHome(request, debug = "You must pick at least one reaction type!")
     problem = generateNameReagentProblem(modes)
     step = models.ReactionStepModel.create(problem)
     step.save()

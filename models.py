@@ -7,6 +7,7 @@ import django.forms as forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from south.modelsinspector import add_introspection_rules
 
 class PickledObjectField(models.Field):
     description = "An object."
@@ -32,6 +33,8 @@ class PickledObjectField(models.Field):
         #No unlimited-length fields?
         return 'text'
 
+#Allow Django South to introspect the PickledObject field.
+add_introspection_rules([], ["^orgo\.models\.PickledObjectField"])
         
 """
 MoleculeBoxModel
@@ -40,7 +43,7 @@ Contains: pickled moleculebox
 Contains: SVG representation
 """
 class MoleculeBoxModel(models.Model):
-    problemModel = models.ForeignKey('SynthesisProblemModel', null=True)
+    problemModel = models.ForeignKey('SynthesisProblemModel', null=True, on_delete=models.SET_NULL)
     moleculeBox = PickledObjectField()
     svg = models.TextField()
     
@@ -115,10 +118,10 @@ Contains: pickled reactionstep
 Contains: HTML representation
 """
 class ReactionStepModel(models.Model):    
-    problemModel = models.ForeignKey('SynthesisProblemModel', null=True)
+    problemModel = models.ForeignKey('SynthesisProblemModel', null=True, on_delete=models.SET_NULL)
     reactionStep = PickledObjectField()
-    reactantBox = models.ForeignKey('MoleculeBoxModel', related_name='reactant')
-    productBox = models.ForeignKey('MoleculeBoxModel', related_name='product')
+    reactantBox = models.ForeignKey('MoleculeBoxModel', related_name='reactant', on_delete=models.SET_NULL)
+    productBox = models.ForeignKey('MoleculeBoxModel', related_name='product', on_delete=models.SET_NULL)
     html = models.TextField()
     
     #Call ReactionStepModel.create(parentSynthesisProblemModel, reactionStepObject) to create a ReactionStepModel representing reactionStepObject
@@ -160,7 +163,13 @@ class MoleculeModel(models.Model):
         x = cls(smiles = s)
         return x
         
-    
+class ReagentType(models.Model):
+    #A little class that saves a string describing each reagent type.
+    name = models.CharField(max_length=100)
+    @classmethod
+    def create(cls, name):
+        x = cls(name = name)
+        return x
     
 class UserProfile(models.Model):
     #A user profile - saves all the important stuff about each user, including
@@ -168,8 +177,9 @@ class UserProfile(models.Model):
     #More to come.
     
     #Use user.profile to get this UserProfile.
-    user = models.ForeignKey(User, unique=True)
-    currentNameReagentProblem = models.ForeignKey(ReactionStepModel, null=True)
+    user = models.ForeignKey(User, unique=True, on_delete=models.SET_NULL)
+    currentNameReagentProblem = models.ForeignKey(ReactionStepModel, null=True, on_delete=models.SET_NULL)
+    savedReagentTypes = models.ManyToManyField(ReagentType)
     #savedProblem = models.ForeignKey(SynthesisProblemModel)
     
 #Auto-make a UserProfile for each user when needed
@@ -180,7 +190,7 @@ class ChooseReagentsForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(ChooseReagentsForm, self).__init__(*args, **kwargs)
         for name, reactions in typeToReaction.items():
-            self.fields[name] = forms.BooleanField(label = name, initial = True, required = False)
+            self.fields[name] = forms.BooleanField(label=name, initial=True, required=False)
             
 
 

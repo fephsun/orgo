@@ -81,10 +81,10 @@ def homeMoleculeChanger(request):
     return HttpResponse(svg)
             
 @login_required
-def loggedInHome(request):
+def loggedInHome(request, debug = None):
     #Home page for those who have logged in.
     name = request.user.username
-    return render(request, 'loggedin.html', {'name': name, 'ChooseReagentsForm':models.ChooseReagentsForm})
+    return render(request, 'loggedin.html', {'name': name, 'ChooseReagentsForm':models.ChooseReagentsForm, 'debug': debug})
     
 ###Can delete; this is me learning Django
 def renderSmiles(request, molecule):
@@ -133,26 +133,42 @@ def renderOldNameReagent(request):
     
 @login_required
 def renderNameReagent(request):
+    profile = request.user.profile
     #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
     try:
-        prodBox = request.user.profile.currentNameReagentProblem.productBox
-        request.user.profile.currentNameReagentProblem.reactantBox.delete()
-        prodBox.delete()
+        profile.currentNameReagentProblem.productBox.delete()
+        profile.currentNameReagentProblem.reactantBox.delete()
+        profile.currentNameReagentProblem.delete()
     except:
         pass
     modes = []
     if request.method == 'POST':
+        #User filled out the checkboxes
+        #First, clear the user's savedReagentTypes
+        profile.savedReagentTypes.clear()
+        #Parse and save which reaction types were checked.
         checkboxes = models.ChooseReagentsForm(request.POST)
         if checkboxes.is_valid():
             for name, reactions in typeToReaction.items():
                 if checkboxes.cleaned_data[name]:
                     modes.append(name)
+                    try:
+                        reagentType = models.ReagentType.objects.get(name = name)
+                    except:
+                        #Make a new reagentType.  (We only need to do this once after we update our reagent types.)
+                        reagentType = models.ReagentType.create(name = name)
+                        reagentType.save()
+                    profile.savedReagentTypes.add(reagentType)
+    else:
+        #User clicked on "new problem"
+        #Load up the user's reagent preferences.
+        for reagentTypeInstance in profile.savedReagentTypes.all():
+            modes.append(reagentTypeInstance.name)
     if modes == []:
         #Error - at least one mode must be selected!
         #TODO - add an error field to loggedInHome
-        return loggedInHome(request)
+        return loggedInHome(request, debug = str(profile.savedReagentTypes.all()))
     problem = generateNameReagentProblem(modes)
-    profile = request.user.profile
     step = models.ReactionStepModel.create(problem)
     step.save()
     profile.currentNameReagentProblem = step

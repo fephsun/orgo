@@ -142,8 +142,19 @@ def renderOldNameReagent(request):
         return renderNameReagent(request)
     return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg, "TargetMolecule": step.productBox.svg, "Name": request.user.username})
     
-def checkboxUpdate(request):
-	profile = request.user.profile
+
+@login_required
+def renderNameReagent(request):
+    profile = request.user.profile
+    #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
+    try:
+        temp1 = profile.currentNameReagentProblem.productBox
+        temp2 = profile.currentNameReagentProblem.reactantBox
+        profile.currentNameReagentProblem.delete()
+        temp1.delete()
+        temp2.delete()
+    except:
+        pass
     modes = []
     if request.method == 'POST':
         #User filled out the checkboxes
@@ -171,39 +182,20 @@ def checkboxUpdate(request):
 
 
 	
-@login_required
-def renderNameReagent(request):
-    profile = request.user.profile
-    #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
-    try:
-        profile.currentNameReagentProblem.productBox.delete()
-        profile.currentNameReagentProblem.reactantBox.delete()
-        profile.currentNameReagentProblem.delete()
-    except:
-        pass
-	
-	modes = checkboxUpdate(request)
-    if modes == []:
-        #Error - at least one mode must be selected!
-        return loggedInHome(request, debug = "You must pick at least one reaction type!")
-		
-    problem = generateNameReagentProblem(modes)
-    step = models.ReactionStepModel.create(problem)
-    step.save()
-    profile.currentNameReagentProblem = step
-    profile.save()
-    return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg, "TargetMolecule": step.productBox.svg, "Name": request.user.username})
-    #return render(request, 'problemInterface.html', {"ReactantMolecule": orgoStructure.smiles(problem.reactantBox.molecules), "TargetMolecule": orgoStructure.smiles(problem.productBox.molecules), "Name": request.user.username})
-
 @csrf_exempt
 def checkNameReagent(request):
     #Takes in a list of reagents that the user guessed.
     #Returns whether that list is correct, plus the actual product, if that list is incorrect.
     if request.method == 'POST':
+      try:
         reagentsDict = parseReagentsString(request.POST['reagents'])
-        reactant = request.user.profile.currentNameReagentProblem.reactantBox.moleculeBox
-        target = request.user.profile.currentNameReagentProblem.productBox.moleculeBox
+        profile = request.user.profile
+        reactant = profile.currentNameReagentProblem.reactantBox.moleculeBox
+        target = profile.currentNameReagentProblem.productBox.moleculeBox
         testStep = ReactionStep(reactant)
+        #If the problem is done, do nothing - don't let them get more points.
+        if profile.currentNameReagentProblem.done:
+            return HttpResponse("")
         testStep.hasReagents = reagentsDict
         correct, products = testStep.checkStep(target)
         responseData = dict()
@@ -213,12 +205,28 @@ def checkNameReagent(request):
         else:
             responseData["product"] = products.stringList()
         #If we have the correct answer, free up some database space by deleting this stuff.
+        thisCatagory = profile.currentNameReagentProblem.catagory
+        try:
+            accModel = profile.accuracies.get(catagory=thisCatagory)
+        except:
+            accModel = models.AccuracyModel.create(catagory=thisCatagory)
+            accModel.save()
+            profile.accuracies.add(accModel)
         if correct == True:
-            pass
-            #Later: update analytics.
-            
-        return HttpResponse(json.dumps(responseData))
-
+            accModel.correct += 1
+            accModel.total += 1
+            accModel.save()
+            profile.currentNameReagentProblem.done = True
+            profile.currentNameReagentProblem.save()
+        else:
+            accModel.total += 1
+            accModel.save()
+      except StandardError as e:
+        responseData = dict()
+        responseData["product"] = str(e)
+        responseData["success"] = False
+        
+      return HttpResponse(json.dumps(responseData))
  
     
 ##Make this have a shiny flowchart layout once that becomes possible.

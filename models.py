@@ -7,7 +7,6 @@ import django.forms as forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from south.modelsinspector import add_introspection_rules
 
 class PickledObjectField(models.Field):
     description = "An object."
@@ -33,9 +32,7 @@ class PickledObjectField(models.Field):
         #No unlimited-length fields?
         return 'text'
 
-#Allow Django South to introspect the PickledObject field.
-add_introspection_rules([], ["^orgo\.models\.PickledObjectField"])
-        
+
 """
 MoleculeBoxModel
 Contains: foreignkey to a SynthesisProblemModel
@@ -43,11 +40,12 @@ Contains: pickled moleculebox
 Contains: SVG representation
 """
 class MoleculeBoxModel(models.Model):
-    moleculeBox = PickledObjectField()
-    svg = models.TextField()
-	equalsTarget = models.BooleanField()
+    problemModel = models.ForeignKey('SynthesisProblemModel', null=True, on_delete=models.SET_NULL)
+    moleculeBox = PickledObjectField(null=True)
+    svg = models.TextField(null=True)
+	equalsTarget = models.BooleanField(null=True)
     
-    #Call MoleculeBoxModel.create(paXrentSynthesisProblemModel, moleculeBoxObject) to create a MoleculeBoxModel representing moleculeBoxObject
+    #Call MoleculeBoxModel.create(parentSynthesisProblemModel, moleculeBoxObject) to create a MoleculeBoxModel representing moleculeBoxObject
     #moleculeBoxObject is an instance of MoleculeBox
     #parentSynthesisProblemModel is an instance of SynthesisProblemModel
     @classmethod
@@ -109,9 +107,9 @@ class SolutionModel(models.Model):
 	
 #something to store arrows --> many to many field, ArrowModel{molecule box, molecule box, string}
 class ArrowModel(models.Model):
-	pointFrom = models.ForeignKey(MoleculeBoxModel)
-	pointTo = models.ForeignKey(MoleculeBoxModel)
-	reagentsHtml = models.TextField()
+	pointFrom = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL)
+	pointTo = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL)
+	reagentsHtml = models.TextField(null=True)
 	
 	@classmethod
 	def create(cls, newPointFrom, newPointTo, newReagentsHtml):
@@ -148,10 +146,10 @@ class SynthesisProblemModel(models.Model):
 	#something to store moleculeboxes --> many to many field, molecule box
 	#something to store arrows --> many to many field, ArrowModel{molecule box, molecule box, string}
 	#target: a moleculeboxmodel foreignkey
-    solution = models.ForeignKey(SolutionModel)
+    solution = models.ForeignKey(SolutionModel, null=True, on_delete=models.SET_NULL)
 	molecules = models.ManyToManyField(MoleculeBoxModel)
 	arrows = models.ManyToManyField(ArrowModel)
-    target = models.ForeignKey(MoleculeBoxModel)
+    target = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL)
     
 	#reactionSteps is a list of reactionsteps; the final one contains the target molecule.
     @classmethod
@@ -223,11 +221,13 @@ Contains: pickled reactionstep
 Contains: HTML representation
 """
 #Used in NameReagent
-class ReactionStepModel(models.Model):    
+class ReactionStepModel(models.Model):
     reactionStep = PickledObjectField()
     reactantBox = models.ForeignKey('MoleculeBoxModel', related_name='reactant', null=True, on_delete=models.SET_NULL)
     productBox = models.ForeignKey('MoleculeBoxModel', related_name='product', null=True, on_delete=models.SET_NULL)
-    html = models.TextField()
+    html = models.TextField(null=True)
+    done = models.BooleanField(null=True)
+    catagory = models.CharField(max_length=100, null=True)
     
     #Call ReactionStepModel.create(parentSynthesisProblemModel, reactionStepObject) to create a ReactionStepModel representing reactionStepObject
     #reactionStepObject is an instance of ReactionStep
@@ -238,8 +238,12 @@ class ReactionStepModel(models.Model):
         reactantBox.save()
         productBox = MoleculeBoxModel.create(reactionStepObject.productBox)
         productBox.save()
+        if hasattr(reactionStepObject, 'catagory'):
+            catagory = reactionStepObject.catagory
+        else:
+            catagory = None
         x = cls(reactionStep = reactionStepObject, html = reactionStepObject.stringList(),
-            reactantBox = reactantBox, productBox = productBox)
+            reactantBox = reactantBox, productBox = productBox, catagory = catagory, done = False)
         return x
 
     
@@ -275,6 +279,17 @@ class ReagentType(models.Model):
     def create(cls, name):
         x = cls(name = name)
         return x
+        
+class AccuracyModel(models.Model):
+    #A little class that tracks the # attempted and correct of each reaction catagory
+    #for each user.
+    catagory = models.CharField(max_length=100)
+    correct = models.SmallIntegerField()
+    total = models.SmallIntegerField()
+    @classmethod
+    def create(cls, catagory):
+        x = cls(catagory=catagory, correct=0, total=0)
+        return x
     
 class UserProfile(models.Model):
     #A user profile - saves all the important stuff about each user, including
@@ -286,6 +301,7 @@ class UserProfile(models.Model):
     currentNameReagentProblem = models.ForeignKey(ReactionStepModel,   null=True, on_delete=models.SET_NULL)
 	currentSynthesisProblem = models.ForeignKey(SynthesisProblemModel, null=True, on_delete=models.SET_NULL)
     savedReagentTypes = models.ManyToManyField(ReagentType)
+    accuracies = models.ManyToManyField(AccuracyModel)
     #savedProblem = models.ForeignKey(SynthesisProblemModel)
     
 #Auto-make a UserProfile for each user when needed

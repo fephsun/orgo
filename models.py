@@ -43,7 +43,7 @@ class MoleculeBoxModel(models.Model):
     problemModel = models.ForeignKey('SynthesisProblemModel', null=True, on_delete=models.SET_NULL)
     moleculeBox = PickledObjectField(null=True)
     svg = models.TextField(null=True)
-    equalsTarget = models.BooleanField(null=True)
+    equalsTarget = models.BooleanField()
     
     #Call MoleculeBoxModel.create(parentSynthesisProblemModel, moleculeBoxObject) to create a MoleculeBoxModel representing moleculeBoxObject
     #moleculeBoxObject is an instance of MoleculeBox
@@ -65,7 +65,16 @@ class MoleculeBoxModel(models.Model):
         return self.equalsTarget
         
         
-        
+#something to store arrows --> many to many field, ArrowModel{molecule box, molecule box, string}
+class ArrowModel(models.Model):
+    pointFrom = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL)
+    pointTo = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL)
+    reagentsHtml = models.TextField(null=True)
+    
+    @classmethod
+    def create(cls, newPointFrom, newPointTo, newReagentsHtml):
+        x = cls(pointFrom = newPointFrom, pointTo = newPointTo, reagentsHtml = newReagentsHtml)
+        return x        
     
         
 """
@@ -100,16 +109,7 @@ class SolutionModel(models.Model):
         return x
     
     
-#something to store arrows --> many to many field, ArrowModel{molecule box, molecule box, string}
-class ArrowModel(models.Model):
-    pointFrom = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL)
-    pointTo = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL)
-    reagentsHtml = models.TextField(null=True)
-    
-    @classmethod
-    def create(cls, newPointFrom, newPointTo, newReagentsHtml):
-        x = cls(pointFrom = newPointFrom, pointTo = newPointTo, reagentsHtml = newReagentsHtml)
-        return x
+
     
 #def ([arrowmodels], [moleculeboxmodels]) = getArrowAndMoleculeModels(reactionSteps) in synthProblem
 #Helper method used by a constructor in models.
@@ -221,13 +221,14 @@ class ReactionStepModel(models.Model):
     reactantBox = models.ForeignKey('MoleculeBoxModel', related_name='reactant', null=True, on_delete=models.SET_NULL)
     productBox = models.ForeignKey('MoleculeBoxModel', related_name='product', null=True, on_delete=models.SET_NULL)
     html = models.TextField(null=True)
-    done = models.BooleanField(null=True)
+    done = models.BooleanField()
     catagory = models.CharField(max_length=100, null=True)
     
     #Call ReactionStepModel.create(parentSynthesisProblemModel, reactionStepObject) to create a ReactionStepModel representing reactionStepObject
     #reactionStepObject is an instance of ReactionStep
     #parentSynthesisProblemModel is an instance of SynthesisProblemModel
     @classmethod
+    
     def create(cls, reactionStepObject):
         reactantBox = MoleculeBoxModel.create(reactionStepObject.reactantBox)
         reactantBox.save()

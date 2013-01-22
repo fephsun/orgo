@@ -2,6 +2,7 @@
 from django.shortcuts import render
 from django.contrib.auth import *
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -20,8 +21,11 @@ def home(request, debug = ""):
         return loggedInHome(request)
     outSmiles = reactions.smiles(randomGenerator.randomStart()[0])
     svg = serverRender.render(outSmiles)
-    return render(request, 'index.html', {'molecule': svg, 'signUpForm': models.mySignUpForm,
-            'logInForm': forms.AuthenticationForm(), 'debug':debug , 'outpSmilesForm': models.MoleculeForm})###Can delete "outpSmilesForm" term; this is me learning Django     
+    return render(request, 'index.html', {'molecule': svg,
+                                          'signUpForm': models.mySignUpForm,
+                                          'logInForm': forms.AuthenticationForm(),
+                                          'debug':debug , 
+                                          'resetPWForm': PasswordResetForm()})
 
 def signUp(request):
     if request.method == 'POST':
@@ -86,6 +90,7 @@ def loggedInHome(request, debug = ""):
     profile = request.user.profile
     #Set up the ChooseReagentsForm with the last choices the user made.
     initialValuesDict = dict()
+    graphList = []
     for name, reactions in typeToReaction.items():
         try:
             profile.savedReagentTypes.get(name=name)
@@ -93,9 +98,19 @@ def loggedInHome(request, debug = ""):
             initialValuesDict[name] = False
         else:
             initialValuesDict[name] = True
+        #Load up the graph data
+        try:
+            accuracyObj = profile.accuracies.get(catagory=name)
+        except:
+            pass
+        else:
+            graphList.append([1.0*accuracyObj.correct/accuracyObj.total, name, accuracyObj.correct, accuracyObj.total])
+    graphList.sort(key=lambda item: item[1])
+
     return render(request, 'loggedin.html', {'name': request.user.username, 
                                              'ChooseReagentsForm':models.ChooseReagentsForm(initial=initialValuesDict), 
-                                             'debug': debug})
+                                             'debug': debug,
+                                             'graphData': graphList,})
     
 ###Can delete; this is me learning Django
 def renderSmiles(request, molecule):

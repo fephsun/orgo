@@ -30,7 +30,7 @@
 <form action = "/orgo/renderSynthesis/resume/" method="post" class="form-horizontal">{% csrf_token %}
     <input type="submit" value="Resume old" class="btn"/>
 </form>
-<form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
+<form action = "/orgo/renderSynthesis/" method="post" class="form-horizontal">{% csrf_token %}
     {% for field in ChooseReagentsForm %}
         {{field}}{{field.label_tag}}
         <br />

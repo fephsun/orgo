@@ -46,7 +46,7 @@ class MoleculeBoxModel(models.Model):
     equalsTarget = models.BooleanField()
     
     #Call MoleculeBoxModel.create(parentSynthesisProblemModel, moleculeBoxObject) to create a MoleculeBoxModel representing moleculeBoxObject
-    #moleculeBoxObject is an instance of MoleculeBox
+    #mobooleanfield(nleculeBoxObject is an instance of MoleculeBox
     #parentSynthesisProblemModel is an instance of SynthesisProblemModel
     @classmethod
     def create(cls, moleculeBoxObject):
@@ -67,8 +67,8 @@ class MoleculeBoxModel(models.Model):
         
 #something to store arrows --> many to many field, ArrowModel{molecule box, molecule box, string}
 class ArrowModel(models.Model):
-    pointFrom = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL)
-    pointTo = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL)
+    pointFrom = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL, related_name="arrowPointsFrom")
+    pointTo = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL, related_name="arrowPointsTo")
     reagentsHtml = models.TextField(null=True)
     
     @classmethod
@@ -90,8 +90,8 @@ Contains: ForeignKey to the final product the synthesis should produce
 class SolutionModel(models.Model):
     #something to store moleculeboxes --> many to many field, molecule box
     #something to store arrows --> many to many field, ArrowModel{molecule box, molecule box, string}
-    molecules = models.ManyToManyField(MoleculeBoxModel)
-    arrows = models.ManyToManyField(ArrowModel)
+    molecules = models.ManyToManyField(MoleculeBoxModel, related_name="solutionMolecules")
+    arrows = models.ManyToManyField(ArrowModel, related_name="solutionArrows")
     
     @classmethod
     def create(cls, reactionSteps):
@@ -133,6 +133,8 @@ def getArrowAndMoleculeModels(reactionSteps):
                         reactionStepHtml(reactionStep))                    for reactionStep in reactionSteps]
     
     ##moleculeboxmodels = moleculedict.values()
+    if None in arrowmodels:
+        return (ArrowModel.create(1, 2, "blah"), MoleculeBoxModel(reactionStep.productBox))
     return (arrowmodels, moleculedict.values())
     
     
@@ -141,10 +143,10 @@ class SynthesisProblemModel(models.Model):
     #something to store moleculeboxes --> many to many field, molecule box
     #something to store arrows --> many to many field, ArrowModel{molecule box, molecule box, string}
     #target: a moleculeboxmodel foreignkey
-    solution = models.ForeignKey(SolutionModel, null=True, on_delete=models.SET_NULL)
-    molecules = models.ManyToManyField(MoleculeBoxModel)
-    arrows = models.ManyToManyField(ArrowModel)
-    target = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL)
+    solution = models.ForeignKey(SolutionModel, null=True, on_delete=models.SET_NULL, related_name="spSolution")
+    molecules = models.ManyToManyField(MoleculeBoxModel, related_name="spMolecules")
+    arrows = models.ManyToManyField(ArrowModel, related_name="spArrows")
+    target = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL, related_name="spTarget")
     
     #reactionSteps is a list of reactionsteps; the final one contains the target molecule.
     @classmethod
@@ -172,7 +174,7 @@ class SynthesisProblemModel(models.Model):
         return x
         
         
-        
+       
     #Return true if any item in molecules is equivalent to the target molecule
     #Most efficient way to do this: store a boolean field in every molecule box model created, for if it equals the target molecule
     #This requires calling checkIfEqualsTarget whenever a new molecule is added.

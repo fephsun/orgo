@@ -197,6 +197,23 @@ def renderNameReagent(request):
         temp2.delete()
     except:
         pass
+        
+       
+    modes = checkboxUpdate(request)
+    if modes == []:
+        #Error - at least one mode must be selected!
+        return loggedInHome(request, debug = "You must pick at least one reaction type!")
+        
+    problem = generateNameReagentProblem(modes)
+    step = models.ReactionStepModel.create(problem)
+    step.save()
+    profile.currentNameReagentProblem = step
+    profile.save()
+    return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg, "TargetMolecule": step.productBox.svg, "Name": request.user.username})
+        
+        
+def checkboxUpdate(request): 
+    profile = request.user.profile       
     modes = []
     if request.method == 'POST':
         #User filled out the checkboxes

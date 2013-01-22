@@ -3,19 +3,34 @@
  {{item1|safe}}
  
   <h2> Resume an old problem </h2>
-<form action = "/orgo/namereagent/resume/" class="form-horizontal">{% csrf_token %}
-    <input type="submit" value="Go!" class="btn"/>
+
+ 
+ 
+ <h2> Naming Reagents </h2>
+ <form action = "/orgo/namereagent/resume/" method="post" class="form-horizontal">{% csrf_token %}
+    <input type="submit" value="Resume old" class="btn"/>
 </form>
- 
- 
- <h2> Generate a problem </h2>
 <form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
     {% for field in ChooseReagentsForm %}
         {{field}}{{field.label_tag}}
         <br />
     {% endfor %}
-    <input type="submit" value="Go!" class="btn"/>
+    <input type="submit" value="Generate new" class="btn"/>
 </form>
+
+  <h2> Synthesis Problems </h2>
+<form action = "/orgo/renderSynthesis/resume/" method="post" class="form-horizontal">{% csrf_token %}
+    <input type="submit" value="Resume old" class="btn"/>
+</form>
+<form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
+    {% for field in ChooseReagentsForm %}
+        {{field}}{{field.label_tag}}
+        <br />
+    {% endfor %}
+    <input type="submit" value="Generate new" class="btn"/>
+</form>
+
+
 
 {{debug|safe}}
 

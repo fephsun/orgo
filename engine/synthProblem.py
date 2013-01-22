@@ -18,24 +18,24 @@ import serverRender
         #If so, creates a new molecule to represent the reacted product.
         #Updates its knowledge of whether the problem is solved or not.
 
-    #Can delete individual molecule-boxes or individual reaction-steps.
+    # Can delete individual molecule-boxes or individual reaction-steps.
 
-    #Can add: reagents to reaction-steps, reagents to molecule-boxes, reaction-steps to molecule-boxes, molecule-boxes to reaction-steps.
-class SynthesisProblem:
-    def __init__(self, startingMaterialBoxes, finalProduct, solution):
+    # Can add: reagents to reaction-steps, reagents to molecule-boxes, reaction-steps to molecule-boxes, molecule-boxes to reaction-steps.
+# class SynthesisProblem:
+    # def __init__(self, startingMaterialBoxes, finalProduct, solution):
     
-        #All of these variables must be set at some point or another.
-        self.startingBoxes = []                 #a list of instances of MoleculeBox
-        self.finalProduct = None                #an instance of MoleculeBox
-        self.steps = []                         #a list of instances of ReactionStep, in any order
-        self.solution = solution                #an instance of SynthesisSolution
+        # All of these variables must be set at some point or another.
+        # self.startingBoxes = []                 #a list of instances of MoleculeBox
+        # self.finalProduct = None                #an instance of MoleculeBox
+        # self.steps = []                         #a list of instances of ReactionStep, in any order
+        # self.solution = solution                #an instance of SynthesisSolution
 
 
-#SynthesisSolution class
-    #List of reactionSteps
-class SynthesisSolution:
-    def __init__(self, steps):
-        self.steps = [] #to be a list of reactionSteps
+# SynthesisSolution class
+    # List of reactionSteps
+# class SynthesisSolution:
+    # def __init__(self, steps):
+        # self.steps = [] #to be a list of reactionSteps
 
 
 
@@ -159,19 +159,6 @@ class MoleculeBox:
         for mol in self.molecules:
             outp += smiles(mol) + "."
         return serverRender.render(outp)
-        
-#ReagentBox class
-#Represents a draggable box containing some quantity of different reagents
-    #List of reagents (as strings) contained in it
-#class ReagentBox:
-#    def __init__(self, reagentsString):
-#        self.reagentsString = reagentsString #a string of raw user input
-#        self.hasReagents = parseReagentsString(reagentsString) #a dictionary
-#        
-#    #Returns a list of the reagents contained in this reaction step as HTML-printable strings.
-#    def stringList(self):
-#        return [REAGENTS[reagent][0] for reagent in list(self.hasReagents) if self.hasReagents[reagent]] 
- 
  
  
 
@@ -434,7 +421,34 @@ def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30):
             molBoxes = newMolBoxes
     #TODO: should return a SynthesisProblem object, once this class is fleshed out.
     return reactions
-                            
+                         
+
+#def [moleculeboxes] = getStartingMoleculeBoxes(reactionSteps) in synthProblem
+#Helper method used by a constructor in models.
+def getStartingMoleculeBoxes(reactionSteps):
+	
+
+
+	return moleculeboxes
+	
+
+
+
+def moleculeBoxHtml(moleculeBox):
+    html = "<div class = \"molecule\" class=\"ui-widget-content\"  >"
+    html += serverRender.render(moleculeBox.stringList())
+    html += "</div>"
+    return html   
+ 
+def reactionStepHtml(reactionStep):
+    html = ""
+    for reagent in list(REAGENTS):
+        if reactionStep.hasReagents[reagent]:
+            html += REAGENTS[reagent][0] + ", "
+            
+    return "<div class = \"reaction\" class = \"ui-widget-content\">"+(html[:-2])+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></div>"
+
+						 
 def generateNameReagentProblem(mode="AlkeneAlkyne"):
     #Endless loop, for now.  Maybe have some sort of give-up condition?
     while True:

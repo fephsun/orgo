@@ -2,7 +2,7 @@
 from django.shortcuts import render
 from django.contrib.auth import *
 from django.contrib.auth.models import User
-from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.forms import PasswordResetForm, PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -73,11 +73,18 @@ def resetPW(request):
         subject = "Orgo - your new password"
         body = 'Hello '+user.username+''',
 Here is your new password: ''' + password + '''
-Because this password was sent over email, it is not secure as a permanant password.  Please log in and change it immediately.
+Because this password was sent over email, it is not secure as a permanent password.  Please log in and change it immediately.
 Thank you,
-Felix + Chelsea'''
+Your friendly admins'''
         newMessage = EmailMessage(subject, body, to=[email])
         newMessage.send()
+		return render(request, 'successfulReset.html')
+	return home(request, debug = "Unknown error in password reset")
+	
+	
+def changePW(request):
+	if request.method == 'POST':
+		pass
 
 
 #@login_required
@@ -129,7 +136,8 @@ def loggedInHome(request, debug = ""):
     return render(request, 'loggedin.html', {'name': request.user.username, 
                                              'ChooseReagentsForm':models.ChooseReagentsForm(initial=initialValuesDict), 
                                              'debug': debug,
-                                             'graphData': graphList,})
+                                             'graphData': graphList,
+											 'changePW': PasswordChangeForm})
     
 ###Can delete; this is me learning Django
 def renderSmiles(request, molecule):

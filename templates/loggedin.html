@@ -59,6 +59,12 @@ $(document).ready(function(){
 });
 </script>
 
+<h2> Change Password </h2>
+<form action = "/orgo/api/changePW/" method="post" class="form-horizontal">{% csrf_token %}
+    {{changePW.as_p}}
+    <input type="submit" value="Change" class="btn"/>
+</form>
+
 <h2>
 <a href ="/orgo/logout/"> Logout </a>
 </h2>

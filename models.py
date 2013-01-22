@@ -43,7 +43,7 @@ class MoleculeBoxModel(models.Model):
     problemModel = models.ForeignKey('SynthesisProblemModel', null=True, on_delete=models.SET_NULL)
     moleculeBox = PickledObjectField(null=True)
     svg = models.TextField(null=True)
-	equalsTarget = models.BooleanField(null=True)
+    equalsTarget = models.BooleanField(null=True)
     
     #Call MoleculeBoxModel.create(parentSynthesisProblemModel, moleculeBoxObject) to create a MoleculeBoxModel representing moleculeBoxObject
     #moleculeBoxObject is an instance of MoleculeBox
@@ -53,24 +53,19 @@ class MoleculeBoxModel(models.Model):
         x = cls(moleculeBox = moleculeBoxObject, svg = moleculeBoxObject.stringList(), equalsTarget = False)
         return x
 
-	def checkIfEqualsTarget(self, targetMoleculeBoxModel):
-		return False
-			##Code copied from checkStep
-			# if len(self.productBox.molecules) != len(target.molecules):
-				# return (False, self.productBox)
-			# for output in self.productBox.molecules:
-				# OK = False
-				# for tar in target.molecules:
-					# if moleculeCompare(output, tar):
-						# OK = True
-						# target.molecules.remove(tar)
-						# break
-					# If by this point, we haven't found a match, return False.
-				# if not OK:
-					# return (False, self.productBox)
-			# Reached the end of molecule list - must have perfect match.
-			# return (True, self.productBox)
-		
+    #target is an instance of MoleculeBoxModel
+    #returns True or False, updates its own equalsTarget field with same
+    def checkIfEqualsTarget(self, target):
+        self.equalsTarget = boxEqualityChecker(self.moleculeBox, target.moleculeBox)
+        
+        #Make helper function:
+        #self.productBox in checkStep == self.moleculeBox here
+        #target in checkStep == target.moleculeBox here
+        
+        return self.equalsTarget
+        
+        
+        
     
         
 """
@@ -80,115 +75,115 @@ Contains: pickled list of reaction-step-models by unique ID
 Contains: pickled synthesis problem solution
 Contains: ForeignKey to the final product the synthesis should produce
 """
-	
-	
+    
+    
 
 class SolutionModel(models.Model):
-	#something to store moleculeboxes --> many to many field, molecule box
-	#something to store arrows --> many to many field, ArrowModel{molecule box, molecule box, string}
-	molecules = models.ManyToManyField(MoleculeBoxModel)
-	arrows = models.ManyToManyField(ArrowModel)
-	
-	@classmethod
-	def create(cls, reactionSteps):
-		x = cls()
-		x.save()
-		
-		(arrowmodels, moleculeboxmodels) = getArrowAndMoleculeModels(reactionSteps)  #helper method defined in synthProblem
-		
-		for arrowmodel in arrowmodels: 
-			x.arrows.add(arrowmodel)
-			
-		for moleculeboxmodel in moleculeboxmodels:
-			x.molecules.add(moleculeboxmodel)
-		
-		return x
-	
-	
+    #something to store moleculeboxes --> many to many field, molecule box
+    #something to store arrows --> many to many field, ArrowModel{molecule box, molecule box, string}
+    molecules = models.ManyToManyField(MoleculeBoxModel)
+    arrows = models.ManyToManyField(ArrowModel)
+    
+    @classmethod
+    def create(cls, reactionSteps):
+        x = cls()
+        x.save()
+        
+        (arrowmodels, moleculeboxmodels) = getArrowAndMoleculeModels(reactionSteps)  #helper method defined in synthProblem
+        
+        for arrowmodel in arrowmodels: 
+            x.arrows.add(arrowmodel)
+            
+        for moleculeboxmodel in moleculeboxmodels:
+            x.molecules.add(moleculeboxmodel)
+        
+        return x
+    
+    
 #something to store arrows --> many to many field, ArrowModel{molecule box, molecule box, string}
 class ArrowModel(models.Model):
-	pointFrom = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL)
-	pointTo = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL)
-	reagentsHtml = models.TextField(null=True)
-	
-	@classmethod
-	def create(cls, newPointFrom, newPointTo, newReagentsHtml):
-		x = cls(pointFrom = newPointFrom, pointTo = newPointTo, reagentsHtml = newReagentsHtml)
-		return x
-	
+    pointFrom = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL)
+    pointTo = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL)
+    reagentsHtml = models.TextField(null=True)
+    
+    @classmethod
+    def create(cls, newPointFrom, newPointTo, newReagentsHtml):
+        x = cls(pointFrom = newPointFrom, pointTo = newPointTo, reagentsHtml = newReagentsHtml)
+        return x
+    
 #def ([arrowmodels], [moleculeboxmodels]) = getArrowAndMoleculeModels(reactionSteps) in synthProblem
 #Helper method used by a constructor in models.
 def getArrowAndMoleculeModels(reactionSteps):
-	
-	#Create dict of moleculeboxes : moleculeboxmodels 
-	moleculedict = {}
-	for reactionStep in reactionSteps:
-		p = reactionStep.productBox
-		r = reactionStep.reactantBox
-		
-		if not p in moleculedict.keys():
-			moleculedict[p] = MoleculeBoxModel(p)
-		if not r in moleculedict.keys():
-			moleculedict[r] = MoleculeBoxModel(r)
-	
-	#Iterate through reactionsteps, creating a list of ArrowModels
-	#ArrowModel.create(newPointFrom (a MoleculeBoxModel), newPointTo (a MoleculeBoxModel), newReagentsHtml (a html string)):
-	arrowmodels = [ArrowModel.create(moleculedict[reactionStep.reactantBox],
-						moleculedict[reactionStep.productBox],
-						reactionStepHtml(reactionStep))					for reactionStep in reactionSteps]
-	
-	##moleculeboxmodels = moleculedict.values()
-	return (arrowmodels, moleculedict.values())
-	
-	
+    
+    #Create dict of moleculeboxes : moleculeboxmodels 
+    moleculedict = {}
+    for reactionStep in reactionSteps:
+        p = reactionStep.productBox
+        r = reactionStep.reactantBox
+        
+        if not p in moleculedict.keys():
+            moleculedict[p] = MoleculeBoxModel(p)
+        if not r in moleculedict.keys():
+            moleculedict[r] = MoleculeBoxModel(r)
+    
+    #Iterate through reactionsteps, creating a list of ArrowModels
+    #ArrowModel.create(newPointFrom (a MoleculeBoxModel), newPointTo (a MoleculeBoxModel), newReagentsHtml (a html string)):
+    arrowmodels = [ArrowModel.create(moleculedict[reactionStep.reactantBox],
+                        moleculedict[reactionStep.productBox],
+                        reactionStepHtml(reactionStep))                    for reactionStep in reactionSteps]
+    
+    ##moleculeboxmodels = moleculedict.values()
+    return (arrowmodels, moleculedict.values())
+    
+    
 class SynthesisProblemModel(models.Model):
-	#something to store solutions --> a SolutionModel
-	#something to store moleculeboxes --> many to many field, molecule box
-	#something to store arrows --> many to many field, ArrowModel{molecule box, molecule box, string}
-	#target: a moleculeboxmodel foreignkey
+    #something to store solutions --> a SolutionModel
+    #something to store moleculeboxes --> many to many field, molecule box
+    #something to store arrows --> many to many field, ArrowModel{molecule box, molecule box, string}
+    #target: a moleculeboxmodel foreignkey
     solution = models.ForeignKey(SolutionModel, null=True, on_delete=models.SET_NULL)
-	molecules = models.ManyToManyField(MoleculeBoxModel)
-	arrows = models.ManyToManyField(ArrowModel)
+    molecules = models.ManyToManyField(MoleculeBoxModel)
+    arrows = models.ManyToManyField(ArrowModel)
     target = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL)
     
-	#reactionSteps is a list of reactionsteps; the final one contains the target molecule.
+    #reactionSteps is a list of reactionsteps; the final one contains the target molecule.
     @classmethod
     def create(cls, reactionSteps):
-		x = cls()
-		
-		#target molecule should be the final step's product
-		t = MoleculeBoxModel.create(reactionSteps[-1].productBox)
-		x.target = t
-		
-		#solution should contain the other content of reactionSteps
-		s = SolutionModel.create(reactionSteps)
-		x.solution = s
+        x = cls()
+        
+        #target molecule should be the final step's product
+        t = MoleculeBoxModel.create(reactionSteps[-1].productBox)
+        x.target = t
+        
+        #solution should contain the other content of reactionSteps
+        s = SolutionModel.create(reactionSteps)
+        x.solution = s
 
-		x.save()
-		
-		#arrows should be empty
-		
-		#molecules should contain the starting materials, which aren't the product of any reaction
-		for moleculebox in getStartingMoleculeBoxes(reactionSteps): #helper method defined in synthProblem
-			m = MoleculeBoxModel.create(moleculebox)
-			m.checkIfEqualsTarget(t)
-			x.molecules.add(m)
-		
-		return x
-		
-		
-		
-	#Return true if any item in molecules is equivalent to the target molecule
-	#Most efficient way to do this: store a boolean field in every molecule box model created, for if it equals the target molecule
-	#This requires calling checkIfEqualsTarget whenever a new molecule is added.
-	def checkIfSolved(self):
-		for moleculeBoxModel in self.molecules.all():
-			if moleculeBoxModel.equalsTarget:
-				return True
-		return False
-		
+        x.save()
+        
+        #arrows should be empty
+        
+        #molecules should contain the starting materials, which aren't the product of any reaction
+        for moleculebox in getStartingMoleculeBoxes(reactionSteps): #helper method defined in synthProblem
+            m = MoleculeBoxModel.create(moleculebox)
+            m.checkIfEqualsTarget(t)
+            x.molecules.add(m)
+        
+        return x
+        
+        
+        
+    #Return true if any item in molecules is equivalent to the target molecule
+    #Most efficient way to do this: store a boolean field in every molecule box model created, for if it equals the target molecule
+    #This requires calling checkIfEqualsTarget whenever a new molecule is added.
+    def checkIfSolved(self):
+        for moleculeBoxModel in self.molecules.all():
+            if moleculeBoxModel.equalsTarget:
+                return True
+        return False
+        
 
-			
+            
 
 
 """
@@ -299,7 +294,7 @@ class UserProfile(models.Model):
     #Use user.profile to get this UserProfile.
     user = models.ForeignKey(User, unique=True)
     currentNameReagentProblem = models.ForeignKey(ReactionStepModel,   null=True, on_delete=models.SET_NULL)
-	currentSynthesisProblem = models.ForeignKey(SynthesisProblemModel, null=True, on_delete=models.SET_NULL)
+    currentSynthesisProblem = models.ForeignKey(SynthesisProblemModel, null=True, on_delete=models.SET_NULL)
     savedReagentTypes = models.ManyToManyField(ReagentType)
     accuracies = models.ManyToManyField(AccuracyModel)
     #savedProblem = models.ForeignKey(SynthesisProblemModel)

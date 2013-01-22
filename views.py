@@ -6,6 +6,7 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.core.mail import EmailMessage
 import json
 import traceback
 import orgo.engine.serverRender as serverRender
@@ -31,6 +32,9 @@ def signUp(request):
     if request.method == 'POST':
         form = models.mySignUpForm(request.POST)
         if form.is_valid():
+            if User.objects.filter(email=form.cleaned_data['email']):
+                #Non-unique email - not allowed!
+                return home(request, debug="Someone else has already registered with this email!")
             form.save()
             newUser = authenticate(username = form.cleaned_data['username'], 
                 password = form.cleaned_data['password1'])
@@ -56,9 +60,24 @@ def logOut(request):
     logout(request)
     return home(request)
 
-
-
-
+def resetPW(request):
+    if request.method == 'POST':
+        #Use built-in Django magic to reset a user's password and send him an email.
+        email = request.POST['email']
+        try:
+            user = User.objects.get(email=email)
+        except:
+            return home(request, debug = "The email you entered does not correspond to any user.")
+        password = User.objects.make_random_password()
+        user.set_password(password)
+        subject = "Orgo - your new password"
+        body = 'Hello '+user.username+''',
+Here is your new password: ''' + password + '''
+Because this password was sent over email, it is not secure as a permanant password.  Please log in and change it immediately.
+Thank you,
+Felix + Chelsea'''
+        newMessage = EmailMessage(subject, body, to=[email])
+        newMessage.send()
 
 
 #@login_required

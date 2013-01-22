@@ -33,6 +33,12 @@ setInterval(function() {
     <input type="submit" value="Submit" class="btn"/>
 </form>
 
+<h2> Forgot Password? </h2>
+<form action="/orgo/api/resetPW/" method="post" class="form-horizontal">{% csrf_token %}
+    {{resetPWForm.as_p}}
+    <input type="submit" value="Reset" class="btn"/>
+</form>
+
 <!--Can delete; this is me learning Django-->
 <!--<h2> Something or another </h2>
 <form action = "/orgo/api/outpsmiles/" method="post" class="form-horizontal">{% csrf_token %}

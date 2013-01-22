@@ -178,10 +178,10 @@ def renderNameReagent(request):
         #Load up the user's reagent preferences.
         for reagentTypeInstance in profile.savedReagentTypes.all():
             modes.append(reagentTypeInstance.name)
-	return modes
+    return modes
 
 
-	
+    
 @csrf_exempt
 def checkNameReagent(request):
     #Takes in a list of reagents that the user guessed.
@@ -265,10 +265,10 @@ def makeReagentHtml(request):
     except:
         tb = traceback.format_exc()
         return HttpResponse(str(tb))
-		
-		
-		
-		
+        
+        
+        
+        
 ###Some methods for displaying and operating with giant synthesis problems.
 @login_required
 def renderOldSynthesis(request):
@@ -289,72 +289,72 @@ def renderSynthesis(request):
         profile.currentSynthesisProblem.delete()
     except:
         pass
-	
-	modes = checkboxUpdate(request)
+    
+    modes = checkboxUpdate(request)
     if modes == []:
         #Error - at least one mode must be selected!
         return loggedInHome(request, debug = "You must pick at least one reaction type!")
-		
+        
     reactionsteps = randomSynthesisProblemMake(modes)
     synthesis = models.SynthesisProblemModel.create(reactionsteps)
     synthesis.save()
     profile.currentSynthesisProblem = synthesis
     profile.save()
-	
-	return render(request, 'synthesisProblemInterface.html', {"TargetMolecule": synthesis.target.svg, "Name": request.user.username})
+    
+    return render(request, 'synthesisProblemInterface.html', {"TargetMolecule": synthesis.target.svg, "Name": request.user.username})
 
-	
+    
 #Other to-do:
-	#addMoleculeToMolecule in views
-	#addReagentToMolecule in views
-	#add buttons in loggedin page to link to api/renderSynthesis and api/renderSynthesis/resume
-	#MoleculeBoxModelinstance.checkIfEqualsTarget()
+    #addMoleculeToMolecule in views
+    #addReagentToMolecule in views
+    #add buttons in loggedin page to link to api/renderSynthesis and api/renderSynthesis/resume
+    #MoleculeBoxModelinstance.checkIfEqualsTarget()
 
-	
+    
 
 def getSynthesisData(request):
-	#Should return a JSON string with the following attributes contained:
-	#molecules is an array of arrays: [ [idnumber, "<svg>...</svg>"], ... ]
-	#arrows is an array of arrays: [ [idnumber1, idnumber2, "reagentText"], ...]
-	#success   -- a boolean (true/false)
-	
-	synthesis = profile.currentSynthesisProblem
-	
-	
-	#Iterate over all molecules for a specific synthesis
-	moleculesOutput = [ (moleculeBoxModel.id, moleculeBoxModel.svg) 
-						for moleculeBoxModel in synthesis.molecules.all()]
-	
-	#Iterate over all arrows for a specific synthesis
-	arrowsOutput = [ (arrowModel.pointFrom.id, arrowModel.pointTo.id, arrowModel.reagentsHtml)
-					 for arrowModel in synthesis.arrows.all()]
-	
+    #Should return a JSON string with the following attributes contained:
+    #molecules is an array of arrays: [ [idnumber, "<svg>...</svg>"], ... ]
+    #arrows is an array of arrays: [ [idnumber1, idnumber2, "reagentText"], ...]
+    #success   -- a boolean (true/false)
+    
+    synthesis = profile.currentSynthesisProblem
+    
+    
+    #Iterate over all molecules for a specific synthesis
+    moleculesOutput = [ (moleculeBoxModel.id, moleculeBoxModel.svg) 
+                        for moleculeBoxModel in synthesis.molecules.all()]
+    
+    #Iterate over all arrows for a specific synthesis
+    arrowsOutput = [ (arrowModel.pointFrom.id, arrowModel.pointTo.id, arrowModel.reagentsHtml)
+                     for arrowModel in synthesis.arrows.all()]
+    
     responseData = dict()
-	
-	responseData["success"] = synthesis.checkIfSolved()
-	responseData["molecules"] = moleculesOutput
-	responseData["arrows"] = arrowsOutput
+    
+    responseData["success"] = synthesis.checkIfSolved()
+    responseData["molecules"] = moleculesOutput
+    responseData["arrows"] = arrowsOutput
 
-	return HttpResponse(json.dumps(responseData))
-	
+    return HttpResponse(json.dumps(responseData))
+    
 
 @csrf_exempt
 #data: {'molecule1': ui.draggable.attr("id"), 'molecule2': this.attr("id")}
 def addMoleculeToMolecule(request):
-	#Create a new moleculebox, combining the two inputs into one box, appending it to synthesis.molecules
-	#Make sure to check whether they react with each other
-	#Create two new arrows, with empty reagents, correctly attached
-	
-	return getSynthesisData(request)
+    #Create a new moleculebox, combining the two inputs into one box, appending it to synthesis.molecules
+    #Make sure to check whether they react with each other
+    #Create two new arrows, with empty reagents, correctly attached
+    
+    return getSynthesisData(request)
 
-	
-	
+    
+    
 @csrf_exempt
 #data: {'reagents': ui.draggable.attr("reagentString"), 'moleculeOn': this.attr("id")}
 def addReagentToMolecule(request):
-	#Do this via creating a reactionstep
-	#Create a new moleculebox, representing the reaction's products
-	#Create a new arrow, containing html of reagents, from reactants to products
+    #Do this via creating a reactionstep
+    #Create a new moleculebox, representing the reaction's products
+    #Create a new arrow, containing html of reagents, from reactants to products
 
-	return getSynthesisData(request)
+    return getSynthesisData(request)
 

@@ -127,24 +127,30 @@ class ReactionStep:
         #Takes in a molBox (target) and checks if its own products are identical to those in target.
         #Regardless of identical-ness, returns its own products as well.
         if self.react(mode="check"):
-            #Does each product correspond to exactly one target?
-            if len(self.productBox.molecules) != len(target.molecules):
-                return (False, self.productBox)
-            for output in self.productBox.molecules:
-                OK = False
-                for tar in target.molecules:
-                    if moleculeCompare(output, tar):
-                        OK = True
-                        target.molecules.remove(tar)
-                        break
-                    #If by this point, we haven't found a match, return False.
-                if not OK:
-                    return (False, self.productBox)
-            #Reached the end of molecule list - must have perfect match.
-            return (True, self.productBox)
+            return (boxEqualityChecker(self.productBox, target), self.productBox)
         #The input was ill-formatted.
         return (False, self.productBox)
 
+#Called by checkIfEqualsTarget in MoleculeBoxModel in models
+#Called by checkStep in ReactionStep in synthProblem
+#Returns a boolean.
+def boxEqualityChecker(first, second):
+    #Does each product correspond to exactly one target?
+    if len(first.molecules) != len(second.molecules):
+        return False
+    for output in first.molecules:
+        OK = False
+        for target in second.molecules:
+            if moleculeCompare(output, target):
+                OK = True
+                second.molecules.remove(target)
+                break
+            #If by this point, we haven't found a match, return False.
+        if not OK:
+            return False
+    #Reached the end of molecule list - must have perfect match.
+    return True
+    
 
 #MoleculeBox class
 #Represents a draggable box containing molecules (svg).
@@ -426,11 +432,11 @@ def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30):
 #def [moleculeboxes] = getStartingMoleculeBoxes(reactionSteps) in synthProblem
 #Helper method used by a constructor in models.
 def getStartingMoleculeBoxes(reactionSteps):
-	
+    
 
 
-	return moleculeboxes
-	
+    return moleculeboxes
+    
 
 
 
@@ -448,7 +454,7 @@ def reactionStepHtml(reactionStep):
             
     return "<div class = \"reaction\" class = \"ui-widget-content\">"+(html[:-2])+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></div>"
 
-						 
+                         
 def generateNameReagentProblem(mode="AlkeneAlkyne"):
     #Endless loop, for now.  Maybe have some sort of give-up condition?
     while True:

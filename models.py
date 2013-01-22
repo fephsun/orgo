@@ -64,6 +64,7 @@ Contains: pickled list of reaction-step-models by unique ID
 Contains: pickled synthesis problem solution
 Contains: ForeignKey to the final product the synthesis should produce
 """
+#PUT STUFF HERE
 class SynthesisProblemModel(models.Model):
 #    moleculeModels = PickledObjectField()
 #    reactionStepModels = PickledObjectField()
@@ -95,18 +96,19 @@ Contains: foreignkey to a SynthesisProblemModel
 Contains: pickled reagentbox
 Contains: its own HTML representation
 """
-class ReagentModel(models.Model):
-    problemModel = models.ForeignKey('SynthesisProblemModel')
-    reagentBox = PickledObjectField()
-    html = models.TextField()
+#Unused
+# class ReagentModel(models.Model):
+    # problemModel = models.ForeignKey('SynthesisProblemModel')
+    # reagentBox = PickledObjectField()
+    # html = models.TextField()
     
-    #Call ReagentModel.create(parentSynthesisProblemModel, reagentBoxObject) to create a ReagentModel representing reagentBoxObject
-    #reagentBoxObject is an instance of ReagentBox
-    #parentSynthesisProblemModel is an instance of SynthesisProblemModel
-    @classmethod
-    def create(cls, parentSynthesisProblemModel, reagentBoxObject):
-        x = cls(reagentBox = reagentBoxObject, problemModel = parentSynthesisProblemModel, html = reagentBoxObject.stringList())
-        return x
+    # Call ReagentModel.create(parentSynthesisProblemModel, reagentBoxObject) to create a ReagentModel representing reagentBoxObject
+    # reagentBoxObject is an instance of ReagentBox
+    # parentSynthesisProblemModel is an instance of SynthesisProblemModel
+    # @classmethod
+    # def create(cls, parentSynthesisProblemModel, reagentBoxObject):
+        # x = cls(reagentBox = reagentBoxObject, problemModel = parentSynthesisProblemModel, html = reagentBoxObject.stringList())
+        # return x
 
 
     
@@ -117,8 +119,8 @@ Contains: foreignkey to a SynthesisProblemModel
 Contains: pickled reactionstep
 Contains: HTML representation
 """
+#Used in NameReagent
 class ReactionStepModel(models.Model):    
-    problemModel = models.ForeignKey('SynthesisProblemModel', null=True, on_delete=models.SET_NULL)
     reactionStep = PickledObjectField()
     reactantBox = models.ForeignKey('MoleculeBoxModel', related_name='reactant', on_delete=models.SET_NULL)
     productBox = models.ForeignKey('MoleculeBoxModel', related_name='product', on_delete=models.SET_NULL)
@@ -128,12 +130,12 @@ class ReactionStepModel(models.Model):
     #reactionStepObject is an instance of ReactionStep
     #parentSynthesisProblemModel is an instance of SynthesisProblemModel
     @classmethod
-    def create(cls, reactionStepObject, parentSynthesisProblemModel=None):
+    def create(cls, reactionStepObject):
         reactantBox = MoleculeBoxModel.create(reactionStepObject.reactantBox)
         reactantBox.save()
         productBox = MoleculeBoxModel.create(reactionStepObject.productBox)
         productBox.save()
-        x = cls(reactionStep = reactionStepObject, problemModel = parentSynthesisProblemModel, html = reactionStepObject.stringList(),
+        x = cls(reactionStep = reactionStepObject, html = reactionStepObject.stringList(),
             reactantBox = reactantBox, productBox = productBox)
         return x
 
@@ -154,14 +156,14 @@ class mySignUpForm(UserCreationForm):
 
     
 ###Can delete; this is me learning Django
-class MoleculeForm(forms.Form):
-    smiles = forms.CharField(max_length = 100)
-class MoleculeModel(models.Model):
-    smiles = models.CharField(max_length=100)    
-    @classmethod
-    def create(cls, s):
-        x = cls(smiles = s)
-        return x
+#class MoleculeForm(forms.Form):
+#    smiles = forms.CharField(max_length = 100)
+#class MoleculeModel(models.Model):
+#    smiles = models.CharField(max_length=100)    
+#    @classmethod
+    # def create(cls, s):
+        # x = cls(smiles = s)
+        # return x
         
 class ReagentType(models.Model):
     #A little class that saves a string describing each reagent type.

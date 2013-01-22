@@ -251,3 +251,39 @@ def makeReagentHtml(request):
     except:
         tb = traceback.format_exc()
         return HttpResponse(str(tb))
+		
+		
+		
+		
+###Some methods for displaying and operating with giant synthesis problems.
+
+def getSynthesisData(request):
+
+
+    responseData = dict()
+
+	responseData["success"] = 
+
+	#Should return a JSON string with the following attributes contained:
+	#molecules is an array of arrays: [ [idnumber, "<svg>...</svg>"], ... ]
+	#arrows is an array of arrays: [ [idnumber1, idnumber2, "reagentText"], ...]
+	#success   -- a boolean (true/false)
+	return HttpResponse(json.dumps(responseData))
+	
+
+@csrf_exempt
+#data: {'molecule1': ui.draggable.attr("id"),
+#'molecule2': this.attr("id")},
+def addMoleculeToMolecule(request):
+
+	return getSynthesisData(request)
+
+	
+	
+@csrf_exempt
+#data: {'reagents': ui.draggable.attr("reagentString"),
+#'moleculeOn': this.attr("id")},
+def addReagentToMolecule(request):
+
+	return getSynthesisData(request)
+

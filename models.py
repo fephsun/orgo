@@ -122,8 +122,8 @@ Contains: HTML representation
 #Used in NameReagent
 class ReactionStepModel(models.Model):    
     reactionStep = PickledObjectField()
-    reactantBox = models.ForeignKey('MoleculeBoxModel', related_name='reactant', on_delete=models.SET_NULL)
-    productBox = models.ForeignKey('MoleculeBoxModel', related_name='product', on_delete=models.SET_NULL)
+    reactantBox = models.ForeignKey('MoleculeBoxModel', related_name='reactant', null=True, on_delete=models.SET_NULL)
+    productBox = models.ForeignKey('MoleculeBoxModel', related_name='product', null=True, on_delete=models.SET_NULL)
     html = models.TextField()
     
     #Call ReactionStepModel.create(parentSynthesisProblemModel, reactionStepObject) to create a ReactionStepModel representing reactionStepObject
@@ -179,7 +179,7 @@ class UserProfile(models.Model):
     #More to come.
     
     #Use user.profile to get this UserProfile.
-    user = models.ForeignKey(User, unique=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(User, unique=True)
     currentNameReagentProblem = models.ForeignKey(ReactionStepModel, null=True, on_delete=models.SET_NULL)
     savedReagentTypes = models.ManyToManyField(ReagentType)
     #savedProblem = models.ForeignKey(SynthesisProblemModel)
@@ -191,7 +191,8 @@ User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
 class ChooseReagentsForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(ChooseReagentsForm, self).__init__(*args, **kwargs)
-        for name, reactions in typeToReaction.items():
+        sortedNames = sorted(typeToReaction.items(), key=lambda thing: thing[0])
+        for name, unused in sortedNames:
             self.fields[name] = forms.BooleanField(label=name, initial=True, required=False)
             
 

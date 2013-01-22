@@ -320,7 +320,7 @@ def parseReagentsString(inpstring):
 def makeStartingMaterial(mode):
     #Make starting material, based on classes of reactions selected.
     molBoxes = []
-    if ('a2add' in mode) or ('a2other' in mode) or ('a3' in mode):
+    if ('10A Alkenes: halide addition' in mode) or ('10B Alkenes: other' in mode) or ('11 Alkynes' in mode):
         for i in xrange(1):
             molBoxes.append(MoleculeBox([randomGenerator.randomStart(endProb=0.3, maxBranchLength=10,
             alkyneProb=0.1, alkeneProb=0.1,
@@ -515,54 +515,55 @@ KOCCH33 = 35
     #a function of two variables, which takes in a list of molecules (x) and another list of molecules (o) and returns them reacted
 #These are listed roughly by precedence: earlier-listed reactions which qualify take precedence over later-listed ones.
 REACTIONS = (
-(((H2,),(PDC,),(ETOH,)), (lambda x: lambda o: hydrogenate(x+o)), ('a2add',)),
-(((HBR,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "Br")), ('a2add',)),
-(((HF,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "F")), ('a2add',)),
-(((HI,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "I")), ('a2add',)),
-(((HCL,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "Cl")), ('a2add',)),
-(((BR2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "Br")), ('a3',)),
-(((F2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "F")), ('a3',)),
-(((I2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "I")), ('a3',)),
-(((CL2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "Cl")), ('a3',)),
-(((BR2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "Br")), ('a2add',)),
-(((F2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "F")), ('a2add',)),
-(((I2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "I")), ('a2add',)),
-(((CL2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "Cl")), ('a2add',)),
-(((HBR,), (ROOR,), (HEAT, LIGHT)), (lambda x: lambda o: radicalhydrohalogenate(x+o, "Br")), ('a2add',)),
-(((RCO3H,), (CH2CL2,)), (lambda x: lambda o: epoxidate(x+o)), ('a2other',)),
-(((H2SO4,), (H2O,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")), True)), ('a2other',)),
-(((H2SO4,), (ETOH,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, ethanol, True)), ('a2other','illegal')),
-(((H2SO4,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x, o, True)), ('a2other','add')),
-(((H2SO4,), (H2O,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")))), ('a2other',)),
-(((H2SO4,), (ETOH,)), (lambda x: lambda o: acidhydrate(x+o, ethanol)), ('a2other', 'illegal',)),
-(((H2SO4,),), (lambda x: lambda o: acidhydrate(x, o)), ('a2other',)),
-(((BR2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "Br")),('a2add',)),
-(((BR2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "Br")), ('a2other','illegal',)),
-(((BR2,),), (lambda x: lambda o: halohydrate(x, o, "Br")), ('a2other',)),
-(((I2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "I")),('a2add',)),
-(((I2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "I")), ('a2other','illegal')),
-(((I2,),), (lambda x: lambda o: halohydrate(x, o, "I")), ('a2other',)),
-(((F2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "F")), ('a2add',)),
-(((F2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "F")), ('a2other','illegal')),
-(((F2,),), (lambda x: lambda o: halohydrate(x, o, "F")), ('a2other',)),
-(((CL2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "Cl")),('a2add',)),
-(((CL2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "Cl")), ('a2other','illegal')),
-(((CL2,),), (lambda x: lambda o: halohydrate(x, o, "Cl")), ('a2other',)),
-(((BH3,), (THF,), (NAOH,), (H2O2,)), (lambda x: lambda o: hydroborate(x+o)), ('a2other',)),
-(((BH3,), (THF,)), (lambda x: lambda o: hydroborate1(x+o)), ('a2other',)),
-(((NAOH,), (H2O2,)), (lambda x: lambda o: hydroborate2(x+o)), ('a2other',)),
-(((OSO4,), (NMO,), (ACETONE, H2O)), (lambda x: lambda o: dihydroxylate(x+o)), ('a2other',)),
-(((O3,),(CH2CL2,),(ME2S,ZN)), (lambda x: lambda o: ozonolyse(x+o)), ('a2other',)),
-(((NA,), (NH3,)), (lambda x: lambda o: sodiumAmmonia(x+o)), ('a3',)),
-(((LINDLAR,), (H2,)), (lambda x: lambda o: lindlar(x+o)), ('a3',)),
-(((NANH2,), (NH3,)), (lambda x: lambda o: alkyneDeprotonate(x+o)), ('a3',)),
-(((KOCCH33,),), (lambda x: lambda o: tertButoxide(x+o)), ('a2other', 'interesting')),
-((), (lambda x: lambda o: acetylideAdd(x, o)),('a3',))
+(((H2SO4,), (H2O,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")), True)), ('10B Alkenes: other',)),
+(((H2,),(PDC,),(ETOH,)), (lambda x: lambda o: hydrogenate(x+o)), ('10A Alkenes: halide addition',)),
+(((HBR,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "Br")), ('10A Alkenes: halide addition',)),
+(((HF,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "F")), ('10A Alkenes: halide addition',)),
+(((HI,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "I")), ('10A Alkenes: halide addition',)),
+(((HCL,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "Cl")), ('10A Alkenes: halide addition',)),
+(((BR2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "Br")), ('11 Alkynes',)),
+(((F2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "F")), ('11 Alkynes',)),
+(((I2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "I")), ('11 Alkynes',)),
+(((CL2,),(CH2CL2,),(EQV1,)), (lambda x: lambda o: halogenate1eq(x+o, "Cl")), ('11 Alkynes',)),
+(((BR2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "Br")), ('10A Alkenes: halide addition',)),
+(((F2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "F")), ('10A Alkenes: halide addition',)),
+(((I2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "I")), ('10A Alkenes: halide addition',)),
+(((CL2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "Cl")), ('10A Alkenes: halide addition',)),
+(((HBR,), (ROOR,), (HEAT, LIGHT)), (lambda x: lambda o: radicalhydrohalogenate(x+o, "Br")), ('10A Alkenes: halide addition',)),
+(((RCO3H,), (CH2CL2,)), (lambda x: lambda o: epoxidate(x+o)), ('10B Alkenes: other',)),
+(((H2SO4,), (ETOH,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, ethanol, True)), ('10B Alkenes: other','illegal')),
+(((H2SO4,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x, o, True)), ('10B Alkenes: other','add')),
+(((H2SO4,), (H2O,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")))), ('10B Alkenes: other',)),
+(((H2SO4,), (ETOH,)), (lambda x: lambda o: acidhydrate(x+o, ethanol)), ('10B Alkenes: other', 'illegal',)),
+(((H2SO4,),), (lambda x: lambda o: acidhydrate(x, o)), ('10B Alkenes: other',)),
+(((BR2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "Br")),('10A Alkenes: halide addition',)),
+(((BR2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "Br")), ('10B Alkenes: other','illegal',)),
+(((BR2,),), (lambda x: lambda o: halohydrate(x, o, "Br")), ('10B Alkenes: other',)),
+(((I2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "I")),('10A Alkenes: halide addition',)),
+(((I2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "I")), ('10B Alkenes: other','illegal')),
+(((I2,),), (lambda x: lambda o: halohydrate(x, o, "I")), ('10B Alkenes: other',)),
+(((F2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "F")), ('10A Alkenes: halide addition',)),
+(((F2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "F")), ('10B Alkenes: other','illegal')),
+(((F2,),), (lambda x: lambda o: halohydrate(x, o, "F")), ('10B Alkenes: other',)),
+(((CL2,), (H2O,)), (lambda x: lambda o: halohydrate(x+o, Molecule(Atom("O")), "Cl")),('10A Alkenes: halide addition',)),
+(((CL2,), (ETOH,)), (lambda x: lambda o: halohydrate(x+o, ethanol, "Cl")), ('10B Alkenes: other','illegal')),
+(((CL2,),), (lambda x: lambda o: halohydrate(x, o, "Cl")), ('10B Alkenes: other',)),
+(((BH3,), (THF,), (NAOH,), (H2O2,)), (lambda x: lambda o: hydroborate(x+o)), ('10B Alkenes: other',)),
+(((BH3,), (THF,)), (lambda x: lambda o: hydroborate1(x+o)), ('10B Alkenes: other',)),
+(((NAOH,), (H2O2,)), (lambda x: lambda o: hydroborate2(x+o)), ('10B Alkenes: other',)),
+(((OSO4,), (NMO,), (ACETONE, H2O)), (lambda x: lambda o: dihydroxylate(x+o)), ('10B Alkenes: other',)),
+(((O3,),(CH2CL2,),(ME2S,ZN)), (lambda x: lambda o: ozonolyse(x+o)), ('10B Alkenes: other',)),
+(((NA,), (NH3,)), (lambda x: lambda o: sodiumAmmonia(x+o)), ('11 Alkynes',)),
+(((LINDLAR,), (H2,)), (lambda x: lambda o: lindlar(x+o)), ('11 Alkynes',)),
+(((NANH2,), (NH3,)), (lambda x: lambda o: alkyneDeprotonate(x+o)), ('11 Alkynes',)),
+(((KOCCH33,),), (lambda x: lambda o: tertButoxide(x+o)), ('10B Alkenes: other', 'interesting')),
+((), (lambda x: lambda o: acetylideAdd(x, o)),('11 Alkynes',))
 )
 
+
 SYNTHONLY = [
-(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(alkyneDeprotonate(x), o)),('a3','add')),
-(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(x, alkyneDeprotonate(o))),('a3','add'))
+(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(alkyneDeprotonate(x), o)),('11 Alkynes','add')),
+(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(x, alkyneDeprotonate(o))),('11 Alkynes','add'))
 ]
 
 FORSYNTH = [reaction for reaction in REACTIONS if not ('illegal' in reaction[2])] + SYNTHONLY
@@ -579,7 +580,7 @@ for reaction in FORSYNTH:
             typeToReaction[label] = [reaction]
 
 #You can make larger groups of reactions down here.
-AlkeneAlkyneMode = ('a2add', 'a2other', 'a3')
+AlkeneAlkyneMode = ('10A Alkenes: halide addition', '10B Alkenes: other', '11 Alkynes')
 
 
 

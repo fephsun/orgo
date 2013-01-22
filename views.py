@@ -78,13 +78,13 @@ Thank you,
 Your friendly admins'''
         newMessage = EmailMessage(subject, body, to=[email])
         newMessage.send()
-		return render(request, 'successfulReset.html')
-	return home(request, debug = "Unknown error in password reset")
-	
-	
+        return render(request, 'successfulReset.html')
+    return home(request, debug = "Unknown error in password reset")
+    
+    
 def changePW(request):
-	if request.method == 'POST':
-		pass
+    if request.method == 'POST':
+        pass
 
 
 #@login_required
@@ -137,7 +137,7 @@ def loggedInHome(request, debug = ""):
                                              'ChooseReagentsForm':models.ChooseReagentsForm(initial=initialValuesDict), 
                                              'debug': debug,
                                              'graphData': graphList,
-											 'changePW': PasswordChangeForm})
+                                             'changePW': PasswordChangeForm})
     
 ###Can delete; this is me learning Django
 def renderSmiles(request, molecule):

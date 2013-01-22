@@ -137,7 +137,7 @@ def loggedInHome(request, debug = ""):
                                              'ChooseReagentsForm':models.ChooseReagentsForm(initial=initialValuesDict), 
                                              'debug': debug,
                                              'graphData': graphList,
-                                             'changePW': PasswordChangeForm})
+                                             'changePW': PasswordChangeForm(request.user)})
     
 ###Can delete; this is me learning Django
 def renderSmiles(request, molecule):

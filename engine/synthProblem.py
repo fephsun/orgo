@@ -426,6 +426,8 @@ def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30):
             #Didn't fuse any molecules.  Oh well.
             molBoxes = newMolBoxes
     #TODO: should return a SynthesisProblem object, once this class is fleshed out.
+    
+    
     return reactions
                          
 
@@ -433,9 +435,7 @@ def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30):
 #Helper method used by a constructor in models.
 def getStartingMoleculeBoxes(reactionSteps):
     
-
-
-    return moleculeboxes
+    return []
     
 
 

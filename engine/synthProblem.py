@@ -444,7 +444,7 @@ def generateNameReagentProblem(mode="AlkeneAlkyne"):
         reactantBox = makeStartingMaterial(mode)[0]  #makeStartingMaterial returns a list of molBoxes
         #Try up to 10 times to make a reaction.
         for attemptNo in xrange(10):
-            reagents, rxnFunction, ignore = legalRxns[random.randint(0, len(legalRxns)-1)]
+            reagents, rxnFunction, labels = legalRxns[random.randint(0, len(legalRxns)-1)]
             if debug:
                 print "Trying step: " + str(reagents)
             currentRxn = ReactionStep(reactantBox)
@@ -452,6 +452,10 @@ def generateNameReagentProblem(mode="AlkeneAlkyne"):
                 currentRxn.hasReagents[reagent[0]] = True
             if currentRxn.react() and len(currentRxn.productBox.molecules)<3:
                 #A good reaction.
+                #Decode labels to find the reaction label.
+                for label in labels:
+                    if not(label in nonLabelKeywords):
+                        currentRxn.catagory = label
                 return currentRxn
                 if debug:
                     print "Result of successful reaction: " +str(smiles(currentRxn.productBox.molecules))

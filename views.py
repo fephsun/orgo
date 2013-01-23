@@ -522,8 +522,8 @@ def askForHelp(request):
     return HttpResponse(len(waitingList.users.all()))
     
 def helpeeWaitPoll(request):
-    #Gets called every 
-    pass
+    #Gets called every couple of seconds by clients waiting for help.
+    models.ChatPair.objects.filter(helpee=request.user)
     
 
 

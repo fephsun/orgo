@@ -7,6 +7,7 @@ import django.forms as forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 class PickledObjectField(models.Field):
     description = "An object."
@@ -290,19 +291,27 @@ class HelpWaitingList(models.Model):
     #For now, we will only have one instance of this, but eventually,
     #each class will have one.
     #Eventually, we will need additional fields (class, etc.)
-    users = models.ManyToManyField(User, null=True)
+    users = models.ManyToManyField(User, null=True, through='WaitTimer')
     @classmethod
     def create(cls):
         return cls()
+        
+class WaitTimer(models.Model):
+    helpWaitingList = models.ForeignKey(HelpWaitingList)
+    user = models.ForeignKey(User)
+    lastCheck = models.DateTimeField(auto_now=True)  #auto_now automatically changes this field to now whenever the object is saved.
     
 class ChatPair(models.Model):
     #A chat between two people, with asymmetric naming.
     helpee = models.ForeignKey(User, related_name='helpee')
+    helpeeLastCheck = models.DateTimeField(null=True)
     helper = models.ForeignKey(User, related_name='helper')
+    helperLastCheck = models.DateTimeField(null=True)    #Can't do auto_now, because there are two users to track.
+    initTime = models.DateTimeField()
     chatRecord = models.ManyToManyField("ChatLine")
     @classmethod
     def create(cls, helpee, helper):
-        return cls(helpee=helpee, helper=helper)
+        return cls(helpee=helpee, helper=helper, initTime=timezone.now(), helpeeLastCheck=timezone.now(), helperLastCheck=timezone.now())
     
 class ChatLine(models.Model):
     originator = models.ForeignKey(User)

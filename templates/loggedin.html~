@@ -9,14 +9,10 @@
 </head>
 <h2> Welcome, {{name}} </h2>
  {{item1|safe}}
+ 
+  <h2> Resume an old problem </h2>
 
-<p>
-<a href="/orgo/chat/volunteertohelp"> Help others </a>
-</p>
-
-<p>
-<a href="/orgo/chat/helpeestatictest"> Test the ask for help thing </a>
-</p>
+ 
  
  <h2> Naming Reagents </h2>
  <form action = "/orgo/namereagent/resume/" method="post" class="form-horizontal">{% csrf_token %}

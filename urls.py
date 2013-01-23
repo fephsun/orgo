@@ -17,11 +17,19 @@ urlpatterns = patterns('',
     url(r'^api/changePW/$', 'orgo.views.changePW', name='changePW'),
     url(r'^logout/$', 'orgo.views.logOut', name='logOut'),
     url(r'^api/problemInterface/$', 'orgo.views.renderProblem', name='renderProblem'),    
-    url(r'^api/checkSingleStepReaction/$', 'orgo.views.checkNameReagent', name='checkNameReagent'),    
+    url(r'^api/checkSingleStepReaction/$', 'orgo.views.checkNameReagent', name='checkNameReagent'), 
+    url(r'^api/showSingleStepAnswer/$', 'orgo.views.showNRAnswer', name='showNRAnswer'),   
     url(r'^api/outpsmiles/$', 'orgo.views.outpSmiles', name='outpSmiles'),  ###Can delete; this is me learning Django  
     url(r'^homeMoleculeChanger/$', 'orgo.views.homeMoleculeChanger', name='homeMoleculeChanger'),
     url(r'^namereagent/$', 'orgo.views.renderNameReagent', name='renderNameReagent'),
     url(r'^namereagent/resume/$', 'orgo.views.renderOldNameReagent', name='renderOldNameReagent'),
+    url(r'^chat/helperpoll/$', 'orgo.views.helperWaitPoll', name='helperWaitPoll'),
+    url(r'^chat/helpeepoll/$', 'orgo.views.helpeeWaitPoll', name='helpeeWaitPoll'),
+    url(r'^chat/askforhelp/$', 'orgo.views.askForHelp', name='askForHelp'),
+    url(r'^chat/volunteertohelp/$', 'orgo.views.volunteerToHelp', name='volunteerToHelp'),
+    url(r'^chat/helpeestatictest/$', 'orgo.views.helpeeStaticTest', name='helpeeStaticTest'), #This is temporary
+    url(r'^chat/helpermain/$', 'orgo.views.helperMain', name='helperMain'),
+    
     
     url(r'^renderSynthesis/$', 'orgo.views.renderSynthesis', name='renderSynthesis'),
     url(r'^renderSynthesis/resume/$', 'orgo.views.renderOldSynthesis', name='renderOldSynthesis'),

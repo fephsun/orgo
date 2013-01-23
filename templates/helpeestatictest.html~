@@ -1,0 +1,49 @@
+<html>
+<head>
+    <script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"></script>
+</head>
+
+<script>
+$(document).ready(function(){
+    askForHelp();
+
+});
+
+function askForHelp() {
+    $.ajax({
+        type: "GET",
+        url: "/orgo/chat/askforhelp/",
+        success: function(data) {
+            $("#numInQueue").html(data)
+        
+        }
+    });
+    setTimeout(keepPolling, 3000);
+}
+
+function keepPolling() {
+    $.ajax({
+        type: "GET",
+        url: "/orgo/chat/helpeepoll/",
+        success: function(data) {
+            $(".allOut").html(data);
+            dataObject = jQuery.parseJSON(data);
+            if (dataObject.success){
+                $("#numInQueue").html("Success!");
+            } else {
+                $("#numInQueue").html(dataObject.queueSize);
+            }
+
+        }
+    });
+    setTimeout(keepPolling, 3000);
+}
+</script>
+<div id="numInQueue">
+</div>
+
+<div id="allOut">
+</div>
+
+
+</html>

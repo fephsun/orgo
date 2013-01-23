@@ -435,7 +435,7 @@ def addMoleculeToMolecule(request):
             testStep.addMolecule(moleculebox2)
             
             synthesis = request.user.profile.currentSynthesisProblem
-            (isTarget, productBox) = testStep.checkStep(synthesis.target)
+            (isTarget, productBox) = testStep.checkStep(synthesis.target.moleculeBox)
             
             moleculeboxmodel3 = models.MoleculeBoxModel.create(productBox)
             moleculeboxmodel3.equalsTarget = isTarget
@@ -486,7 +486,7 @@ def addReagentToMolecule(request):
             testStep.addReagent(parseReagentsString(reagentString))
             
             synthesis = request.user.profile.currentSynthesisProblem
-            (isTarget, productBox) = testStep.checkStep(synthesis.target)
+            (isTarget, productBox) = testStep.checkStep(synthesis.target.moleculeBox)
             
             moleculeboxmodel2 = models.MoleculeBoxModel.create(productBox)
             moleculeboxmodel2.equalsTarget = isTarget

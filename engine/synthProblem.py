@@ -88,7 +88,11 @@ class ReactionStep:
         
     #Returns a list of the reagents contained in this reaction step as HTML-printable strings.
     def stringList(self):
-        return [REAGENTS[reagent][0] for reagent in list(self.hasReagents) if self.hasReagents[reagent]] 
+        out = ''
+        for reagent in list(self.hasReagents):
+            if self.hasReagents[reagent]:
+                out += REAGENTS[reagent][0] + ', '
+        return out
     
     
     def checkStep(self, target):

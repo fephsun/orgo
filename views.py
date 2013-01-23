@@ -523,9 +523,16 @@ def askForHelp(request):
     
 def helpeeWaitPoll(request):
     #Gets called every couple of seconds by clients waiting for help.
-    models.ChatPair.objects.filter(helpee=request.user)
-    
-
+    out = dict()
+    try:
+        chat = request.user.chatpair_set.all()[0]
+    except:
+        #Nope, keep waiting.
+        out['success'] = False
+        out['queueSize'] = request.user.helpwaitinglist_set()[0].users.count()
+        return HttpResponse(json.dumps(out))
+    out['success'] = True
+    return HttpResponse(json.dumps(out))
 
 
 

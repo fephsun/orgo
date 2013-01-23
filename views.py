@@ -83,8 +83,15 @@ Your friendly admins'''
     
     
 def changePW(request):
+    #Change the user's password.
     if request.method == 'POST':
-        pass
+        if authenticate(username=request.user.username, password=request.POST['old_password']) == None:
+            return loggedInHome(request, debug="Your old password is incorrect.")
+        if request.POST['new_password1'] != request.POST['new_password2']:
+            return loggedInHome(request, debug="Your two new passwords don't match.")
+        request.user.set_password(request.POST['new_password1'])
+        return loggedInHome(request, debug="Password changed successfully.")
+        #old_password, new_password1, new_password2
 
 
 #@login_required
@@ -286,6 +293,15 @@ def checkNameReagent(request):
         responseData["success"] = False
         
       return HttpResponse(json.dumps(responseData))
+      
+@csrf_exempt
+def showNRAnswer(request):
+    out = request.user.profile.currentNameReagentProblem.html
+    htmlOutput =  "<li class=\"reagent\" class = \"ui-state-default\" >"+out+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></li>"
+    #Mark this problem as done.
+    request.user.profile.currentNameReagentProblem.done = True
+    request.user.profile.currentNameReagentProblem.save()
+    return HttpResponse(htmlOutput)
  
     
 ##Make this have a shiny flowchart layout once that becomes possible.

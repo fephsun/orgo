@@ -176,7 +176,7 @@ class SynthesisProblemModel(models.Model):
         #molecules should contain the starting materials, which aren't the product of any reaction
         for moleculebox in getStartingMoleculeBoxes(reactionSteps): #helper method defined in synthProblem
             m = MoleculeBoxModel.create(moleculebox)
-            m.checkIfEqualsTarget(t)
+            m.checkIfEqualsTarget(t.moleculeBox)
             m.save()
             try:
                 x.molecules.add(m)

@@ -165,125 +165,23 @@ def parseReagentsString(inpstring):
 
     #hacky
     #Make sure you don't count substrings if you're counting things they're part of.
-    # if (string.match(/ch2cl2/g) != null) {
-        # if ((string.match(/h2/g).length - string.match(/ch2cl2/g).length) == 0)
-            # dictionary["H<sub>2</sub>"] = false;
-        # if ((string.match(/cl2/g).length - string.match(/ch2cl2/g).length) == 0)
-            # dictionary["Cl<sub>2</sub>"] = false;
-    # }
-    if string.count("ch2cl2") != 0:
-        if (string.count("h2") - string.count("ch2cl2")) == 0:
-            outp[H2] = False
-        if (string.count("cl2") - string.count("ch2cl2")) == 0:
-            outp[CL2] = False
-            
-    # if (string.match(/nanh2/g) != null) {
-        # if ((string.match(/na/g).length - string.match(/nanh2/g).length) == 0)
-            # dictionary["Na"] = false;
-        # if ((string.match(/h2/g).length - string.match(/nanh2/g).length) == 0)
-            # dictionary["H<sub>2</sub>"] = false;
-    # }
-    if string.count("nanh2") != 0:
-        if (string.count("na") - string.count("nanh2")) == 0:
-            outp[NA] = False
-        if (string.count("h2") - string.count("nanh2")) == 0:
-            outp[H2] = False
-        
-    # if (string.match(/naoh/g) != null) {
-        # if ((string.match(/na/g).length - string.match(/naoh/g).length) == 0)
-            # dictionary["Na"] = false;
-    # }
-    if string.count("naoh") != 0:
-        if (string.count("naoh") - string.count("na")) == 0:
-            outp[NA] = False
-        
-    # if (string.match(/hydrogen fluoride/g) != null) {
-        # if ((string.match(/hydrogen fluoride/g).length - string.match(/hydrogen/g).length) == 0)
-            # dictionary["H<sub>2</sub>"] = false;
-    # }
-    if string.count("hydrogen fluoride") != 0:
-        if (string.count("hydrogen fluoride") - string.count("hydrogen")) == 0:
-            outp[H2] = False
-        
-    # if (string.match(/thf/g) != null) {
-        # if ((string.match(/thf/g).length - string.match(/hf/g).length) == 0)
-            # dictionary["HF"] = false;
-    # }
-    if string.count("thf") != 0:
-        if (string.count("thf") - string.count("hf")) == 0:
-            outp[HF] = False
-        
-    # if (string.match(/hydrogen chloride/g) != null) {
-        # if ((string.match(/hydrogen chloride/g).length - string.match(/hydrogen/g).length) == 0)
-            # dictionary["H<sub>2</sub>"] = false;
-    # }
-    if string.count("hydrogen chloride") != 0:
-        if (string.count("hydrogen chloride") - string.count("hydrogen")) == 0:
-            outp[H2] = False
-        
-    # if (string.match(/hydrogen iodide/g) != null) {
-        # if ((string.match(/hydrogen iodide/g).length - string.match(/hydrogen/g).length) == 0)
-            # dictionary["H<sub>2</sub>"] = false;
-    # }
-    if string.count("hydrogen iodide") != 0:
-        if (string.count("hydrogen iodide") - string.count("hydrogen")) == 0:
-            outp[H2] = False
-        
-    # if (string.match(/hydrogen bromide/g) != null) {
-        # if ((string.match(/hydrogen bromide/g).length - string.match(/hydrogen/g).length) == 0)
-            # dictionary["H<sub>2</sub>"] = false;
-    # }
-    # }
-    if string.count("hydrogen bromide") != 0:
-        if (string.count("hydrogen bromide") - string.count("hydrogen")) == 0:
-            outp[H2] = False
-        
-    # if (string.match(/h2[o0]/g) != null) {
-        # if ((string.match(/h2[o0]/g).length - string.match(/h2/g).length) == 0)
-            # dictionary["H<sub>2</sub>"] = false;
-    # }
-    if string.count("h20") != 0:
-        if (string.count("h20") - string.count("h2")) == 0:
-            outp[H2] = False
-    if string.count("h2o") != 0:
-        if (string.count("h2o") - string.count("h2")) == 0:
-            outp[H2] = False
-        
-    # if (string.match(/co3h/g) != null) {
-        # if ((string.match(/co3h/g).length - string.match(/o3/g).length) == 0)
-            # dictionary["O<sub>3</sub>"] = false;
-    # }
-    if string.count("co3h") != 0:
-        if (string.count("co3h") - string.count("o3")) == 0:
-            outp[O3] = False
-        
-    # if (string.match(/acetone/g) != null) {
-        # if ((string.match(/acetone/g).length - string.match(/one/g).length) == 0)
-            # dictionary["1 equiv."] = false;
-    # }
-    if string.count("acetone") != 0:
-        if (string.count("acetone") - string.count("one")) == 0:
-            outp[EQV1] = False
-        
-    # if (string.match(/h2so4/g) != null) {
-        # if ((string.match(/h2so4/g).length - string.match(/h2/g).length)==0)
-            # dictionary["H<sub>2</sub>"] = false;
-    # }
-    if string.count("h2so4") != 0:
-        if (string.count("h2so4") - string.count("h2")) == 0:
-            outp[H2] = False
-        
-    # if (string.match(/h2o2/g) != null) {
-        # if ((string.match(/h2o2/g).length - string.match(/h2/g).length)==0)
-            # dictionary["H<sub>2</sub>"] = false;
-        # if ((string.match(/h2o2/g).length - string.match(/h2o/g).length)==0)
-            # dictionary["H<sub>2</sub>O"] = false;
-    # }
-    if string.count("h2o2") != 0:
-        if (string.count("h2o2") - string.count("h2")) == 0:
-            outp[H2] = False
-        if (string.count("h2o2") - string.count("h2o")) == 0:
-            outp[H2O] = False
+    
+    if string.count("ch2cl2") + string.count("nanh2") + string.count("h2o") + string.count("h20") + string.count("h2so4") + string.count("h2o2") == string.count("h2"):
+        outp[H2] = False
+    if string.count("cl2") == string.count("ch2cl2"):
+        outp[CL2] = False
+    if string.count("naoh") + string.count("nanh2") == string.count("na"):
+        outp[NA] = False
+    if (string.count("hydrogen fluoride") + string.count("hydrogen chloride") + string.count("hydrogen iodide") + string.count("hydrogen bromide") - string.count("hydrogen")) == 0:
+        outp[H2] = False
+    if (string.count("thf") - string.count("hf")) == 0:
+        outp[HF] = False
+    if (string.count("co3h") - string.count("o3")) == 0:
+        outp[O3] = False
+    if (string.count("acetone") + string.count("propanone") + string.count("ozone") - string.count("one")) == 0:
+        outp[EQV1] = False
+    if (string.count("h2o2") - string.count("h2o")) == 0:
+        outp[H2O] = False
        
     return outp
     

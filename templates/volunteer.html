@@ -16,7 +16,7 @@ function getQueue() {
         success: function(data) {
             out = ""
             //Data contains a list of waiting users.
-            nameArray = data.split()
+            nameArray = data.split(" ")
             for (i=0; i<nameArray.length; i++) {
                 out += '<a href="#" onclick="connectHelpee(this.id)" id="'+nameArray[i]+'">'+nameArray[i]+'</a> <br / >'
             }

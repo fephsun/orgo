@@ -522,8 +522,9 @@ def askForHelp(request):
     else:
         waitingList = models.HelpWaitingList.objects.all()[0]
     #Add this user to the waiting list.
-    memb = models.WaitTimer(helpWaitingList=waitingList, user=request.user)
-    memb.save()
+    if len(models.WaitTimer.objects.filter(user=request.user))==0:
+        memb = models.WaitTimer(helpWaitingList=waitingList, user=request.user)
+        memb.save()
     return HttpResponse(len(waitingList.users.all()))
   except StandardError as e:
     return HttpResponse(str(e))
@@ -555,7 +556,8 @@ def helpeeWaitPoll(request):
         chats.sort(key=lambda x: x.initTime, reverse=True)
         thisChat = chats[0]
         for i in xrange(1, len(chats)):
-            models.ChatPairs.delete(chats[i])
+            models.ChatPair.delete(chats[i])
+        out['helper'] = thisChat.helper.username
         return HttpResponse(json.dumps(out))
   except StandardError as e:
     return HttpResponse(str(e))

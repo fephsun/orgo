@@ -29,14 +29,14 @@ function keepPolling() {
             $("#allOut").html(data);
             dataObject = jQuery.parseJSON(data);
             if (dataObject.success){
-                $("#numInQueue").html("Success!");
+                $("#numInQueue").html("Success!  Helped by "+dataObject.helper);
             } else {
                 $("#numInQueue").html(dataObject.queueSize);
+                setTimeout(keepPolling, 3000);
             }
 
         }
     });
-    setTimeout(keepPolling, 3000);
 }
 </script>
 <div id="numInQueue">

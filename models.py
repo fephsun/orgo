@@ -103,7 +103,10 @@ class SolutionModel(models.Model):
             
         for moleculeboxmodel in moleculeboxmodels:
             assert moleculeboxmodel != None
-            x.molecules.add(moleculeboxmodel)
+            try:
+                x.molecules.add(moleculeboxmodel)
+            except:
+                raise Exception("04")
         
         return x
     
@@ -175,7 +178,10 @@ class SynthesisProblemModel(models.Model):
             m = MoleculeBoxModel.create(moleculebox)
             m.checkIfEqualsTarget(t)
             m.save()
-            x.molecules.add(m)
+            try:
+                x.molecules.add(m)
+            except:
+                raise Exception("05")
         
         return x
         
@@ -185,10 +191,13 @@ class SynthesisProblemModel(models.Model):
     #Most efficient way to do this: store a boolean field in every molecule box model created, for if it equals the target molecule
     #This requires calling checkIfEqualsTarget whenever a new molecule is added.
     def checkIfSolved(self):
-        for moleculeBoxModel in self.molecules.all():
-            if moleculeBoxModel.equalsTarget:
-                return True
-        return False
+        try:
+            for moleculeBoxModel in self.molecules.all():
+                if moleculeBoxModel.equalsTarget:
+                    return True
+            return False
+        except:
+            raise Exception("06")
         
 
             

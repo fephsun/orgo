@@ -255,7 +255,7 @@ def checkNameReagent(request):
         #If the problem is done, do nothing - don't let them get more points.
         if profile.currentNameReagentProblem.done:
             return HttpResponse("")
-        testStep.hasReagents = reagentsDict
+        testStep.addReagent(reagentsDict)
         correct, products = testStep.checkStep(target)
         responseData = dict()
         responseData["success"] = correct
@@ -362,12 +362,7 @@ def renderSynthesis(request):
     
     return render(request, 'synthesisProblemInterface.html', {"TargetMolecule": synthesis.target.svg, "Name": request.user.username})
 
-    
-#Other to-do:
-    #addMoleculeToMolecule in views
-    #addReagentToMolecule in views
-    #add buttons in loggedin page to link to api/renderSynthesis and api/renderSynthesis/resume
-    #MoleculeBoxModelinstance.checkIfEqualsTarget()
+
 
     
 
@@ -377,7 +372,7 @@ def getSynthesisData(request):
     #arrows is an array of arrays: [ [idnumber1, idnumber2, "reagentText"], ...]
     #success   -- a boolean (true/false)
     
-    synthesis = profile.currentSynthesisProblem
+    synthesis = request.user.profile.currentSynthesisProblem
     
     
     #Iterate over all molecules for a specific synthesis
@@ -396,13 +391,55 @@ def getSynthesisData(request):
 
     return HttpResponse(json.dumps(responseData))
     
-
+    
+#Other to-do:
+    #addReagentToMolecule in views
+    
+    
 @csrf_exempt
 #data: {'molecule1': ui.draggable.attr("id"), 'molecule2': this.attr("id")}
 def addMoleculeToMolecule(request):
     #Create a new moleculebox, combining the two inputs into one box, appending it to synthesis.molecules
-    #Make sure to check whether they react with each other
+    #Make sure to check whether they react with each other -- do this via reactionStep
     #Create two new arrows, with empty reagents, correctly attached
+    
+    if request.method == 'POST':
+        try:
+            moleculeboxmodel1 = MoleculeBoxModel.objects.get(id=request.POST["molecule1"])
+            moleculebox1 = moleculeboxmodel1.moleculeBox
+            
+            moleculeboxmodel2 = MoleculeBoxModel.objects.get(id=request.POST["molecule2"])
+            moleculebox2 = moleculeboxmodel2.moleculeBox
+            
+            testStep = ReactionStep(moleculebox1)
+            testStep.addMolecule(moleculebox2)
+            
+            synthesis = request.user.profile.currentSynthesisProblem
+            (isTarget, productBox) = testStep.checkStep(synthesis.target)
+            
+            moleculeboxmodel3 = MoleculeBoxModel.create(productBox)
+            moleculeboxmodel3.equalsTarget = isTarget
+            moleculeboxmodel3.save()
+            
+            #newPointFrom, newPointTo, newReagentsHtml
+            arrow1 = ArrowModel.create(moleculeboxmodel1, moleculeboxmodel3, "")
+            arrow1.save()
+            arrow2 = ArrowModel.create(moleculeboxmodel2, moleculeboxmodel3, "")
+            arrow2.save()
+            
+            #Add the arrows and the new moleculebox to the synthesis
+            synthesis.molecules.add(moleculeboxmodel3)
+            synthesis.arrows.add(arrow1)
+            synthesis.arrows.add(arrow2)
+            
+            
+        #For saner debugging
+        except StandardError as e:
+            responseData = dict()
+            responseData["success"] = False
+            responseData["arrows"] = []
+            responseData["molecules"] = [(1, str(e))]
+            return HttpResponse(json.dumps(responseData))
     
     return getSynthesisData(request)
 

@@ -45,8 +45,8 @@ class MoleculeBoxModel(models.Model):
     svg = models.TextField(null=True)
     equalsTarget = models.BooleanField()
     
-    #Call MoleculeBoxModel.create(parentSynthesisProblemModel, moleculeBoxObject) to create a MoleculeBoxModel representing moleculeBoxObject
-    #mobooleanfield(nleculeBoxObject is an instance of MoleculeBox
+    #Call MoleculeBoxModel.create(moleculeBoxObject) to create a MoleculeBoxModel representing moleculeBoxObject
+    #moleculeBoxObject is an instance of MoleculeBox
     #parentSynthesisProblemModel is an instance of SynthesisProblemModel
     @classmethod
     def create(cls, moleculeBoxObject):
@@ -57,11 +57,6 @@ class MoleculeBoxModel(models.Model):
     #returns True or False, updates its own equalsTarget field with same
     def checkIfEqualsTarget(self, target):
         self.equalsTarget = boxEqualityChecker(self.moleculeBox, target.moleculeBox)
-        
-        #Make helper function:
-        #self.productBox in checkStep == self.moleculeBox here
-        #target in checkStep == target.moleculeBox here
-        
         return self.equalsTarget
         
         
@@ -72,6 +67,8 @@ class ArrowModel(models.Model):
     reagentsHtml = models.TextField(null=True)
     
     @classmethod
+    #newPointFrom and newPointTo are MoleculeBoxModels
+    #newReagentsHtml is a string
     def create(cls, newPointFrom, newPointTo, newReagentsHtml):
         x = cls(pointFrom = newPointFrom, pointTo = newPointTo, reagentsHtml = newReagentsHtml)
         return x        

@@ -6,37 +6,6 @@ import reactions as reactionsModule
 import string
 import serverRender
 
-#Synthesis problem class
-    #List of starting materials
-    #List of molecules in target
-    #List of reactionSteps
-    #List of reagents the user has entered into sidebar
-    #A synthesisSolution
-
-    
-    #Checks, when a new molecule or reagent is added to a reaction step, whether it matches any known reactions
-        #If so, creates a new molecule to represent the reacted product.
-        #Updates its knowledge of whether the problem is solved or not.
-
-    # Can delete individual molecule-boxes or individual reaction-steps.
-
-    # Can add: reagents to reaction-steps, reagents to molecule-boxes, reaction-steps to molecule-boxes, molecule-boxes to reaction-steps.
-# class SynthesisProblem:
-    # def __init__(self, startingMaterialBoxes, finalProduct, solution):
-    
-        # All of these variables must be set at some point or another.
-        # self.startingBoxes = []                 #a list of instances of MoleculeBox
-        # self.finalProduct = None                #an instance of MoleculeBox
-        # self.steps = []                         #a list of instances of ReactionStep, in any order
-        # self.solution = solution                #an instance of SynthesisSolution
-
-
-# SynthesisSolution class
-    # List of reactionSteps
-# class SynthesisSolution:
-    # def __init__(self, steps):
-        # self.steps = [] #to be a list of reactionSteps
-
 
 
 #ReactionStep class
@@ -57,9 +26,9 @@ class ReactionStep:
     #Add more reagents.
     def addReagent(self, reagentDict):
         for reagent in list(REAGENTS):
-            if reagentBox.hasReagents[reagent]:
+            if reagentBox.hasReagents[reagent] or reagentDict[reagent]:
                 self.hasReagents[reagent] = True
-        return self.react()
+                
     #def addReagent(self, reagentBox): #reagentList is a list of reagent boxes
     #    for reagent in list(REAGENTS):
     #        if reagentBox.hasReagents[reagent]:
@@ -69,7 +38,6 @@ class ReactionStep:
     def addMolecule(self, moleculeBox):
         self.otherMoleculeBoxes += [moleculeBox]
         self.otherMolecules += moleculeBox.molecules
-        
         
     #Returns True or False depending on whether or not a reaction occurred.
     #If True, it updates self.product to be a new MoleculeBox containing 
@@ -128,6 +96,8 @@ class ReactionStep:
         #Regardless of identical-ness, returns its own products as well.
         if self.react(mode="check"):
             return (boxEqualityChecker(self.productBox, target), self.productBox)
+        else:
+            return (boxEqualityChecker(self.reactantBox, target), self.reactantBox)
         #The input was ill-formatted.
         return (False, self.productBox)
 
@@ -426,16 +396,18 @@ def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30):
             #Didn't fuse any molecules.  Oh well.
             molBoxes = newMolBoxes
     #TODO: should return a SynthesisProblem object, once this class is fleshed out.
+    #NOT A TODO ANYMORE. This is now properly handled by the SynthesisProblemModel constructor,
+    #as the SynthesisProblem class no longer exists.
     return reactions
                          
 
 #def [moleculeboxes] = getStartingMoleculeBoxes(reactionSteps) in synthProblem
 #Helper method used by a constructor in models.
 def getStartingMoleculeBoxes(reactionSteps):
-    
-
-
-    return moleculeboxes
+    products = list(set([reactionStep.productBox for reactionStep in reactionSteps]))
+    startingMoleculeBoxes = [reactionStep.reactantBox for reactionStep in reactionSteps if not (reactionStep.reactantBox in products)]
+    startingMoleculeBoxes = list(set(startingMoleculeBoxes)) #this should remove duplicates
+    return startingMoleculeBoxes
     
 
 

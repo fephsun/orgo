@@ -369,7 +369,8 @@ def renderSynthesis(request):
     if modes == []:
         #Error - at least one mode must be selected!
         return loggedInHome(request, debug = "You must pick at least one reaction type!")
-        
+    
+    assert modes != []
     reactionsteps = randomSynthesisProblemMake(modes)
     synthesis = models.SynthesisProblemModel.create(reactionsteps)
     synthesis.save()
@@ -468,5 +469,35 @@ def addReagentToMolecule(request):
     #Create a new moleculebox, representing the reaction's products
     #Create a new arrow, containing html of reagents, from reactants to products
 
+    if request.method == 'POST':
+        try:
+            moleculeboxmodel1 = MoleculeBoxModel.objects.get(id=request.POST["moleculeOn"])
+            moleculebox1 = moleculeboxmodel1.moleculeBox
+            
+            reagentString = request.POST["reagents"]
+            
+            testStep = ReactionStep(moleculebox1)
+            testStep.addReagent(parseReagentsString(reagentString))
+            
+            synthesis = request.user.profile.currentSynthesisProblem
+            (isTarget, productBox) = testStep.checkStep(synthesis.target)
+            
+            moleculeboxmodel2 = MoleculeBoxModel.create(productBox)
+            moleculeboxmodel2.equalsTarget = isTarget
+            moleculeboxmodel2.save()
+        
+            arrow = ArrowModel.create(moleculeboxmodel1, moleculeboxmodel2, "")
+            arrow.save()
+            
+            synthesis.molecules.add(moleculeboxmodel2)
+            synthesis.arrows.add(arrow)
+        
+        except StandardError as e:
+            responseData = dict()
+            responseData["success"] = False
+            responseData["arrows"] = []
+            responseData["molecules"] = [(1, str(e))]
+            return HttpResponse(json.dumps(responseData))
+    
     return getSynthesisData(request)
 

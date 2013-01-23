@@ -1,0 +1,52 @@
+<html>
+<head>
+    <script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"></script>
+</head>
+
+<script>
+$(document).ready(function(){
+    getQueue();
+
+});
+
+function getQueue() {
+    $.ajax({
+        type: "GET",
+        url: "/orgo/chat/helperpoll/",
+        success: function(data) {
+            out = ""
+            //Data contains a list of waiting users.
+            nameArray = data.split(" ")
+            for (i=0; i<nameArray.length; i++) {
+                out += '<a href="#" onclick="connectHelpee(this.id)" id="'+nameArray[i]+'">'+nameArray[i]+'</a> <br / >'
+            }
+            $("#queue").html(out);
+        }
+    });
+    setTimeout(getQueue, 3000);
+}
+
+function connectHelpee(userId) {
+    $.ajax({
+        type: "POST",
+        url: "/orgo/chat/helperpoll/",
+        data: {'username': userId},
+        success: function(data) {
+            //We get an entire html page back.  All we need to do is render it.
+            $(document.body).html(data);
+            $("#debug").html(data);
+        }
+    });
+}
+</script>
+
+<div id="queue">
+</div>
+
+<div id="debug">
+</div>
+
+{{debug}}
+
+
+</html>

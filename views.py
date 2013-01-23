@@ -393,8 +393,11 @@ def getSynthesisData(request):
     
     
     #Iterate over all molecules for a specific synthesis
+    try:
     moleculesOutput = [ (moleculeBoxModel.id, moleculeBoxModel.svg) 
                         for moleculeBoxModel in synthesis.molecules.all()]
+    except:
+        raise Exception("01")
     
     #Iterate over all arrows for a specific synthesis
     arrowsOutput = [ (arrowModel.pointFrom.id, arrowModel.pointTo.id, arrowModel.reagentsHtml)
@@ -445,7 +448,10 @@ def addMoleculeToMolecule(request):
             arrow2.save()
             
             #Add the arrows and the new moleculebox to the synthesis
-            synthesis.molecules.add(moleculeboxmodel3)
+            try:
+                synthesis.molecules.add(moleculeboxmodel3)
+            except:
+                raise Exception("02")
             synthesis.arrows.add(arrow1)
             synthesis.arrows.add(arrow2)
             
@@ -489,7 +495,10 @@ def addReagentToMolecule(request):
             arrow = ArrowModel.create(moleculeboxmodel1, moleculeboxmodel2, "")
             arrow.save()
             
-            synthesis.molecules.add(moleculeboxmodel2)
+            try:
+                synthesis.molecules.add(moleculeboxmodel2)
+            except:
+                raise Exception("03")
             synthesis.arrows.add(arrow)
         
         except StandardError as e:

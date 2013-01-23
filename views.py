@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import EmailMessage
+from django.utils import timezone
 import json
 import traceback
 import orgo.engine.serverRender as serverRender
@@ -510,30 +511,106 @@ def addReagentToMolecule(request):
     
     return getSynthesisData(request)
 
+@csrf_exempt
 def askForHelp(request):
+  try:
     #Gets called when a user asks for help.
     #If there are no HelpWaitingList's, make one.
-    if len(models.HelpWaitingList.objects.all()):
+    if len(models.HelpWaitingList.objects.all())==0:
         waitingList = models.HelpWaitingList.create()
+        waitingList.save()
     else:
         waitingList = models.HelpWaitingList.objects.all()[0]
     #Add this user to the waiting list.
-    waitingList.users.add(request.user)
+    memb = models.WaitTimer(helpWaitingList=waitingList, user=request.user)
+    memb.save()
     return HttpResponse(len(waitingList.users.all()))
-    
+  except StandardError as e:
+    return HttpResponse(str(e))
+
+@csrf_exempt
 def helpeeWaitPoll(request):
+  try:
     #Gets called every couple of seconds by clients waiting for help.
     out = dict()
-    try:
-        chat = request.user.chatpair_set.all()[0]
-    except:
+    #Look for a chat containing this user.
+    chats = models.ChatPair.objects.filter(helpee=request.user)
+    if len(chats) == 0 or\
+    sum([(timezone.now()-chat.initTime).total_seconds()<10 for chat in chats]) == 0:
         #Nope, keep waiting.
         out['success'] = False
-        out['queueSize'] = request.user.helpwaitinglist_set()[0].users.count()
+        if len(request.user.helpwaitinglist_set.all()) == 0:
+            #Oops, the user somehow got wiped from the waiting list.  Better re-add him.
+            waitingList = models.HelpWaitingList.objects.all()[0]
+            memb = models.WaitTimer(helpWaitingList=waitingList, user=request.user)
+            memb.save()
+        out['queueSize'] = len(request.user.helpwaitinglist_set.all()[0].users.all())
+        #Save this user's waitTimer, so that the lastCheck time updates.
+        request.user.waittimer_set.all()[0].save()
         return HttpResponse(json.dumps(out))
-    out['success'] = True
-    return HttpResponse(json.dumps(out))
+    else:
+        out['success'] = True
+        #Look through all the ChatPairs we found, and delete all the old ones.
+        chats = list(chats)
+        chats.sort(key=lambda x: x.initTime, reverse=True)
+        thisChat = chats[0]
+        for i in xrange(1, len(chats)):
+            models.ChatPairs.delete(chats[i])
+        return HttpResponse(json.dumps(out))
+  except StandardError as e:
+    return HttpResponse(str(e))
+    
+@csrf_exempt
+def volunteerToHelp(request, debug=""):
+    #Renders an "instructor lobby" where users who want to help wait for users
+    #to need help.
+    #Static.
+    return render(request, "volunteer.html", {'debug': debug})
 
+@csrf_exempt  
+def helpeeStaticTest(request, debug=""):
+    return render(request, "helpeestatictest.html", {'debug': debug})
+
+@csrf_exempt    
+def helperWaitPoll(request):
+  try:
+    #If there was a POST, that means the helper clicked on a helpee's username.
+    #Initiate chat.
+    if request.method == 'POST':
+        #Get the helpee's username
+        helpee = User.objects.get(username=request.POST['username'])
+        #Remove the helpee from the queue.
+        try:
+            models.WaitTimer.delete(helpee.waittimer_set.all()[0])
+        except:
+            #If this doesn't work, either the helpee has stopped asking for help,
+            #or some other helper picked the helpee first.  Either way, go back to
+            #the helper lobby and display an error.
+            return volunteerToHelp(request, debug="Sorry, that user no longer wants help.")
+        #Make a new ChatPair.
+        chat = models.ChatPair.create(helpee=helpee, helper=request.user)
+        chat.save()
+        return render(request, 'helperchat.html', {'helpee': helpee.username})
+    #Otherwise, we are just updating the list of people who need help.
+    #Generates a list of people who need help.
+    thisQueue = models.HelpWaitingList.objects.all()[0]
+    waitingUsers = ""
+    for x in thisQueue.users.all():
+        #Did the user poll recently?  If not, he probably closed his browser window.
+        #We should remove him from the queue.
+        if (timezone.now() - x.waittimer_set.all()[0].lastCheck).total_seconds() > 10:
+            #Too long.  Remove.
+            models.WaitTimer.delete(x.waittimer_set.all()[0])
+        else:
+            waitingUsers += x.username + " "
+    return HttpResponse(waitingUsers)
+  except StandardError as e:
+    return HttpResponse(str(e))
+    
+def helpeeChatPoll(request):
+    #Is called every couple of seconds by the helpee's browser.
+    #Looks for new ChatLines, also updates its helpeeLastCheck.
+    pass
 
 
 

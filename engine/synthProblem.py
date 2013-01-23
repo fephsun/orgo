@@ -26,7 +26,7 @@ class ReactionStep:
     #Add more reagents.
     def addReagent(self, reagentDict):
         for reagent in list(REAGENTS):
-            if reagentBox.hasReagents[reagent] or reagentDict[reagent]:
+            if self.hasReagents[reagent] or reagentDict[reagent]:
                 self.hasReagents[reagent] = True
                 
     #def addReagent(self, reagentBox): #reagentList is a list of reagent boxes

@@ -5,7 +5,7 @@ import cPickle
 
 randThing = 0
 
-debug = True
+debug = False
 
 
 #Returns a list of molecules.

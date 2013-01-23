@@ -455,7 +455,7 @@ def addMoleculeToMolecule(request):
             responseData = dict()
             responseData["success"] = False
             responseData["arrows"] = []
-            responseData["molecules"] = [(1, str(e))]
+            responseData["molecules"] = [(1, str(e)+" "+str(traceback.format_exc()))]
             return HttpResponse(json.dumps(responseData))
     
     return getSynthesisData(request)

@@ -509,7 +509,9 @@ def askForHelp(request):
         waitingList = models.HelpWaitingList.objects.all()[0]
     #Add this user to the waiting list.
     waitingList.users.add(request.user)
-    #return HttpResponse(
+    return HttpResponse(len(waitingList.users.all()))
+    
+
     
 
 

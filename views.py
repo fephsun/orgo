@@ -394,7 +394,7 @@ def getSynthesisData(request):
     
     #Iterate over all molecules for a specific synthesis
     try:
-    moleculesOutput = [ (moleculeBoxModel.id, moleculeBoxModel.svg) 
+        moleculesOutput = [ (moleculeBoxModel.id, moleculeBoxModel.svg) 
                         for moleculeBoxModel in synthesis.molecules.all()]
     except:
         raise Exception("01")
@@ -511,6 +511,7 @@ def addReagentToMolecule(request):
     return getSynthesisData(request)
 
 def askForHelp(request):
+    #Gets called when a user asks for help.
     #If there are no HelpWaitingList's, make one.
     if len(models.HelpWaitingList.objects.all()):
         waitingList = models.HelpWaitingList.create()
@@ -520,7 +521,9 @@ def askForHelp(request):
     waitingList.users.add(request.user)
     return HttpResponse(len(waitingList.users.all()))
     
-
+def helpeeWaitPoll(request):
+    #Gets called every 
+    pass
     
 
 

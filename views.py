@@ -445,10 +445,7 @@ def addMoleculeToMolecule(request):
             arrow2.save()
             
             #Add the arrows and the new moleculebox to the synthesis
-            try:
-                synthesis.molecules.add(moleculeboxmodel3)
-            except:
-                pass
+            synthesis.molecules.add(moleculeboxmodel3)
             synthesis.arrows.add(arrow1)
             synthesis.arrows.add(arrow2)
             

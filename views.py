@@ -442,9 +442,9 @@ def addMoleculeToMolecule(request):
             moleculeboxmodel3.save()
             
             #newPointFrom, newPointTo, newReagentsHtml
-            arrow1 = ArrowModel.create(moleculeboxmodel1, moleculeboxmodel3, "")
+            arrow1 = models.ArrowModel.create(moleculeboxmodel1, moleculeboxmodel3, "")
             arrow1.save()
-            arrow2 = ArrowModel.create(moleculeboxmodel2, moleculeboxmodel3, "")
+            arrow2 = models.ArrowModel.create(moleculeboxmodel2, moleculeboxmodel3, "")
             arrow2.save()
             
             #Add the arrows and the new moleculebox to the synthesis
@@ -492,7 +492,7 @@ def addReagentToMolecule(request):
             moleculeboxmodel2.equalsTarget = isTarget
             moleculeboxmodel2.save()
         
-            arrow = ArrowModel.create(moleculeboxmodel1, moleculeboxmodel2, "")
+            arrow = models.ArrowModel.create(moleculeboxmodel1, moleculeboxmodel2, "")
             arrow.save()
             
             try:

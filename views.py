@@ -507,3 +507,21 @@ def addReagentToMolecule(request):
     
     return getSynthesisData(request)
 
+def askForHelp(request):
+    #If there are no HelpWaitingList's, make one.
+    if len(models.HelpWaitingList.objects.all()):
+        waitingList = models.HelpWaitingList.create()
+    else:
+        waitingList = models.HelpWaitingList.objects.all()[0]
+    #Add this user to the waiting list.
+    waitingList.users.add(request.user)
+    #return HttpResponse(
+    
+
+
+
+
+
+
+
+

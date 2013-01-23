@@ -402,8 +402,11 @@ def getSynthesisData(request):
     
     responseData = dict()
     
-    responseData["success"] = synthesis.checkIfSolved()
     responseData["molecules"] = moleculesOutput
+    try:
+        responseData["success"] = synthesis.checkIfSolved()
+    except:
+        responseData["molecules"] = "Bah, humbug."
     responseData["arrows"] = arrowsOutput
 
     return HttpResponse(json.dumps(responseData))
@@ -445,7 +448,10 @@ def addMoleculeToMolecule(request):
             arrow2.save()
             
             #Add the arrows and the new moleculebox to the synthesis
-            synthesis.molecules.add(moleculeboxmodel3)
+            try:
+                synthesis.molecules.add(moleculeboxmodel3)
+            except:
+                pass
             synthesis.arrows.add(arrow1)
             synthesis.arrows.add(arrow2)
             
@@ -455,7 +461,7 @@ def addMoleculeToMolecule(request):
             responseData = dict()
             responseData["success"] = False
             responseData["arrows"] = []
-            responseData["molecules"] = [(1, str(e)+" "+str(traceback.format_exc()))]
+            responseData["molecules"] = [(1, str(e))]
             return HttpResponse(json.dumps(responseData))
     
     return getSynthesisData(request)

@@ -276,6 +276,34 @@ class mySignUpForm(UserCreationForm):
         # x = cls(smiles = s)
         # return x
         
+class HelpWaitingList(models.Model):
+    #A container to manage waiting users who NEED help.
+    #For now, we will only have one instance of this, but eventually,
+    #each class will have one.
+    #Eventually, we will need additional fields (class, etc.)
+    users = models.ManyToManyField(User, null=True)
+    @classmethod
+    def create(cls):
+        return cls()
+    
+class ChatPair(models.Model):
+    #A chat between two people, with asymmetric naming.
+    helpee = models.ForeignKey(User, related_name='helpee')
+    helper = models.ForeignKey(User, related_name='helper')
+    chatRecord = models.ManyToManyField("ChatLine")
+    @classmethod
+    def create(cls, helpee, helper):
+        return cls(helpee=helpee, helper=helper)
+    
+class ChatLine(models.Model):
+    originator = models.ForeignKey(User)
+    content = models.TextField()
+    helpeeSeen = models.BooleanField(default=False)
+    helperSeen = models.BooleanField(default=False)
+    @classmethod
+    def create(cls, originator):
+        return cls(originator=originator, content="")
+        
 class ReagentType(models.Model):
     #A little class that saves a string describing each reagent type.
     name = models.CharField(max_length=100)

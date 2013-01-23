@@ -108,7 +108,10 @@ class ReactionStep:
 #Called by checkIfEqualsTarget in MoleculeBoxModel in models
 #Called by checkStep in ReactionStep in synthProblem
 #Returns a boolean.
+#first is a moleculebox and so is second
 def boxEqualityChecker(first, second):
+    assert isinstance(first, MoleculeBox)
+    assert isinstance(second, MoleculeBox)
     #Does each product correspond to exactly one target?
     if len(first.molecules) != len(second.molecules):
         return False

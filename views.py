@@ -422,10 +422,10 @@ def addMoleculeToMolecule(request):
     
     if request.method == 'POST':
         try:
-            moleculeboxmodel1 = MoleculeBoxModel.objects.get(id=request.POST["molecule1"])
+            moleculeboxmodel1 = models.MoleculeBoxModel.objects.get(id=request.POST["molecule1"])
             moleculebox1 = moleculeboxmodel1.moleculeBox
             
-            moleculeboxmodel2 = MoleculeBoxModel.objects.get(id=request.POST["molecule2"])
+            moleculeboxmodel2 = models.MoleculeBoxModel.objects.get(id=request.POST["molecule2"])
             moleculebox2 = moleculeboxmodel2.moleculeBox
             
             testStep = ReactionStep(moleculebox1)
@@ -434,7 +434,7 @@ def addMoleculeToMolecule(request):
             synthesis = request.user.profile.currentSynthesisProblem
             (isTarget, productBox) = testStep.checkStep(synthesis.target)
             
-            moleculeboxmodel3 = MoleculeBoxModel.create(productBox)
+            moleculeboxmodel3 = models.MoleculeBoxModel.create(productBox)
             moleculeboxmodel3.equalsTarget = isTarget
             moleculeboxmodel3.save()
             
@@ -471,7 +471,7 @@ def addReagentToMolecule(request):
 
     if request.method == 'POST':
         try:
-            moleculeboxmodel1 = MoleculeBoxModel.objects.get(id=request.POST["moleculeOn"])
+            moleculeboxmodel1 = models.MoleculeBoxModel.objects.get(id=request.POST["moleculeOn"])
             moleculebox1 = moleculeboxmodel1.moleculeBox
             
             reagentString = request.POST["reagents"]
@@ -482,7 +482,7 @@ def addReagentToMolecule(request):
             synthesis = request.user.profile.currentSynthesisProblem
             (isTarget, productBox) = testStep.checkStep(synthesis.target)
             
-            moleculeboxmodel2 = MoleculeBoxModel.create(productBox)
+            moleculeboxmodel2 = models.MoleculeBoxModel.create(productBox)
             moleculeboxmodel2.equalsTarget = isTarget
             moleculeboxmodel2.save()
         

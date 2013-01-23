@@ -109,24 +109,21 @@ class ReactionStep:
 #Called by checkStep in ReactionStep in synthProblem
 #Returns a boolean.
 def boxEqualityChecker(first, second):
-    try:
-        #Does each product correspond to exactly one target?
-        if len(first.molecules) != len(second.molecules):
+    #Does each product correspond to exactly one target?
+    if len(first.molecules) != len(second.molecules):
+        return False
+    for output in first.molecules:
+        OK = False
+        for target in second.molecules:
+            if moleculeCompare(output, target):
+                OK = True
+                second.molecules.remove(target)
+                break
+            #If by this point, we haven't found a match, return False.
+        if not OK:
             return False
-        for output in first.molecules:
-            OK = False
-            for target in second.molecules:
-                if moleculeCompare(output, target):
-                    OK = True
-                    second.molecules.remove(target)
-                    break
-                #If by this point, we haven't found a match, return False.
-            if not OK:
-                return False
-        #Reached the end of molecule list - must have perfect match.
-        return True
-    except:
-        raise Exception("asgsdfg")
+    #Reached the end of molecule list - must have perfect match.
+    return True
     
 
 #MoleculeBox class

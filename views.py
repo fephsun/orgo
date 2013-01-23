@@ -402,11 +402,8 @@ def getSynthesisData(request):
     
     responseData = dict()
     
+    responseData["success"] = synthesis.checkIfSolved()
     responseData["molecules"] = moleculesOutput
-    try:
-        responseData["success"] = synthesis.checkIfSolved()
-    except:
-        responseData["molecules"] = "Bah, humbug."
     responseData["arrows"] = arrowsOutput
 
     return HttpResponse(json.dumps(responseData))

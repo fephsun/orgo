@@ -408,7 +408,6 @@ def getStartingMoleculeBoxes(reactionSteps):
     startingMoleculeBoxes = [reactionStep.reactantBox for reactionStep in reactionSteps if not (reactionStep.reactantBox in products)]
     startingMoleculeBoxes = list(set(startingMoleculeBoxes)) #this should remove duplicates
     return startingMoleculeBoxes
-    
 
 
 

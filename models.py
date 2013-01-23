@@ -71,6 +71,7 @@ class ArrowModel(models.Model):
     #newReagentsHtml is a string
     def create(cls, newPointFrom, newPointTo, newReagentsHtml):
         x = cls(pointFrom = newPointFrom, pointTo = newPointTo, reagentsHtml = newReagentsHtml)
+        x.save()
         return x        
     
         
@@ -95,12 +96,13 @@ class SolutionModel(models.Model):
         x = cls()
         x.save()
         
-        (arrowmodels, moleculeboxmodels) = getArrowAndMoleculeModels(reactionSteps)  #helper method defined in synthProblem
+        (arrowmodels, moleculeboxmodels) = getArrowAndMoleculeModels(reactionSteps)  #helper method defined below
         
         for arrowmodel in arrowmodels: 
             x.arrows.add(arrowmodel)
             
         for moleculeboxmodel in moleculeboxmodels:
+            assert moleculeboxmodel != None
             x.molecules.add(moleculeboxmodel)
         
         return x
@@ -108,7 +110,7 @@ class SolutionModel(models.Model):
     
 
     
-#def ([arrowmodels], [moleculeboxmodels]) = getArrowAndMoleculeModels(reactionSteps) in synthProblem
+#def ([arrowmodels], [moleculeboxmodels]) = getArrowAndMoleculeModels(reactionSteps)
 #Helper method used by a constructor in models.
 def getArrowAndMoleculeModels(reactionSteps):
     
@@ -119,19 +121,22 @@ def getArrowAndMoleculeModels(reactionSteps):
         r = reactionStep.reactantBox
         
         if not p in moleculedict.keys():
-            moleculedict[p] = MoleculeBoxModel(p)
+            newmodel = MoleculeBoxModel.create(p)
+            newmodel.save()
+            moleculedict[p] = newmodel
         if not r in moleculedict.keys():
-            moleculedict[r] = MoleculeBoxModel(r)
+            newmodel = MoleculeBoxModel.create(r)
+            newmodel.save()
+            moleculedict[r] = newmodel
     
     #Iterate through reactionsteps, creating a list of ArrowModels
     #ArrowModel.create(newPointFrom (a MoleculeBoxModel), newPointTo (a MoleculeBoxModel), newReagentsHtml (a html string)):
     arrowmodels = [ArrowModel.create(moleculedict[reactionStep.reactantBox],
-                        moleculedict[reactionStep.productBox],
-                        reactionStepHtml(reactionStep))                    for reactionStep in reactionSteps]
+                                    moleculedict[reactionStep.productBox],
+                                    reactionStepHtml(reactionStep))
+                   for reactionStep in reactionSteps]
     
     ##moleculeboxmodels = moleculedict.values()
-    if None in arrowmodels:
-        return (ArrowModel.create(1, 2, "blah"), MoleculeBoxModel(reactionStep.productBox))
     return (arrowmodels, moleculedict.values())
     
     
@@ -148,15 +153,18 @@ class SynthesisProblemModel(models.Model):
     #reactionSteps is a list of reactionsteps; the final one contains the target molecule.
     @classmethod
     def create(cls, reactionSteps):
-        x = cls()
+        
+        assert len(reactionSteps) != 0
         
         #target molecule should be the final step's product
         t = MoleculeBoxModel.create(reactionSteps[-1].productBox)
-        x.target = t
+        t.save()
         
         #solution should contain the other content of reactionSteps
         s = SolutionModel.create(reactionSteps)
-        x.solution = s
+        s.save()
+        
+        x = cls(target = t, solution = s)
 
         x.save()
         
@@ -166,6 +174,7 @@ class SynthesisProblemModel(models.Model):
         for moleculebox in getStartingMoleculeBoxes(reactionSteps): #helper method defined in synthProblem
             m = MoleculeBoxModel.create(moleculebox)
             m.checkIfEqualsTarget(t)
+            m.save()
             x.molecules.add(m)
         
         return x

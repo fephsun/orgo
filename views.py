@@ -558,6 +558,7 @@ def helpeeWaitPoll(request):
         for i in xrange(1, len(chats)):
             models.ChatPair.delete(chats[i])
         out['helper'] = thisChat.helper.username
+        out['chatPK'] = thisChat.pk
         return HttpResponse(json.dumps(out))
   except StandardError as e:
     return HttpResponse(str(e))
@@ -592,7 +593,7 @@ def helperWaitPoll(request):
         #Make a new ChatPair.
         chat = models.ChatPair.create(helpee=helpee, helper=request.user)
         chat.save()
-        return render(request, 'helperchat.html', {'helpee': helpee.username})
+        return render(request, 'helperchat.html', {'helpee': helpee.username, 'chatPK': chat.pk})
     #Otherwise, we are just updating the list of people who need help.
     #Generates a list of people who need help.
     thisQueue = models.HelpWaitingList.objects.all()[0]
@@ -612,7 +613,10 @@ def helperWaitPoll(request):
 def helpeeChatPoll(request):
     #Is called every couple of seconds by the helpee's browser.
     #Looks for new ChatLines, also updates its helpeeLastCheck.
-    pass
+    if request.method=='POST':
+        pk = request.POST['PK']
+        chat = models.ChatPair.objects.get(pk=pk)
+        
 
 
 

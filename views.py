@@ -382,8 +382,6 @@ def renderSynthesis(request):
     
     return render(request, 'synthesisProblemInterface.html', {"TargetMolecule": synthesis.target.svg, "Name": request.user.username})
 
-
-
     
 
 def getSynthesisData(request):
@@ -415,9 +413,28 @@ def getSynthesisData(request):
     return HttpResponse(json.dumps(responseData))
     
     
-#Other to-do:
-    #addReagentToMolecule in views
     
+def getSolutionData(request):
+    synthesis = request.user.profile.currentSynthesisProblem.solution
+    
+    #Iterate over all molecules for a specific synthesis
+    try:
+        moleculesOutput = [ (moleculeBoxModel.id, moleculeBoxModel.svg) 
+                        for moleculeBoxModel in synthesis.molecules.all()]
+    except:
+        raise Exception("01")
+    
+    #Iterate over all arrows for a specific synthesis
+    arrowsOutput = [ (arrowModel.pointFrom.id, arrowModel.pointTo.id, arrowModel.reagentsHtml)
+                     for arrowModel in synthesis.arrows.all()]
+    
+    responseData = dict()
+    
+    responseData["success"] = "solution"
+    responseData["molecules"] = moleculesOutput
+    responseData["arrows"] = arrowsOutput
+
+    return HttpResponse(json.dumps(responseData))
     
 @csrf_exempt
 #data: {'molecule1': ui.draggable.attr("id"), 'molecule2': this.attr("id")}

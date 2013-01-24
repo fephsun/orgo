@@ -537,7 +537,7 @@ NANH2: ("NaNH<sub>2</sub>", ("Sodium amide", "Sodamide", "NaNH2", "Amide")),
 EQV1: ("1 equiv.", ("1", "eq", "one")),
 HEAT: ("Heat", ("heat", "delta", "hot", "warm")),
 LIGHT: ("Light", ("hv", "light", "hnu")),
-KOCCH33: ("KOtBu", ("tert-butoxide", "KOC(CH3)3", "OC(CH3)3", "potassium tert-butoxide", "KOtBu"))
+KOCCH33: ("KOC(CH<sub>3</sub>)<sub>3</sub>", ("tert-butoxide", "KOC(CH3)3", "OC(CH3)3", "potassium tert-butoxide", "KOtBu"))
 }
 
 

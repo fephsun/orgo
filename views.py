@@ -307,25 +307,25 @@ def showNRAnswer(request):
     
 ##Make this have a shiny flowchart layout once that becomes possible.
 ##Obsolete? Not convinced this is actually used anywhere.
-def moleculesAndReactionsHtml(startingMaterials, reactionSteps):
-    html = ""
-    startingMaterialsCopy = copy.deepcopy(startingMaterials)
-    for startingMaterial in startingMaterialsCopy:
-        keepgoing = True
-        moleculeToCheck = startingMaterial
-        while keepgoing:
-            html += moleculeBoxHtml(moleculeToCheck)
-            stepList = [reactionStep for reactionStep in reactionSteps if reactionStep.reactantBox == moleculeToCheck]
-            if len(stepList) == 1:
-                html += reactionStepHtml(stepList[0])
-            elif len(stepList) == 0:
-                keepgoing = False
-                html += "<br/>"
-            else:
-                html += reactionStepHtml(stepList[0])
+# def moleculesAndReactionsHtml(startingMaterials, reactionSteps):
+    # html = ""
+    # startingMaterialsCopy = copy.deepcopy(startingMaterials)
+    # for startingMaterial in startingMaterialsCopy:
+        # keepgoing = True
+        # moleculeToCheck = startingMaterial
+        # while keepgoing:
+            # html += moleculeBoxHtml(moleculeToCheck)
+            # stepList = [reactionStep for reactionStep in reactionSteps if reactionStep.reactantBox == moleculeToCheck]
+            # if len(stepList) == 1:
+                # html += reactionStepHtml(stepList[0])
+            # elif len(stepList) == 0:
+                # keepgoing = False
+                # html += "<br/>"
+            # else:
+                # html += reactionStepHtml(stepList[0])
                 
     
-    return html
+    # return html
     
 @csrf_exempt
 def makeReagentHtml(request):
@@ -437,6 +437,8 @@ def addMoleculeToMolecule(request):
             
             synthesis = request.user.profile.currentSynthesisProblem
             (isTarget, productBox) = testStep.checkStep(synthesis.target.moleculeBox)
+            
+            productBox.molecules = reactions.removeDuplicates(productBox.molecules)
             
             moleculeboxmodel3 = models.MoleculeBoxModel.create(productBox)
             moleculeboxmodel3.equalsTarget = isTarget

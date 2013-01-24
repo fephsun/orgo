@@ -52,7 +52,7 @@ def reactWithoutRemoveDuplicates(molecules, findPlace, reactAtPlace):
     if not isinstance(molecules, list):
         return react([molecules], findPlace, reactAtPlace)
     while True:
-        places = [(molecule, findPlace(molecule)) for molecule in molecules]
+        places = [(m, findPlace(m)) for molecule in molecules for m in [copy.deepcopy(molecule)]]
         if not (False in [item[1]==None for item in places]):
             break
         for molecule, place in places:
@@ -88,7 +88,7 @@ def tautomerize(moleculeList):
             target2 = place[1]
             oxygen = place[2]
 
-            #Unused but important
+            """#Unused but important
             add1 = None
             add2 = None
             addtarget1 = None
@@ -96,7 +96,7 @@ def tautomerize(moleculeList):
             
             #Protect the inputs from modification:
             (molecule, target1, target2, add1, add2, addtarget1, addtarget2)=\
-               duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)
+               duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)"""
             
             #Remove C=C CT-stereocheistry
             target1.eliminateCT()
@@ -104,23 +104,14 @@ def tautomerize(moleculeList):
             #Change C-C to single bond
             molecule.changeBond(target1, target2, 1)
 
-            #Do duplication again, since it only works with a pair of targets at a time
+           """ #Do duplication again, since it only works with a pair of targets at a time
             (molecule, target1, oxygen, add1, add2, addtarget1, addtarget2)=\
-               duplicateInputs(molecule, target1, oxygen, add1, add2, addtarget1, addtarget2)
+               duplicateInputs(molecule, target1, oxygen, add1, add2, addtarget1, addtarget2)"""
             
             #Change C-O to double bond
             molecule.changeBond(target1, oxygen, 2)
             
             return [molecule]
-        
-
-
-    #Change to single bond
-    molecule.changeBond(target1, target2, 1)
-    #Ch
-    molecule.addAtom(add1, target1, 2)
-    
-    return [molecule]
 
 
     #Returns a (centralcarbon, alkenecarbon, oxygen) in a tuple. 

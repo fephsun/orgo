@@ -1,3 +1,4 @@
+
 from helperFunctions import *
 import itertools
 
@@ -58,7 +59,7 @@ def reactWithoutRemoveDuplicates(molecules, findPlace, reactAtPlace):
     if not isinstance(molecules, list):
         return react([molecules], findPlace, reactAtPlace)
     while True:
-        places = [(m, findPlace(m)) for molecule in molecules for m in [copy.deepcopy(molecule)]]
+        places = [(molecule, findPlace(molecule)) for molecule in molecules]
         if not (False in [item[1]==None for item in places]):
             break
         for molecule, place in places:
@@ -94,36 +95,48 @@ def tautomerize(moleculeList):
             target2 = place[1]
             oxygen = place[2]
 
-            """#Unused but important
-            add1 = None
-
-            add2 = None
-            addtarget1 = None
-
-            addtarget2 = None
-            
-
-            #Protect the inputs from modification:
-            (molecule, target1, target2, add1, add2, addtarget1, addtarget2)=\
-
-               duplicateInputs(molecule, target1, target2, add1, add2, addtarget1, addtarget2)"""
+            molecule, (target1, target2, oxygen) = listClone(molecule, [target1, target2, oxygen])
             
             #Remove C=C CT-stereocheistry
             target1.eliminateCT()
             target2.eliminateCT()
             #Change C-C to single bond
             molecule.changeBond(target1, target2, 1)
-
-            """ #Do duplication again, since it only works with a pair of targets at a time
-            (molecule, target1, oxygen, add1, add2, addtarget1, addtarget2)=\
-
-               duplicateInputs(molecule, target1, oxygen, add1, add2, addtarget1, addtarget2)"""
             
             #Change C-O to double bond
             molecule.changeBond(target1, oxygen, 2)
             
             return [molecule]
 
+
+    #Returns a (centralcarbon, alkenecarbon, oxygen) in a tuple. 
+    def findPlace(molecule):
+        if molecule == None:
+            return None
+        for atom in molecule.atoms:
+            if not (atom.element == 'C'):
+                continue
+            isAlkene = False
+            alkeneCarbon = None
+            #check if is alkene
+            for neighbor in atom.neighbors:
+                if neighbor.element == 'C' and atom.neighbors[neighbor] == 2:
+                    isAlkene = True
+                    alkeneCarbon = neighbor
+            if not isAlkene:
+                continue
+            #Sanity check this later
+            for neighbor in atom.neighbors:
+                if neighbor.element == 'O' and atom.neighbors[neighbor] == 1 and len(list(neighbor.neighbors))==1:
+                    return (atom, alkeneCarbon, neighbor)
+        return None
+    
+    #if things are crashing, uncomment this line
+    #return moleculeList
+    
+    return reactWithoutRemoveDuplicates(moleculeList, findPlace, reactAtPlace)
+
+     
 
     #Returns a (centralcarbon, alkenecarbon, oxygen) in a tuple. 
     def findPlace(molecule):
@@ -1232,3 +1245,4 @@ if __name__ == '__main__':
     c85.newChiralCenter(c86, (c89, c87, f81))
 
     print smiles(tertButoxide([cycPentMol]))
+    

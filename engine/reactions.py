@@ -2,6 +2,8 @@
 from helperFunctions import *
 import itertools
 
+MAXLEN = 8
+
 class ReactionTooCrazyError(Exception):
     pass
 
@@ -31,7 +33,7 @@ def react(molecules, findPlace, reactAtPlace):
     if not isinstance(molecules, list):
         return react([molecules], findPlace, reactAtPlace)
     while True:
-        if len(molecules) > 12:
+        if len(molecules) > MAXLEN:
             #If the reaction gets too crazy, kill.
             raise ReactionTooCrazyError
         places = [(molecule, findPlace(molecule)) for molecule in molecules]
@@ -518,6 +520,8 @@ def tertButoxide(molecules):
         
     def complete(molecules):
         #Complete testing.
+        if len(molecules) > MAXLEN:
+            raise ReactionTooCrazyError
         out = []
         #Note to self: do not modify molecules.  You need it for returning at the end.
         for molecule in molecules:

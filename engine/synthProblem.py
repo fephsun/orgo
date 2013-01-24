@@ -56,7 +56,11 @@ class ReactionStep:
                 continue
             else:
                 #react!
-                products = reaction[1](self.reactantBox.molecules)(self.otherMolecules) #a function of two variables
+                try:
+                    products = reaction[1](self.reactantBox.molecules)(self.otherMolecules) #a function of two variables
+                except ReactionTooCrazyError:
+                    #TODO: write some sort of return that alerts the frontend.
+                    return False
                 if mode == "check":
                     #check if the output list is non-empty
                     #if so, reaction is successful
@@ -311,6 +315,7 @@ def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30):
             #Didn't fuse any molecules.  Oh well.
             molBoxes = newMolBoxes
     if len(reactions) == 0:
+        print "Retry"
         return randomSynthesisProblemMake(mode, steps, maxLength)
     return reactions
                          

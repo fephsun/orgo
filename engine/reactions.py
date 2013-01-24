@@ -428,7 +428,7 @@ def tertButoxide(molecules):
         a = complete(molecules)
         print "Result of tBut: " +str(smiles(a))
         return a
-    return complete(molecules)
+    return removeDuplicates(complete(molecules))
     
     
 def listClone(molecule, atomList):

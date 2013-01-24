@@ -165,23 +165,30 @@ def parseReagentsString(inpstring):
 
     #hacky
     #Make sure you don't count substrings if you're counting things they're part of.
-    
-    if string.count("ch2cl2") + string.count("nanh2") + string.count("h2o") + string.count("h20") + string.count("h2so4") + string.count("h2o2") == string.count("h2"):
-        outp[H2] = False
-    if string.count("cl2") == string.count("ch2cl2"):
-        outp[CL2] = False
-    if string.count("naoh") + string.count("nanh2") == string.count("na"):
-        outp[NA] = False
-    if (string.count("hydrogen fluoride") + string.count("hydrogen chloride") + string.count("hydrogen iodide") + string.count("hydrogen bromide") - string.count("hydrogen")) == 0:
-        outp[H2] = False
-    if (string.count("thf") - string.count("hf")) == 0:
-        outp[HF] = False
-    if (string.count("co3h") - string.count("o3")) == 0:
-        outp[O3] = False
-    if (string.count("acetone") + string.count("propanone") + string.count("ozone") - string.count("one")) == 0:
-        outp[EQV1] = False
-    if (string.count("h2o2") - string.count("h2o")) == 0:
-        outp[H2O] = False
+    if (string.count("h2") != 0):
+        if (string.count("ch2cl2") + string.count("nanh2") + string.count("h2o") + string.count("h20") + string.count("h2so4") + string.count("h2o2") == string.count("h2")):
+            outp[H2] = False
+    if (string.count("ch2cl2") != 0):
+        if string.count("cl2") == string.count("ch2cl2"):
+            outp[CL2] = False
+    if (string.count("na") != 0):
+        if string.count("naoh") + string.count("nanh2") == string.count("na"):
+            outp[NA] = False
+    if (string.count("hydrogen") != 0):
+        if (string.count("hydrogen fluoride") + string.count("hydrogen chloride") + string.count("hydrogen iodide") + string.count("hydrogen bromide") - string.count("hydrogen")) == 0:
+            outp[H2] = False
+    if (string.count("hf") != 0):
+        if (string.count("thf") - string.count("hf")) == 0:
+            outp[HF] = False
+    if (string.count("o3") != 0):
+        if (string.count("co3h") - string.count("o3")) == 0:
+            outp[O3] = False
+    if (string.count("one") != 0):
+        if (string.count("acetone") + string.count("propanone") + string.count("ozone") - string.count("one")) == 0:
+            outp[EQV1] = False
+    if (string.count("h2o") != 0):
+        if (string.count("h2o2") - string.count("h2o")) == 0:
+            outp[H2O] = False
        
     return outp
     

@@ -8,9 +8,10 @@ $(document).ready(function(){
     getChat();
     $("#submit").click(function(){
         //Submit a new message to the server.
+        alert("Submitting")
         $.ajax({
             type: "POST",
-            url: "/orgo/chat/helperchatpoll",
+            url: "/orgo/chat/helperchatpoll/",
             data: {'PK': {{chatPK}},
                    'message': $('input:text').val()},
             success: update
@@ -32,10 +33,10 @@ function getChat() {
 }
 
 function update(data) {
+    $("#debug").html(data);
     jsonObject = $.parseJSON(data);
     if (!jsonObject['open']) {
         $("#chatbox").html("Session dropped.  Did the other user log out?");
-        $("#debug").html(data);
         return;
     }
     for (i=0; i<jsonObject['length']; i++) {
@@ -50,10 +51,12 @@ You are helping {{helpee}}.
 <div id="chatbox">
 </div>
 
-<input type="text" name="input">
-<button id="submit">
+<input type="text" name="input"></input>
+<button id="submit">Submit</button>
 
 <div id="debug">
 </div>
+
+{{chatPK}}
 
 </html>

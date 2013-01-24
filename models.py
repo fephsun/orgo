@@ -137,7 +137,7 @@ def getArrowAndMoleculeModels(reactionSteps):
     #ArrowModel.create(newPointFrom (a MoleculeBoxModel), newPointTo (a MoleculeBoxModel), newReagentsHtml (a html string)):
     arrowmodels = [ArrowModel.create(moleculedict[reactionStep.reactantBox],
                                     moleculedict[reactionStep.productBox],
-                                    reactionStepHtml(reactionStep))
+                                    reactionStep.stringList())
                    for reactionStep in reactionSteps]
     
     ##moleculeboxmodels = moleculedict.values()

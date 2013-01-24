@@ -68,6 +68,10 @@ class ReactionStep:
                         self.productBox = MoleculeBox(self.reactantBox.molecules + self.otherMolecules)
                         return True
                 elif mode == "generate":
+                    if len(products) > 4:
+                        #Too many molecules.  It takes too long to moleculeCompare them pairwise, so just 
+                        #return False now.
+                        return False
                     #Return true if some new molecule was made during the course of the reaction
                     for product in products:
                         if sum([moleculeCompare(product, reactant) for reactant in self.reactantBox.molecules])==0:
@@ -303,13 +307,11 @@ def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30):
                         if debug:
                             print "Result: " +str(smiles(currentRxn.productBox.molecules))
                             print molBoxes
-                            raw_input()
         if len(molBoxes) == 0:
             #Didn't fuse any molecules.  Oh well.
             molBoxes = newMolBoxes
-    #TODO: should return a SynthesisProblem object, once this class is fleshed out.
-    #NOT A TODO ANYMORE. This is now properly handled by the SynthesisProblemModel constructor,
-    #as the SynthesisProblem class no longer exists.
+    if len(reactions) == 0:
+        return randomSynthesisProblemMake(mode, steps, maxLength)
     return reactions
                          
 

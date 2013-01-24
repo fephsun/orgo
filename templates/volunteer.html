@@ -4,8 +4,26 @@
 </head>
 
 <script>
+var state = "Waiting";
+var pk = 0;
+var timeoutId = 0;
 $(document).ready(function(){
     getQueue();
+    $("#submit").click(function(){
+        if (state == "Waiting"){
+            return;
+        }
+        //Submit a new message to the server.
+        $.ajax({
+            type: "POST",
+            url: "/orgo/chat/helperchatpoll/",
+            data: {'PK': pk,
+                   'message': $('input:text').val()},
+            success: update
+        });
+        //Reset the text input.
+        $('input:text').val("");
+    });
 
 });
 
@@ -23,7 +41,7 @@ function getQueue() {
             $("#queue").html(out);
         }
     });
-    setTimeout(getQueue, 3000);
+    timeoutId = setTimeout(getQueue, 3000);
 }
 
 function connectHelpee(userId) {
@@ -32,11 +50,39 @@ function connectHelpee(userId) {
         url: "/orgo/chat/helperpoll/",
         data: {'username': userId},
         success: function(data) {
-            //We get an entire html page back.  All we need to do is render it.
-            $(document.body).html(data);
             $("#debug").html(data);
+            jsonObject = $.parseJSON(data);
+            state = "Chatting";
+            pk = jsonObject.chatPK;
+            $("#queue").html("You are now helping "+jsonObject.helpee+".");
+            clearTimeout(timeoutId);
+            getChat();
         }
     });
+}
+
+function getChat() {
+    //Gets chat messages from the server.
+    $.ajax({
+        type: "POST",
+        url: "/orgo/chat/helperchatpoll/",
+        data: {'PK': pk},
+        success: update
+    });
+    setTimeout(getChat, 3000);
+}
+
+function update(data) {
+    jsonObject = $.parseJSON(data);
+    if (!jsonObject['open']) {
+        $("#debug").html(data);
+        $("#chatbox").html("Session dropped.  Did the other user log out?");
+        state = "Waiting";
+        return;
+    }
+    for (i=0; i<jsonObject['length']; i++) {
+        $("#chatbox").append(jsonObject[i] + "<br />");
+    }
 }
 </script>
 
@@ -46,7 +92,12 @@ function connectHelpee(userId) {
 <div id="debug">
 </div>
 
-{{debug}}
+<div id="chatbox">
+</div>
+
+<input type="text" name="input"></input>
+<button id="submit">Submit</button>
+
 
 
 </html>

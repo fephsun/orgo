@@ -1,5 +1,9 @@
+
 from helperFunctions import *
 import itertools
+
+class ReactionTooCrazyError(Exception):
+    pass
 
 def removeDuplicates(moleculeList):
     if not isinstance(moleculeList, list):
@@ -27,6 +31,9 @@ def react(molecules, findPlace, reactAtPlace):
     if not isinstance(molecules, list):
         return react([molecules], findPlace, reactAtPlace)
     while True:
+        if len(molecules) > 6:
+            #If the reaction gets too crazy, kill.
+            raise ReactionTooCrazyError
         places = [(molecule, findPlace(molecule)) for molecule in molecules]
         if not (False in [item[1]==None for item in places]):
             break
@@ -130,6 +137,33 @@ def tautomerize(moleculeList):
     return reactWithoutRemoveDuplicates(moleculeList, findPlace, reactAtPlace)
 
      
+
+    #Returns a (centralcarbon, alkenecarbon, oxygen) in a tuple. 
+    def findPlace(molecule):
+        if molecule == None:
+            return None
+        for atom in molecule.atoms:
+            if not (atom.element == 'C'):
+                continue
+            isAlkene = False
+            alkeneCarbon = None
+            #check if is alkene
+            for neighbor in atom.neighbors:
+                if neighbor.element == 'C' and atom.neighbors[neighbor] == 2:
+                    isAlkene = True
+                    alkeneCarbon = neighbor
+            if not isAlkene:
+                continue
+            #Sanity check this later
+            for neighbor in atom.neighbors:
+                if neighbor.element == 'O' and atom.neighbors[neighbor] == 1 and len(list(neighbor.neighbors))==1:
+                    return (atom, alkeneCarbon, neighbor)
+        return None
+    
+    #if things are crashing, uncomment this line
+    #return moleculeList
+    
+    return reactWithoutRemoveDuplicates(moleculeList, findPlace, reactAtPlace)
 
 
 
@@ -477,12 +511,12 @@ def tertButoxide(molecules):
         for Xmolecule, c1, c2 in candidates:
             if len(c1.neighbors)+len(c2.neighbors) == maxSub:
                 maxSubCandidates.append(Xmolecule)
-        print maxSubCandidates
+        if debug:
+            print maxSubCandidates
         return maxSubCandidates
 
         
     def complete(molecules):
-        print "New recurse"
         #Complete testing.
         out = []
         #Note to self: do not modify molecules.  You need it for returning at the end.
@@ -505,8 +539,9 @@ def tertButoxide(molecules):
         if out==molecules:
             return molecules
         else:
-            print out
-            print molecules
+            if debug:
+                print out
+                print molecules
         return complete(removeDuplicates(out))
     if debug:
         a = complete(molecules)
@@ -1210,5 +1245,4 @@ if __name__ == '__main__':
     c85.newChiralCenter(c86, (c89, c87, f81))
 
     print smiles(tertButoxide([cycPentMol]))
-
-
+    

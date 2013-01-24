@@ -1,6 +1,8 @@
 from helperFunctions import *
 import itertools
 
+
+
 def removeDuplicates(moleculeList):
     if not isinstance(moleculeList, list):
         return [moleculeList]
@@ -25,6 +27,8 @@ def react(molecules, findPlace, reactAtPlace):
     if not isinstance(molecules, list):
         return react([molecules], findPlace, reactAtPlace)
     while True:
+        if len(molecules) > 6:
+            pass
         places = [(molecule, findPlace(molecule)) for molecule in molecules]
         if not (False in [item[1]==None for item in places]):
             break

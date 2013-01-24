@@ -15,9 +15,9 @@ $(document).ready(function(){
         //Submit a new message to the server.
         $.ajax({
             type: "POST",
-            url: "/orgo/chat/helpeechatpoll",
+            url: "/orgo/chat/helpeechatpoll/",
             data: {'PK': pk,
-                   'message': $('input[type=text]').val()},
+                   'message': $('input:text').val()},
             success: update
         });
         //Reset the text input.
@@ -70,6 +70,7 @@ function getChat() {
 }
 
 function update(data) {
+    $("#allOut").html(data);
     jsonObject = $.parseJSON(data);
     if (!jsonObject['open']) {
         $("#chatbox").html("Session dropped.  Did the other user log out?");
@@ -77,7 +78,7 @@ function update(data) {
         return;
     }
     for (i=0; i<jsonObject['length']; i++) {
-        $("#chatbox").append(jsonObject[i] + "<br />");
+        $("#chatbox").append(jsonObject[i] + "<br / >");
     }
 }
 </script>
@@ -90,8 +91,8 @@ function update(data) {
 <div id="chatbox">
 </div>
 
-<input type="text" name="input">
-<button id="submit">
+<input type="text" name="input"></input>
+<button id="submit">Submit</button>
 
 
 </html>

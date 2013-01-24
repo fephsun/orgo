@@ -558,9 +558,7 @@ def helpeeWaitPoll(request):
         chats.sort(key=lambda x: x.initTime, reverse=True)
         thisChat = chats[0]
         for i in xrange(1, len(chats)):
-            pass
-            #FIXME!
-            #models.ChatPair.delete(chats[i])
+            models.ChatPair.delete(chats[i])
         out['helper'] = thisChat.helper.username
         out['chatPK'] = thisChat.pk
         return HttpResponse(json.dumps(out))
@@ -597,7 +595,10 @@ def helperWaitPoll(request):
         #Make a new ChatPair.
         chat = models.ChatPair.create(helpee=helpee, helper=request.user)
         chat.save()
-        return render(request, 'helperchat.html', {'helpee': helpee.username, 'chatPK': chat.pk})
+        out = dict()
+        out['helpee'] = helpee.username
+        out['chatPK'] = chat.pk
+        return HttpResponse(json.dumps(out))
     #Otherwise, we are just updating the list of people who need help.
     #Generates a list of people who need help.
     thisQueue = models.HelpWaitingList.objects.all()[0]
@@ -623,7 +624,7 @@ def helpeeChatPoll(request):
         #This should never happen.
         return
     out = dict()
-    pk = request.POST['PK']
+    pk = int(request.POST['PK'])
     chat = models.ChatPair.objects.get(pk=pk)
     if 'message' in request.POST:
         #A new message was sent.  Add it to the ChatPair.
@@ -651,7 +652,7 @@ def helpeeChatPoll(request):
         newLines[i].helpeeSeen = True
         newLines[i].save()
     return HttpResponse(json.dumps(out))
-  except StandardError as e:
+  except BaseException as e:
     return HttpResponse(str(e))
     
 @csrf_exempt    
@@ -663,8 +664,10 @@ def helperChatPoll(request):
         #This should never happen.
         return
     out = dict()
-    pk = request.POST['PK']
+    pk = int(request.POST['PK'])
+
     chat = models.ChatPair.objects.get(pk=pk)
+
     if 'message' in request.POST:
         #A new message was sent.  Add it to the ChatPair.
         msg = escape(request.POST['message'])
@@ -691,6 +694,6 @@ def helperChatPoll(request):
         newLines[i].helperSeen = True
         newLines[i].save()
     return HttpResponse(json.dumps(out))
-  except StandardError as e:
+  except  BaseException as e:
     return HttpResponse(str(e))
 

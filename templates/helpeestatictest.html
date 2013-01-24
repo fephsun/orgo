@@ -4,9 +4,25 @@
 </head>
 
 <script>
+var state = "Waiting"
+var pk = 0 //Gets changed before chat starts.
 $(document).ready(function(){
     askForHelp();
-
+    $("#submit").click(function(){
+        if (state == "Waiting") {
+            return;
+        }
+        //Submit a new message to the server.
+        $.ajax({
+            type: "POST",
+            url: "/orgo/chat/helpeechatpoll",
+            data: {'PK': pk,
+                   'message': $('input[type=text]').val()},
+            success: update
+        });
+        //Reset the text input.
+        $('input:text').val("");
+    });
 });
 
 function askForHelp() {
@@ -30,6 +46,9 @@ function keepPolling() {
             dataObject = jQuery.parseJSON(data);
             if (dataObject.success){
                 $("#numInQueue").html("Success!  Helped by "+dataObject.helper);
+                state = "Chatting";
+                pk = dataObject.chatPK;
+                getChat();
             } else {
                 $("#numInQueue").html(dataObject.queueSize);
                 setTimeout(keepPolling, 3000);
@@ -38,12 +57,41 @@ function keepPolling() {
         }
     });
 }
+
+function getChat() {
+    //Gets chat messages from the server.
+    $.ajax({
+        type: "POST",
+        url: "/orgo/chat/helpeechatpoll/",
+        data: {'PK': pk},
+        success: update
+    });
+    setTimeout(getChat, 3000);
+}
+
+function update(data) {
+    jsonObject = $.parseJSON(data);
+    if (!jsonObject['open']) {
+        $("#chatbox").html("Session dropped.  Did the other user log out?");
+        state = "Waiting";
+        return;
+    }
+    for (i=0; i<jsonObject['length']; i++) {
+        $("#chatbox").append(jsonObject[i] + "<br />");
+    }
+}
 </script>
 <div id="numInQueue">
 </div>
 
 <div id="allOut">
 </div>
+
+<div id="chatbox">
+</div>
+
+<input type="text" name="input">
+<button id="submit">
 
 
 </html>

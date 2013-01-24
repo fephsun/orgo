@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import EmailMessage
 from django.utils import timezone
+from django.utils.html import escape
 import json
 import traceback
 import orgo.engine.serverRender as serverRender
@@ -16,6 +17,7 @@ import orgo.engine.randomGenerator as randomGenerator
 import orgo.engine.orgoStructure as orgoStructure
 import orgo.models as models
 from orgo.engine.synthProblem import *
+TIMEOUT = 10 #seconds
 
 def home(request, debug = ""):
     #Home page.
@@ -537,7 +539,7 @@ def helpeeWaitPoll(request):
     #Look for a chat containing this user.
     chats = models.ChatPair.objects.filter(helpee=request.user)
     if len(chats) == 0 or\
-    sum([(timezone.now()-chat.initTime).total_seconds()<10 for chat in chats]) == 0:
+    sum([(timezone.now()-chat.initTime).total_seconds()<TIMEOUT for chat in chats]) == 0:
         #Nope, keep waiting.
         out['success'] = False
         if len(request.user.helpwaitinglist_set.all()) == 0:
@@ -556,7 +558,9 @@ def helpeeWaitPoll(request):
         chats.sort(key=lambda x: x.initTime, reverse=True)
         thisChat = chats[0]
         for i in xrange(1, len(chats)):
-            models.ChatPair.delete(chats[i])
+            pass
+            #FIXME!
+            #models.ChatPair.delete(chats[i])
         out['helper'] = thisChat.helper.username
         out['chatPK'] = thisChat.pk
         return HttpResponse(json.dumps(out))
@@ -601,7 +605,7 @@ def helperWaitPoll(request):
     for x in thisQueue.users.all():
         #Did the user poll recently?  If not, he probably closed his browser window.
         #We should remove him from the queue.
-        if (timezone.now() - x.waittimer_set.all()[0].lastCheck).total_seconds() > 10:
+        if (timezone.now() - x.waittimer_set.all()[0].lastCheck).total_seconds() > TIMEOUT:
             #Too long.  Remove.
             models.WaitTimer.delete(x.waittimer_set.all()[0])
         else:
@@ -609,17 +613,84 @@ def helperWaitPoll(request):
     return HttpResponse(waitingUsers)
   except StandardError as e:
     return HttpResponse(str(e))
-    
+
+@csrf_exempt    
 def helpeeChatPoll(request):
+  try:
     #Is called every couple of seconds by the helpee's browser.
     #Looks for new ChatLines, also updates its helpeeLastCheck.
-    if request.method=='POST':
-        pk = request.POST['PK']
-        chat = models.ChatPair.objects.get(pk=pk)
-        
+    if request.method!='POST':
+        #This should never happen.
+        return
+    out = dict()
+    pk = request.POST['PK']
+    chat = models.ChatPair.objects.get(pk=pk)
+    if 'message' in request.POST:
+        #A new message was sent.  Add it to the ChatPair.
+        msg = escape(request.POST['message'])
+        newLine = models.ChatLine.create(originator=request.user, content=msg)
+        newLine.save()
+        chat.chatRecord.add(newLine)
+    
+    #Check for helper's messages (regardless of whether a message
+    #was sent).
+    #Update the last check
+    chat.helpeeLastCheck = timezone.now()
+    chat.save()
+    if (timezone.now() - chat.helperLastCheck).total_seconds() > TIMEOUT:
+        #The helper is missing.  Terminate chat.
+        out['open'] = False
+        models.ChatPair.delete(chat)
+        return HttpResponse(json.dumps(out))
+    out['open'] = True
+    newLines = list(chat.chatRecord.filter(helpeeSeen = False))
+    newLines.sort(key=lambda x: x.postTime)
+    out['length'] = len(newLines)
+    for i in xrange(len(newLines)):
+        out[i] = newLines[i].originator.username+ ": " +newLines[i].content
+        newLines[i].helpeeSeen = True
+        newLines[i].save()
+    return HttpResponse(json.dumps(out))
+  except StandardError as e:
+    return HttpResponse(str(e))
+    
+@csrf_exempt    
+def helperChatPoll(request):
+  try:
+    #Is called every couple of seconds by the helper's browser.
+    #Looks for new ChatLines, also updates its helperLastCheck.
+    if request.method!='POST':
+        #This should never happen.
+        return
+    out = dict()
+    pk = request.POST['PK']
+    chat = models.ChatPair.objects.get(pk=pk)
+    if 'message' in request.POST:
+        #A new message was sent.  Add it to the ChatPair.
+        msg = escape(request.POST['message'])
+        newLine = models.ChatLine.create(originator=request.user, content=msg)
+        newLine.save()
+        chat.chatRecord.add(newLine)
 
-
-
-
-
+    #Check for helper's messages (regardless of whether a message
+    #was sent).
+    #Update the last check
+    chat.helperLastCheck = timezone.now()
+    chat.save()
+    if (timezone.now() - chat.helpeeLastCheck).total_seconds() > TIMEOUT:
+        #The helper is missing.  Terminate chat.
+        out['open'] = False
+        models.ChatPair.delete(chat)
+        return HttpResponse(json.dumps(out))
+    out['open'] = True
+    newLines = list(chat.chatRecord.filter(helperSeen = False))
+    newLines.sort(key=lambda x: x.postTime)
+    out['length'] = len(newLines)
+    for i in xrange(len(newLines)):
+        out[i] = newLines[i].originator.username+ ": " + newLines[i].content
+        newLines[i].helperSeen = True
+        newLines[i].save()
+    return HttpResponse(json.dumps(out))
+  except StandardError as e:
+    return HttpResponse(str(e))
 

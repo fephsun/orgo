@@ -1,7 +1,8 @@
 from helperFunctions import *
 import itertools
 
-
+class ReactionTooCrazyError(Exception):
+    pass
 
 def removeDuplicates(moleculeList):
     if not isinstance(moleculeList, list):
@@ -30,7 +31,8 @@ def react(molecules, findPlace, reactAtPlace):
         return react([molecules], findPlace, reactAtPlace)
     while True:
         if len(molecules) > 6:
-            pass
+            #If the reaction gets too crazy, kill.
+            raise ReactionTooCrazyError
         places = [(molecule, findPlace(molecule)) for molecule in molecules]
         if not (False in [item[1]==None for item in places]):
             break
@@ -117,14 +119,6 @@ def tautomerize(moleculeList):
             
             return [molecule]
         
-
-
-    #Change to single bond
-    molecule.changeBond(target1, target2, 1)
-    #Ch
-    molecule.addAtom(add1, target1, 2)
-    
-    return [molecule]
 
 
     #Returns a (centralcarbon, alkenecarbon, oxygen) in a tuple. 
@@ -502,12 +496,12 @@ def tertButoxide(molecules):
         for Xmolecule, c1, c2 in candidates:
             if len(c1.neighbors)+len(c2.neighbors) == maxSub:
                 maxSubCandidates.append(Xmolecule)
-        print maxSubCandidates
+        if debug:
+            print maxSubCandidates
         return maxSubCandidates
 
         
     def complete(molecules):
-        print "New recurse"
         #Complete testing.
         out = []
         #Note to self: do not modify molecules.  You need it for returning at the end.
@@ -530,8 +524,9 @@ def tertButoxide(molecules):
         if out==molecules:
             return molecules
         else:
-            print out
-            print molecules
+            if debug:
+                print out
+                print molecules
         return complete(removeDuplicates(out))
     if debug:
         a = complete(molecules)

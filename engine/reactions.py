@@ -100,6 +100,8 @@ def tautomerize(moleculeList):
             #Remove C=C CT-stereocheistry
             target1.eliminateCT()
             target2.eliminateCT()
+            target1.eliminateChiral()
+            target2.eliminateChiral()
             #Change C-C to single bond
             molecule.changeBond(target1, target2, 1)
             

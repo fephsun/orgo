@@ -114,7 +114,7 @@ def tautomerize(moleculeList):
             #Change C-C to single bond
             molecule.changeBond(target1, target2, 1)
 
-           """ #Do duplication again, since it only works with a pair of targets at a time
+            """ #Do duplication again, since it only works with a pair of targets at a time
             (molecule, target1, oxygen, add1, add2, addtarget1, addtarget2)=\
 
                duplicateInputs(molecule, target1, oxygen, add1, add2, addtarget1, addtarget2)"""

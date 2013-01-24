@@ -318,9 +318,10 @@ class ChatLine(models.Model):
     content = models.TextField()
     helpeeSeen = models.BooleanField(default=False)
     helperSeen = models.BooleanField(default=False)
+    postTime = models.DateTimeField()
     @classmethod
-    def create(cls, originator):
-        return cls(originator=originator, content="")
+    def create(cls, originator, content):
+        return cls(originator=originator, content=content, postTime=timezone.now())
         
 class ReagentType(models.Model):
     #A little class that saves a string describing each reagent type.

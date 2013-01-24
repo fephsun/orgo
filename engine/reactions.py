@@ -30,7 +30,7 @@ def react(molecules, findPlace, reactAtPlace):
     if not isinstance(molecules, list):
         return react([molecules], findPlace, reactAtPlace)
     while True:
-        if len(molecules) > 6:
+        if len(molecules) > 12:
             #If the reaction gets too crazy, kill.
             raise ReactionTooCrazyError
         places = [(molecule, findPlace(molecule)) for molecule in molecules]

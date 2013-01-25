@@ -362,6 +362,10 @@ def loadSynthesisFromId(request):
         return
     loadId = request.POST['Id']
     synthesis = models.SynthesisProblemModel.objects.get(pk=loadId)
+    profile = request.user.profile
+    profile.currentSynthesisProblem = synthesis
+    profile.save()
+    return renderOldSynthesis(request)
 
 @login_required
 def renderSynthesis(request):

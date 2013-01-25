@@ -376,7 +376,7 @@ def loadSynthesisFromId(request):
 def renderSynthesis(request):
     profile = request.user.profile
     #If the retain attribute is True, don't delete.
-    if not(profile.currentSynthesisProblem.retain):
+    if profile.currentSynthesisProblem == None or not(profile.currentSynthesisProblem.retain):
         #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
         try:
             for arrowModel in profile.currentSynthesisProblem.arrows.all():

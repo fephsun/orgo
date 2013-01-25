@@ -467,7 +467,7 @@ def deleteMolecule(request):
         arrIdsToDelete = []                 #for arrows
         
         
-        debuggingString = "You said to delete: "+molIdToDelete+"\n"
+        debuggingString = "You said to delete: "+str(molIdToDelete)+"\n"
         
         #While you have recently marked molecules for deletion:
         while markedAny:

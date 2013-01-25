@@ -363,6 +363,15 @@ def renderSynthesis(request):
     profile = request.user.profile
     #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
     try:
+        for arrowModel in profile.currentSynthesisProblem.arrows.all():
+            arrowModel.delete()
+        for moleculeModel in profile.currentSynthesisProblem.molecules.all():
+            moleculeModel.delete()
+        for arrowModel in profile.currentSynthesisProblem.solution.arrows.all():
+            arrowModel.delete()
+        for moleculeModel in profile.currentSynthesisProblem.solution.molecules.all():
+            moleculeModel.delete()
+        profile.currentSynthesisProblem.solution.delete()
         profile.currentSynthesisProblem.target.delete()
         profile.currentSynthesisProblem.delete()
     except:
@@ -412,21 +421,55 @@ def getSynthesisData(request):
 
     return HttpResponse(json.dumps(responseData))
     
+def deleteMolecule(request):
+    #Iteratively delete molecule with id sent in request
+    
+    molIdToDelete = request.POST["moleculeID"]
+    
+    synthesis = request.user.profile.currentSynthesisProblem
+    
+    markedAny = True
+    molIdsToDelete = [molIdToDelete]    #for molecules
+    arrIdsToDelete = []                 #for arrows
+    
+    #While you have recently marked molecules for deletion:
+    while markedAny:
+        markedAny = False
+        
+        #iterate through arrows, checking for any steps with to-delete reactants but not-to-delete products
+        for arrowModel in synthesis.arrows.all():
+        #if any are found, mark them for deletion
+            if (arrowModel.pointFrom.id in molIdsToDelete) and not (arrowModel.pointTo.id in molIdsToDelete):
+                markedAny = True
+                arrIdsToDelete += arrowModel.id
+                molIdsToDelete += arrowModel.pointTo.id
+        
+        
+    #Delete all arrow IDs you found
+    for id1 in arrIdsToDelete:
+        ArrowModel.objects.get(id=id1).delete()
+    
+    #Delete all molecule IDs you found
+    for id1 in molIdsToDelete:
+        MoleculeBoxModel.objects.get(id=id1).delete()
+        
+    #Return new rendering of problem
+    return getSynthesisData(request)
     
     
 def getSolutionData(request):
-    synthesis = request.user.profile.currentSynthesisProblem.solution
+    solution = request.user.profile.currentSynthesisProblem.solution
     
     #Iterate over all molecules for a specific synthesis
     try:
         moleculesOutput = [ (moleculeBoxModel.id, moleculeBoxModel.svg) 
-                        for moleculeBoxModel in synthesis.molecules.all()]
+                        for moleculeBoxModel in solution.molecules.all()]
     except:
         raise Exception("01")
     
     #Iterate over all arrows for a specific synthesis
     arrowsOutput = [ (arrowModel.pointFrom.id, arrowModel.pointTo.id, arrowModel.reagentsHtml)
-                     for arrowModel in synthesis.arrows.all()]
+                     for arrowModel in solution.arrows.all()]
     
     responseData = dict()
     

@@ -41,14 +41,13 @@ Contains: pickled moleculebox
 Contains: SVG representation
 """
 class MoleculeBoxModel(models.Model):
-    problemModel = models.ForeignKey('SynthesisProblemModel', null=True, on_delete=models.SET_NULL)
+    #problemModel = models.ForeignKey('SynthesisProblemModel', null=True, on_delete=models.SET_NULL)
     moleculeBox = PickledObjectField(null=True)
     svg = models.TextField(null=True)
     equalsTarget = models.BooleanField()
     
     #Call MoleculeBoxModel.create(moleculeBoxObject) to create a MoleculeBoxModel representing moleculeBoxObject
     #moleculeBoxObject is an instance of MoleculeBox
-    #parentSynthesisProblemModel is an instance of SynthesisProblemModel
     @classmethod
     def create(cls, moleculeBoxObject):
         x = cls(moleculeBox = moleculeBoxObject, svg = moleculeBoxObject.stringList(), equalsTarget = False)

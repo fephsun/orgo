@@ -62,8 +62,8 @@ class MoleculeBoxModel(models.Model):
         
 #something to store arrows --> many to many field, ArrowModel{molecule box, molecule box, string}
 class ArrowModel(models.Model):
-    pointFrom = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL, related_name="arrowPointsFrom")
-    pointTo = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL, related_name="arrowPointsTo")
+    pointFrom = models.ForeignKey(MoleculeBoxModel, null=True, related_name="arrowPointsFrom")
+    pointTo = models.ForeignKey(MoleculeBoxModel, null=True, related_name="arrowPointsTo")
     reagentsHtml = models.TextField(null=True)
     
     @classmethod

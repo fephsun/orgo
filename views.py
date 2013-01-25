@@ -450,22 +450,26 @@ def deleteMolecule(request):
             
         #Delete all arrow IDs you found
         for id1 in arrIdsToDelete:
-            ArrowModel.objects.get(id=id1).delete()
+            a = models.ArrowModel.objects.get(id=id1)
+            synthesis.arrows.remove(a)
+            a.delete()
         
         #Delete all molecule IDs you found
         for id1 in molIdsToDelete:
-            MoleculeBoxModel.objects.get(id=id1).delete()
+            a = models.MoleculeBoxModel.objects.get(id=id1)
+            synthesis.arrows.remove(a)
+            a.delete()
             
         #Return new rendering of problem
+        return getSynthesisData(request)
 
     except:
         responseData = dict()
         responseData["success"] = False
-        responseData["molecules"] = str(traceback.format_exc())
-        responseData["arrows"] = ""
+        responseData["molecules"] = [[1, str(traceback.format_exc())]]
+        responseData["arrows"] = []
         return HttpResponse(json.dumps(responseData))
 
-    return getSynthesisData(request)
     
     
 def getSolutionData(request):

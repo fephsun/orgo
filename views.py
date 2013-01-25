@@ -362,25 +362,31 @@ def loadSynthesisFromId(request):
         return
     loadId = request.POST['Id']
     synthesis = models.SynthesisProblemModel.objects.get(pk=loadId)
+    profile = request.user.profile
+    profile.currentSynthesisProblem = synthesis
+    profile.save()
+    return renderOldSynthesis(request)
 
 @login_required
 def renderSynthesis(request):
     profile = request.user.profile
-    #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
-    try:
-        for arrowModel in profile.currentSynthesisProblem.arrows.all():
-            arrowModel.delete()
-        for moleculeModel in profile.currentSynthesisProblem.molecules.all():
-            moleculeModel.delete()
-        for arrowModel in profile.currentSynthesisProblem.solution.arrows.all():
-            arrowModel.delete()
-        for moleculeModel in profile.currentSynthesisProblem.solution.molecules.all():
-            moleculeModel.delete()
-        profile.currentSynthesisProblem.solution.delete()
-        profile.currentSynthesisProblem.target.delete()
-        profile.currentSynthesisProblem.delete()
-    except:
-        pass
+    #If the retain attribute is True, don't delete.
+    if not(profile.currentSynthesisProblem.retain):
+        #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
+        try:
+            for arrowModel in profile.currentSynthesisProblem.arrows.all():
+                arrowModel.delete()
+            for moleculeModel in profile.currentSynthesisProblem.molecules.all():
+                moleculeModel.delete()
+            for arrowModel in profile.currentSynthesisProblem.solution.arrows.all():
+                arrowModel.delete()
+            for moleculeModel in profile.currentSynthesisProblem.solution.molecules.all():
+                moleculeModel.delete()
+            profile.currentSynthesisProblem.solution.delete()
+            profile.currentSynthesisProblem.target.delete()
+            profile.currentSynthesisProblem.delete()
+        except:
+            pass
     
     modes = checkboxUpdate(request)
     if modes == []:
@@ -471,7 +477,7 @@ def deleteMolecule(request):
                     arrIdsToDelete += [arrowModel.id]
                     molIdsToDelete += [arrowModel.pointTo.id]
                     debuggingString += "Arrow with IDs "+arrowModel.pointFrom.id+", "+arrowModel.pointTo.id+" WAS deleted.\n"
-                else
+                else:
                     debuggingString += "Arrow with IDs "+arrowModel.pointFrom.id+", "+arrowModel.pointTo.id+" not deleted.\n"
             
             

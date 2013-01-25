@@ -421,39 +421,50 @@ def getSynthesisData(request):
 
     return HttpResponse(json.dumps(responseData))
     
-def deleteMolecule(request):
+
+def deleteMolecule(request):    
     #Iteratively delete molecule with id sent in request
     
-    molIdToDelete = request.POST["moleculeID"]
     
-    synthesis = request.user.profile.currentSynthesisProblem
-    
-    markedAny = True
-    molIdsToDelete = [molIdToDelete]    #for molecules
-    arrIdsToDelete = []                 #for arrows
-    
-    #While you have recently marked molecules for deletion:
-    while markedAny:
-        markedAny = False
+    try:
+        molIdToDelete = request.POST["moleculeID"]
         
-        #iterate through arrows, checking for any steps with to-delete reactants but not-to-delete products
-        for arrowModel in synthesis.arrows.all():
-        #if any are found, mark them for deletion
-            if (arrowModel.pointFrom.id in molIdsToDelete) and not (arrowModel.pointTo.id in molIdsToDelete):
-                markedAny = True
-                arrIdsToDelete += arrowModel.id
-                molIdsToDelete += arrowModel.pointTo.id
+        synthesis = request.user.profile.currentSynthesisProblem
         
+        markedAny = True
+        molIdsToDelete = [molIdToDelete]    #for molecules
+        arrIdsToDelete = []                 #for arrows
         
-    #Delete all arrow IDs you found
-    for id1 in arrIdsToDelete:
-        ArrowModel.objects.get(id=id1).delete()
-    
-    #Delete all molecule IDs you found
-    for id1 in molIdsToDelete:
-        MoleculeBoxModel.objects.get(id=id1).delete()
+        #While you have recently marked molecules for deletion:
+        while markedAny:
+            markedAny = False
+            
+            #iterate through arrows, checking for any steps with to-delete reactants but not-to-delete products
+            for arrowModel in synthesis.arrows.all():
+            #if any are found, mark them for deletion
+                if (arrowModel.pointFrom.id in molIdsToDelete) and not (arrowModel.pointTo.id in molIdsToDelete):
+                    markedAny = True
+                    arrIdsToDelete += arrowModel.id
+                    molIdsToDelete += arrowModel.pointTo.id
+            
+            
+        #Delete all arrow IDs you found
+        for id1 in arrIdsToDelete:
+            ArrowModel.objects.get(id=id1).delete()
         
-    #Return new rendering of problem
+        #Delete all molecule IDs you found
+        for id1 in molIdsToDelete:
+            MoleculeBoxModel.objects.get(id=id1).delete()
+            
+        #Return new rendering of problem
+
+    except:
+        responseData = dict()
+        responseData["success"] = False
+        responseData["molecules"] = str(traceback.format_exc())
+        responseData["arrows"] = ""
+        return HttpResponse(json.dumps(responseData))
+
     return getSynthesisData(request)
     
     

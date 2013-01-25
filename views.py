@@ -477,7 +477,7 @@ def deleteMolecule(request):
                     arrIdsToDelete += arrowModel.id
                     molIdsToDelete += arrowModel.pointTo.id
                     debuggingString += "Arrow with IDs "+arrowModel.pointFrom.id+", "+arrowModel.pointTo.id+" WAS deleted.\n"
-                else
+                else:
                     debuggingString += "Arrow with IDs "+arrowModel.pointFrom.id+", "+arrowModel.pointTo.id+" not deleted.\n"
             
             

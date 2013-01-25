@@ -406,27 +406,32 @@ def getSynthesisData(request):
     
     synthesis = request.user.profile.currentSynthesisProblem
     
-    
     #Iterate over all molecules for a specific synthesis
     try:
         moleculesOutput = [ (moleculeBoxModel.id, moleculeBoxModel.svg) 
                         for moleculeBoxModel in synthesis.molecules.all()]
-    except:
-        raise Exception("01")
     
-    #Iterate over all arrows for a specific synthesis
-    
-    arrowsOutput = [ (arrowModel.pointFrom.id, arrowModel.pointTo.id, arrowModel.reagentsHtml)
-                     for arrowModel in synthesis.arrows.all()]
-    
-    responseData = dict()
-    
-    responseData["success"] = synthesis.checkIfSolved()
-    responseData["molecules"] = moleculesOutput
-    responseData["arrows"] = arrowsOutput
+        #Iterate over all arrows for a specific synthesis
+        
+        arrowsOutput = [ (arrowModel.pointFrom.id, arrowModel.pointTo.id, arrowModel.reagentsHtml)
+                         for arrowModel in synthesis.arrows.all()]
+        
+        responseData = dict()
+        
+        responseData["success"] = synthesis.checkIfSolved()
+        responseData["molecules"] = moleculesOutput
+        responseData["arrows"] = arrowsOutput
 
-    return HttpResponse(json.dumps(responseData))
-
+        return HttpResponse(json.dumps(responseData))
+        
+    except StandardError as e:
+        responseData = dict()
+        responseData["success"] = False
+        responseData["molecules"] = [(1, str(e)+traceback.format_exc())]
+        responseData["arrows"] = []
+        return HttpResponse(json.dumps(responseData))
+        
+        
 
 @csrf_exempt   
 def deleteMolecule(request):    

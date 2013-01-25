@@ -514,7 +514,7 @@ def addReagentToMolecule(request):
             moleculeboxmodel2.equalsTarget = isTarget
             moleculeboxmodel2.save()
         
-            arrow = models.ArrowModel.create(moleculeboxmodel1, moleculeboxmodel2, reagentString)
+            arrow = models.ArrowModel.create(moleculeboxmodel1, moleculeboxmodel2, testStep.stringList())
             arrow.save()
             
             try:

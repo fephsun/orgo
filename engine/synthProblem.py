@@ -94,7 +94,7 @@ class ReactionStep:
         
         
         
-    #Returns a list of the reagents contained in this reaction step as HTML-printable strings.
+    #Returns a string of the reagents contained in this reaction step as proper HTML format.
     def stringList(self):
         out = ''
         for reagent in list(self.hasReagents):

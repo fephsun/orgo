@@ -463,7 +463,7 @@ def deleteMolecule(request):
     
     try:
     
-        molIdToDelete = request.POST["moleculeID"]
+        molIdToDelete = int(request.POST["moleculeID"])
         
         synthesis = request.user.profile.currentSynthesisProblem
         
@@ -482,8 +482,8 @@ def deleteMolecule(request):
             #iterate through arrows, checking for any steps with to-delete reactants but not-to-delete products
             for arrowModel in synthesis.arrows.all():
                 #if any are found, mark them for deletion
-                debuggingString += "Conditions? "+ str(arrowModel.pointFrom.id in molIdsToDelete) + ", " + str(not (arrowModel.pointTo.id in molIdsToDelete)) + "\n"
-                if (arrowModel.pointFrom.id in molIdsToDelete) and not (arrowModel.pointTo.id in molIdsToDelete):
+                debuggingString += "Conditions? "+ str(int(arrowModel.pointFrom.id) in molIdsToDelete) + ", " + str(not (int(arrowModel.pointTo.id) in molIdsToDelete)) + "\n"
+                if (int(arrowModel.pointFrom.id) in molIdsToDelete) and not (int(arrowModel.pointTo.id) in molIdsToDelete):
                     markedAny = True
                     arrIdsToDelete += [arrowModel.id]
                     molIdsToDelete += [arrowModel.pointTo.id]

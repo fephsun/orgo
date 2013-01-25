@@ -409,13 +409,16 @@ def renderSynthesis(request):
 
     
 
-def getSynthesisData(request):
+def getSynthesisData(request, synthesis=None):
     #Should return a JSON string with the following attributes contained:
     #molecules is an array of arrays: [ [idnumber, "<svg>...</svg>"], ... ]
     #arrows is an array of arrays: [ [idnumber1, idnumber2, "reagentText"], ...]
     #success   -- a boolean (true/false)
-    
-    synthesis = request.user.profile.currentSynthesisProblem
+    if synthesis == None:
+        mode = "Send to browser"
+        synthesis = request.user.profile.currentSynthesisProblem
+    else:
+        mode = "Return dictionary"
     
     #Iterate over all molecules for a specific synthesis
     try:
@@ -438,8 +441,10 @@ def getSynthesisData(request):
         responseData["success"] = synthesis.checkIfSolved()
         responseData["molecules"] = moleculesOutput
         responseData["arrows"] = arrowsOutput
-
-        return HttpResponse(json.dumps(responseData))
+        if mode == "Send to browser":
+            return HttpResponse(json.dumps(responseData))
+        elif mode == "Return dictionary":
+            return responseData
         
     except StandardError as e:
         responseData = dict()
@@ -701,9 +706,6 @@ def volunteerToHelp(request, debug=""):
     #Static.
     return render(request, "volunteer.html", {'debug': debug})
 
-@csrf_exempt  
-def helpeeStaticTest(request, debug=""):
-    return render(request, "helpeestatictest.html", {'debug': debug})
 
 @csrf_exempt    
 def helperWaitPoll(request):
@@ -724,7 +726,9 @@ def helperWaitPoll(request):
         #Make a new ChatPair.
         chat = models.ChatPair.create(helpee=helpee, helper=request.user)
         chat.save()
-        out = dict()
+        #Get the helpee's synthesis data.
+        out = getSynthesisData(helpee.profile.currentSynthesisProblem)
+        out['target'] = helpee.profile.currentSynthesisProblem.target.svg #Need to send target separately.
         out['helpee'] = helpee.username
         out['chatPK'] = chat.pk
         return HttpResponse(json.dumps(out))

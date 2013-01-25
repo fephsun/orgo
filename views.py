@@ -485,8 +485,8 @@ def deleteMolecule(request):
                 debuggingString += "Conditions? "+ str(int(arrowModel.pointFrom.id) in molIdsToDelete) + ", " + str(not (int(arrowModel.pointTo.id) in molIdsToDelete)) + "\n"
                 if (int(arrowModel.pointFrom.id) in molIdsToDelete) and not (int(arrowModel.pointTo.id) in molIdsToDelete):
                     markedAny = True
-                    arrIdsToDelete += [arrowModel.id]
-                    molIdsToDelete += [arrowModel.pointTo.id]
+                    arrIdsToDelete += [int(arrowModel.id)]
+                    molIdsToDelete += [int(arrowModel.pointTo.id)]
                     debuggingString += "Arrow with IDs "+str(arrowModel.pointFrom.id)+", "+str(arrowModel.pointTo.id)+" WAS deleted.\n"
                 else:
                     debuggingString += "Arrow with IDs "+str(arrowModel.pointFrom.id)+", "+str(arrowModel.pointTo.id)+" not deleted.\n"
@@ -520,10 +520,10 @@ def deleteMolecule(request):
         #Return new rendering of problem
         return getSynthesisData(request)
 
-    except StandardError as e:
+    except StandardError:
         responseData = dict()
         responseData["success"] = False
-        responseData["molecules"] = [(1, str(e))]
+        responseData["molecules"] = [(1, traceback.format_exc())]
         responseData["arrows"] = []
         return HttpResponse(json.dumps(responseData))
 

@@ -482,11 +482,11 @@ def deleteMolecule(request):
             #iterate through arrows, checking for any steps with to-delete reactants but not-to-delete products
             for arrowModel in synthesis.arrows.all():
                 #if any are found, mark them for deletion
-                debuggingString += "Conditions? "+ str(int(arrowModel.pointFrom.id) in molIdsToDelete) + ", " + str(not (int(arrowModel.pointTo.id) in molIdsToDelete)) + "\n"
-                if (int(arrowModel.pointFrom.id) in molIdsToDelete) and not (int(arrowModel.pointTo.id) in molIdsToDelete):
+                debuggingString += "Conditions? "+ str(True in [int(arrowModel.pointFrom.id)==int(molId) for molId in molIdsToDelete]) + ", " + str(not (True in [int(arrowModel.pointTo.id)==int(molId) for molId in molIdsToDelete])) + "\n"
+                if (True in [int(arrowModel.pointFrom.id)==int(molId) for molId in molIdsToDelete]) and not (True in [int(arrowModel.pointTo.id)==int(molId) for molId in molIdsToDelete]):
                     markedAny = True
-                    arrIdsToDelete += [int(arrowModel.id)]
-                    molIdsToDelete += [int(arrowModel.pointTo.id)]
+                    arrIdsToDelete += [arrowModel.id]
+                    molIdsToDelete += [arrowModel.pointTo.id]
                     debuggingString += "Arrow with IDs "+str(arrowModel.pointFrom.id)+", "+str(arrowModel.pointTo.id)+" WAS deleted.\n"
                 else:
                     debuggingString += "Arrow with IDs "+str(arrowModel.pointFrom.id)+", "+str(arrowModel.pointTo.id)+" not deleted.\n"
@@ -502,17 +502,17 @@ def deleteMolecule(request):
         
         #Delete all arrow IDs you found
         for id1 in arrIdsToDelete:
+            debuggingString += "Deleted arr: "+str(id1)+"\n"
             a = models.ArrowModel.objects.get(id=id1)
             synthesis.arrows.remove(a)
             a.delete()
-            debuggingString += "Deleted arr: "+str(id1)+"\n"
         
         #Delete all molecule IDs you found
         for id1 in molIdsToDelete:
+            debuggingString += "Deleted mol: "+str(id1)+"\n"
             a = models.MoleculeBoxModel.objects.get(id=id1)
             synthesis.molecules.remove(a)
             a.delete()
-            debuggingString += "Deleted mol: "+str(id1)+"\n"
             
         e = StandardError(debuggingString)
         #raise e

@@ -468,14 +468,19 @@ def deleteMolecule(request):
                 #if any are found, mark them for deletion
                 if (arrowModel.pointFrom.id in molIdsToDelete) and not (arrowModel.pointTo.id in molIdsToDelete):
                     markedAny = True
-                    arrIdsToDelete += arrowModel.id
-                    molIdsToDelete += arrowModel.pointTo.id
+                    arrIdsToDelete += [arrowModel.id]
+                    molIdsToDelete += [arrowModel.pointTo.id]
                     debuggingString += "Arrow with IDs "+arrowModel.pointFrom.id+", "+arrowModel.pointTo.id+" WAS deleted.\n"
                 else
                     debuggingString += "Arrow with IDs "+arrowModel.pointFrom.id+", "+arrowModel.pointTo.id+" not deleted.\n"
             
             
         debuggingString += "No more loop! \n"
+        
+        #Implement: Also iterate through arrows, checking for any steps with to-delete products
+        for arrowModel in synthesis.arrows.all():
+            if (arrowModel.pointTo.id in molIdsToDelete):
+                arrIdsToDelete += [arrowModel.id]
         
         
         #Delete all arrow IDs you found
@@ -492,8 +497,7 @@ def deleteMolecule(request):
             a.delete()
             debuggingString += "Deleted mol: "+id1+"\n"
             
-        e = StandardError()
-        e.reason = debuggingString
+        e = StandardError(debuggingString)
         raise e
         
         #Return new rendering of problem

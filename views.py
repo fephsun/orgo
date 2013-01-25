@@ -503,9 +503,12 @@ def deleteMolecule(request):
         #Delete all arrow IDs you found
         for id1 in arrIdsToDelete:
             debuggingString += "Deleted arr: "+str(id1)+"\n"
-            a = models.ArrowModel.objects.get(id=id1)
-            synthesis.arrows.remove(a)
-            a.delete()
+            try:
+                a = models.ArrowModel.objects.get(id=id1)
+                synthesis.arrows.remove(a)
+                a.delete()
+            except:
+                raise StandardError(debuggingString)
         
         #Delete all molecule IDs you found
         for id1 in molIdsToDelete:

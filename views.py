@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.utils.html import escape
 import json
 import traceback
+import forkit
 import orgo.engine.serverRender as serverRender
 import orgo.engine.reactions as reactions
 import orgo.engine.randomGenerator as randomGenerator
@@ -357,13 +358,17 @@ def renderOldSynthesis(request):
     return render(request, 'synthesisProblemInterface.html', {"TargetMolecule": synthesis.target.svg, "Name": request.user.username})
 
 def loadSynthesisFromId(request):
+    #Make a deep copy of the problem, and render it to the new user.
     if request.method != 'POST':
         #This should never happen.
         return
     loadId = request.POST['Id']
     synthesis = models.SynthesisProblemModel.objects.get(pk=loadId)
+    sCopy = forkit.tools.fork(synthesis, deep=True)
+    sCopy.retain = False
+    sCopy.save()
     profile = request.user.profile
-    profile.currentSynthesisProblem = synthesis
+    profile.currentSynthesisProblem = sCopy
     profile.save()
     return renderOldSynthesis(request)
 
@@ -479,7 +484,7 @@ def deleteMolecule(request):
                     molIdsToDelete += [arrowModel.pointTo.id]
                     debuggingString += "Arrow with IDs "+arrowModel.pointFrom.id+", "+arrowModel.pointTo.id+" WAS deleted.\n"
                 else:
-                    debuggingString += "Arrow with IDs "+arrowModel.pointFrom.id+", "+arrowModel.pointTo.id+" not deleted.\n"
+                    debuggingString += "Arrow with IDs "+str(arrowModel.pointFrom.id)+", "+str(arrowModel.pointTo.id)+" not deleted.\n"
             
             
         debuggingString += "No more loop! \n"
@@ -495,14 +500,14 @@ def deleteMolecule(request):
             a = models.ArrowModel.objects.get(id=id1)
             synthesis.arrows.remove(a)
             a.delete()
-            debuggingString += "Deleted arr: "+id1+"\n"
+            debuggingString += "Deleted arr: "+str(id1)+"\n"
         
         #Delete all molecule IDs you found
         for id1 in molIdsToDelete:
             a = models.MoleculeBoxModel.objects.get(id=id1)
             synthesis.arrows.remove(a)
             a.delete()
-            debuggingString += "Deleted mol: "+id1+"\n"
+            debuggingString += "Deleted mol: "+str(id1)+"\n"
             
         e = StandardError(debuggingString)
         raise e

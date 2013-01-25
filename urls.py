@@ -38,6 +38,8 @@ urlpatterns = patterns('',
     url(r'^api/displaySolution/$', 'orgo.views.getSolutionData', name = 'getSolutionData'),
     url(r'^api/addMoleculeToMolecule/$', 'orgo.views.addMoleculeToMolecule', name = 'addMoleculeToMolecule'),
     url(r'^api/addReagentToMolecule/$', 'orgo.views.addReagentToMolecule', name = 'addReagentToMolecule'),
+    url(r'^api/deleteMolecule/$', 'orgo.views.deleteMolecule', name = 'deleteMolecule'),
+    
     
 
     # Uncomment the admin/doc line below to enable admin documentation:

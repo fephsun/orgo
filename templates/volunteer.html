@@ -7,25 +7,34 @@
 var state = "Waiting";
 var pk = 0;
 var timeoutId = 0;
+var REFRESH = 1500;
 $(document).ready(function(){
     getQueue();
-    $("#submit").click(function(){
-        if (state == "Waiting"){
-            return;
+    $("#submit").click(submitLine);
+    $("#input").keydown(function(e){
+        //If the user presses the enter key (#13) while on the input box,
+        //automatically submit line.
+        if (e.keyCode == 13) {
+            submitLine();
         }
-        //Submit a new message to the server.
-        $.ajax({
-            type: "POST",
-            url: "/orgo/chat/helperchatpoll/",
-            data: {'PK': pk,
-                   'message': $('input:text').val()},
-            success: update
-        });
-        //Reset the text input.
-        $('input:text').val("");
     });
-
 });
+
+function submitLine(){
+    if (state == "Waiting"){
+        return;
+    }
+    //Submit a new message to the server.
+    $.ajax({
+        type: "POST",
+        url: "/orgo/chat/helperchatpoll/",
+        data: {'PK': pk,
+               'message': $('#input').val()},
+        success: update
+    });
+    //Reset the text input.
+    $('#input').val("");
+};
 
 function getQueue() {
     $.ajax({
@@ -41,7 +50,7 @@ function getQueue() {
             $("#queue").html(out);
         }
     });
-    timeoutId = setTimeout(getQueue, 3000);
+    timeoutId = setTimeout(getQueue, REFRESH);
 }
 
 function connectHelpee(userId) {
@@ -69,7 +78,7 @@ function getChat() {
         data: {'PK': pk},
         success: update
     });
-    setTimeout(getChat, 3000);
+    setTimeout(getChat, REFRESH);
 }
 
 function update(data) {
@@ -95,7 +104,7 @@ function update(data) {
 <div id="chatbox">
 </div>
 
-<input type="text" name="input"></input>
+<input type="text" name="input" id="input"></input>
 <button id="submit">Submit</button>
 
 

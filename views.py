@@ -797,11 +797,11 @@ def helperChatPoll(request):
     if request.method!='POST':
         #This should never happen.
         return
-    out = dict()
+
     pk = int(request.POST['PK'])
 
     chat = models.ChatPair.objects.get(pk=pk)
-
+    out = getSynthesisData(None, synthesis=chat.helpee.profile.currentSynthesisProblem)
     if 'message' in request.POST:
         #A new message was sent.  Add it to the ChatPair.
         msg = escape(request.POST['message'])

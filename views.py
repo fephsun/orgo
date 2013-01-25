@@ -515,10 +515,10 @@ def deleteMolecule(request):
         #Return new rendering of problem
         return getSynthesisData(request)
 
-    except:
+    except BaseException as e:
         responseData = dict()
         responseData["success"] = False
-        responseData["molecules"] = [(1, traceback.format_exc())]
+        responseData["molecules"] = [(1, str(e) + traceback.format_exc())]
         responseData["arrows"] = []
         return HttpResponse(json.dumps(responseData))
 

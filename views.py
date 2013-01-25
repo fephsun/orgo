@@ -420,7 +420,8 @@ def getSynthesisData(request):
     responseData["arrows"] = arrowsOutput
 
     return HttpResponse(json.dumps(responseData))
-    
+
+@csrf_exempt   
 def deleteMolecule(request):
     #Iteratively delete molecule with id sent in request
     
@@ -758,4 +759,18 @@ def helperChatPoll(request):
     return HttpResponse(json.dumps(out))
   except  BaseException as e:
     return HttpResponse(str(e))
+    
+@csrf_exempt 
+def saveProblem(request):
+    #Saves the user's current problem for eternity (sort of).  Sends back an id that
+    #can be used to access the problem.
+    profile = request.user.profile
+    profile.currentSynthesisProblem.retain = True
+    profile.currentSynthesisProblem.save()
+    return HttpResponse(profile.currentSynthesisProblem.pk)
+    
+    
+    
+    
+    
 

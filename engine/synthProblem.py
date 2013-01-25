@@ -5,6 +5,7 @@ import orgoStructure
 import reactions as reactionsModule
 import string
 import serverRender
+import copy
 
 
 
@@ -16,8 +17,7 @@ import serverRender
 class ReactionStep:
     def __init__(self, parentMoleculeBox):
         self.reactantBox = parentMoleculeBox
-        self.otherMoleculeBoxes = []
-        self.otherMolecules = []
+        self.otherMoleculeBox = MoleculeBox([])
         self.productBox = None
         
         #hasReagents is a dict that maps numbers (of reagents) to true/false
@@ -36,8 +36,7 @@ class ReactionStep:
     #    return self.react()
           
     def addMolecule(self, moleculeBox):
-        self.otherMoleculeBoxes += [moleculeBox]
-        self.otherMolecules += moleculeBox.molecules
+        self.otherMoleculeBox = moleculeBox
         
     #Returns True or False depending on whether or not a reaction occurred.
     #If True, it updates self.product to be a new MoleculeBox containing 
@@ -57,7 +56,7 @@ class ReactionStep:
             else:
                 #react!
                 try:
-                    products = reaction[1](self.reactantBox.molecules)(self.otherMolecules) #a function of two variables
+                    products = reaction[1](self.reactantBox.molecules)(self.otherMoleculeBox.molecules) #a function of two variables
                 except ReactionTooCrazyError:
                     #TODO: write some sort of return that alerts the frontend.
                     return False
@@ -69,7 +68,7 @@ class ReactionStep:
                         return True
                     #if not, the old set of molecules remain intact
                     else:
-                        self.productBox = MoleculeBox(self.reactantBox.molecules + self.otherMolecules)
+                        self.productBox = MoleculeBox(self.reactantBox.molecules + self.otherMoleculeBox.molecules)
                         return True
                 elif mode == "generate":
                     if len(products) > 4:
@@ -205,16 +204,43 @@ def makeStartingMaterial(mode, count=1):
     molecules = []
     if ('10A Alkenes: halide addition' in mode) or ('10B Alkenes: other' in mode) or ('11 Alkynes' in mode):
         for i in xrange(count):
+            if random.random() < 0.4:
+                forceTerminalAlkyne = True
+            else:
+                forceTerminalAlkyne = False
             molecules.append(randomGenerator.randomStart(endProb=0.3, maxBranchLength=10,
             alkyneProb=0.1, alkeneProb=0.1,
-            BrProb=0.1, ClProb=0.1, OHProb=0.05)[0])
+            BrProb=0.1, ClProb=0.1, OHProb=0.05, forceTerminalAlkyne = forceTerminalAlkyne)[0])
         molecules = removeDuplicates(molecules)
         if debug:
             print "Starting material: " + str(smiles(molecules))
         return [MoleculeBox([molecule]) for molecule in molecules]
     
+def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30, count = 2):
+    steps, fused = randomSynthesisProblemStart(mode, steps, maxLength, count)
+    if fused:
+        return steps
+    productsNeeded = []  #Tracks all of the molecules we need.
+    productsNeeded += steps[-1].reactantBox.molecules
+    steps[-1].keep = True  #Add this new attribute to track which reactions are necessary.
+    keepers = 0
+    #If we found at least one more keeper in the last cycle, keep going.
+    while sum([hasattr(step, "keep") for step in steps]) > keepers:
+        keepers = sum([hasattr(step, "keep") for step in steps])
+        for step in steps:
+            for molecule in step.productBox.molecules:
+                if molecule in productsNeeded:
+                    step.keep = True
+                    productsNeeded += (step.reactantBox.molecules + step.otherMoleculeBox.molecules)
+    steps2 = copy.copy(steps)
+    for step in steps:
+        if not(hasattr(step, "keep")):
+            steps2.remove(step)
+    return steps2
     
-def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30, count=2):
+    
+def randomSynthesisProblemStart(mode, steps = 20, maxLength = 30, count=2):
+    fused = False
     #Mode controls the reagents that are legal, as well as the distribution of starting materials.
     legalRxns = []
     for reactionSet in mode:
@@ -248,13 +274,13 @@ def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30, count=2):
         if sum([len(molBox.molecules) for molBox in molBoxes]) > 4:
             if debug:
                 print "Too many molecules!"
-            return randomSynthesisProblemMake(mode, steps, maxLength, 1)
+            return randomSynthesisProblemStart(mode, steps, maxLength, 1)
         for molBox in molBoxes:
             for molecule in molBox.molecules:
                 if len(molecule.atoms) > maxLength:
                     if debug:
                         print "Molecule too large!"
-                    return randomSynthesisProblemMake(mode, steps, maxLength, 1)
+                    return randomSynthesisProblemStart(mode, steps, maxLength, 1)
         newMolBoxes = []
         
         #Go through each molecule, and attempt a random reaction.
@@ -309,6 +335,7 @@ def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30, count=2):
                         newMolBoxes.remove(molBox1)
                         newMolBoxes.remove(molBox2)
                         molBoxes = newMolBoxes + [currentRxn.productBox]
+                        fused = True
                         if debug:
                             print "Result: " +str(smiles(currentRxn.productBox.molecules))
                             print molBoxes
@@ -316,16 +343,16 @@ def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30, count=2):
             #Didn't fuse any molecules.  Oh well.
             molBoxes = newMolBoxes
     if len(reactions) == 0:
-        print "Retry"
-        return randomSynthesisProblemMake(mode, steps, maxLength, 1)
-    return reactions
+        return randomSynthesisProblemStart(mode, steps, maxLength, 1)
+    return reactions, fused
                          
 
 #def [moleculeboxes] = getStartingMoleculeBoxes(reactionSteps) in synthProblem
 #Helper method used by a constructor in models.
 def getStartingMoleculeBoxes(reactionSteps):
     products = list(set([reactionStep.productBox for reactionStep in reactionSteps]))
-    startingMoleculeBoxes = [reactionStep.reactantBox for reactionStep in reactionSteps if not (reactionStep.reactantBox in products)]
+    allMolecules = list(set([step.reactantBox for step in reactionSteps]) | set([step.otherMoleculeBox for step in reactionSteps if (step.otherMoleculeBox.molecules != [])]))
+    startingMoleculeBoxes = [molecule for molecule in allMolecules if (molecule not in products)]
     startingMoleculeBoxes = list(set(startingMoleculeBoxes)) #this should remove duplicates
     return startingMoleculeBoxes
 

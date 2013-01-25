@@ -123,6 +123,7 @@ def getArrowAndMoleculeModels(reactionSteps):
     for reactionStep in reactionSteps:
         p = reactionStep.productBox
         r = reactionStep.reactantBox
+        o = reactionStep.otherMoleculeBox
         
         if not p in moleculedict.keys():
             newmodel = MoleculeBoxModel.create(p)
@@ -132,13 +133,22 @@ def getArrowAndMoleculeModels(reactionSteps):
             newmodel = MoleculeBoxModel.create(r)
             newmodel.save()
             moleculedict[r] = newmodel
+        if not o in moleculedict.keys() and o.molecules != []:
+            newmodel = MoleculeBoxModel.create(o)
+            newmodel.save()
+            moleculedict[o] = newmodel
     
     #Iterate through reactionsteps, creating a list of ArrowModels
     #ArrowModel.create(newPointFrom (a MoleculeBoxModel), newPointTo (a MoleculeBoxModel), newReagentsHtml (a html string)):
-    arrowmodels = [ArrowModel.create(moleculedict[reactionStep.reactantBox],
-                                    moleculedict[reactionStep.productBox],
-                                    reactionStep.stringList()[:-2])
-                   for reactionStep in reactionSteps]
+    arrowmodels = []
+    for step in reactionSteps:
+        arrowmodels.append(ArrowModel.create(moleculedict[step.reactantBox],
+                                    moleculedict[step.productBox],
+                                    step.stringList()[:-2]))
+        if step.otherMoleculeBox.molecules != []:
+            arrowmodels.append(ArrowModel.create(moleculedict[step.otherMoleculeBox],
+                                    moleculedict[step.productBox],
+                                    step.stringList()[:-2]))
     
     ##moleculeboxmodels = moleculedict.values()
     return (arrowmodels, moleculedict.values())

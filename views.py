@@ -510,7 +510,7 @@ def deleteMolecule(request):
         #Delete all molecule IDs you found
         for id1 in molIdsToDelete:
             a = models.MoleculeBoxModel.objects.get(id=id1)
-            synthesis.arrows.remove(a)
+            synthesis.molecules.remove(a)
             a.delete()
             debuggingString += "Deleted mol: "+str(id1)+"\n"
             

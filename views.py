@@ -415,6 +415,9 @@ def getSynthesisData(request):
         raise Exception("01")
     
     #Iterate over all arrows for a specific synthesis
+    assert arrowModel.pointFrom != None
+    assert arrowModel.pointTo != None
+    
     arrowsOutput = [ (arrowModel.pointFrom.id, arrowModel.pointTo.id, arrowModel.reagentsHtml)
                      for arrowModel in synthesis.arrows.all()]
     

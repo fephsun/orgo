@@ -452,6 +452,7 @@ def deleteMolecule(request):
     
     
     try:
+    
         molIdToDelete = request.POST["moleculeID"]
         
         synthesis = request.user.profile.currentSynthesisProblem
@@ -460,34 +461,48 @@ def deleteMolecule(request):
         molIdsToDelete = [molIdToDelete]    #for molecules
         arrIdsToDelete = []                 #for arrows
         
+        
+        debuggingString = "You said to delete: "+molIdToDelete+"\n"
+        
         #While you have recently marked molecules for deletion:
         while markedAny:
+            debuggingString += "One loop. \n"
             markedAny = False
             
             #iterate through arrows, checking for any steps with to-delete reactants but not-to-delete products
             for arrowModel in synthesis.arrows.all():
-            #if any are found, mark them for deletion
+                #if any are found, mark them for deletion
                 if (arrowModel.pointFrom.id in molIdsToDelete) and not (arrowModel.pointTo.id in molIdsToDelete):
                     markedAny = True
                     arrIdsToDelete += arrowModel.id
                     molIdsToDelete += arrowModel.pointTo.id
+                    debuggingString += "Arrow with IDs "+arrowModel.pointFrom.id+", "+arrowModel.pointTo.id+" WAS deleted.\n"
+                else
+                    debuggingString += "Arrow with IDs "+arrowModel.pointFrom.id+", "+arrowModel.pointTo.id+" not deleted.\n"
             
             
+        debuggingString += "No more loop! \n"
+        
+        
         #Delete all arrow IDs you found
         for id1 in arrIdsToDelete:
             a = models.ArrowModel.objects.get(id=id1)
             synthesis.arrows.remove(a)
             a.delete()
+            debuggingString += "Deleted arr: "+id1+"\n"
         
         #Delete all molecule IDs you found
         for id1 in molIdsToDelete:
             a = models.MoleculeBoxModel.objects.get(id=id1)
             synthesis.arrows.remove(a)
             a.delete()
+            debuggingString += "Deleted mol: "+id1+"\n"
             
+        e = StandardError()
+        e.reason = debuggingString
+        raise e
+        
         #Return new rendering of problem
-        return getSynthesisData(request)
-
         return getSynthesisData(request)
 
     except StandardError as e:

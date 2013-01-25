@@ -487,9 +487,9 @@ def deleteMolecule(request):
                     markedAny = True
                     arrIdsToDelete += [arrowModel.id]
                     molIdsToDelete += [arrowModel.pointTo.id]
-                    debuggingString += "Arrow with IDs "+str(arrowModel.pointFrom.id)+", "+str(arrowModel.pointTo.id)+" WAS deleted.\n"
+                    debuggingString += "Arrow "+str(arrowModel.id)+" with IDs "+str(arrowModel.pointFrom.id)+", "+str(arrowModel.pointTo.id)+" WAS deleted.\n"
                 else:
-                    debuggingString += "Arrow with IDs "+str(arrowModel.pointFrom.id)+", "+str(arrowModel.pointTo.id)+" not deleted.\n"
+                    debuggingString += "Arrow "+str(arrowModel.id)+" with IDs "+str(arrowModel.pointFrom.id)+", "+str(arrowModel.pointTo.id)+" not deleted.\n"
             
             
         debuggingString += "No more loop! \n"

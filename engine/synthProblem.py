@@ -174,7 +174,7 @@ def parseReagentsString(inpstring):
     #hacky
     #Make sure you don't count substrings if you're counting things they're part of.
     if (string.count("h2") != 0):
-        if (string.count("ch2cl2") + string.count("nanh2") + string.count("h2o") + string.count("h20") + string.count("h2so4") + string.count("h2o2") == string.count("h2")):
+        if (string.count("ch2cl2") + string.count("nanh2") + string.count("h2o") + string.count("h20") + string.count("h2so4") == string.count("h2")):
             outp[H2] = False
     if (string.count("ch2cl2") != 0):
         if string.count("cl2") == string.count("ch2cl2"):

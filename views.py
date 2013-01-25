@@ -494,9 +494,9 @@ def deleteMolecule(request):
             
         debuggingString += "No more loop! \n"
         
-        #Implement: Also iterate through arrows, checking for any steps with to-delete products
+        #Implement: Also iterate through arrows, checking for any steps with to-delete products that are NOT already in the list to delete
         for arrowModel in synthesis.arrows.all():
-            if (arrowModel.pointTo.id in molIdsToDelete):
+            if (arrowModel.pointTo.id in molIdsToDelete) and not (arrowModel.id in arrIdsToDelete):
                 arrIdsToDelete += [arrowModel.id]
         
         

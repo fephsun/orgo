@@ -590,7 +590,7 @@ def acidhydrate(molecules, others, alkynesOk = False):
 
     def findPlaces1(molecule):
         if alkynesOk:
-            return findAlkenesAndAlkynes(molecule)
+            return findAlkynes(molecule)
         else:
             return findAlkenes(molecule)
     def findPlaces2(molecule):

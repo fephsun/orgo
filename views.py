@@ -475,18 +475,11 @@ def deleteMolecule(request):
     except StandardError as e:
         responseData = dict()
         responseData["success"] = False
-<<<<<<< HEAD
         responseData["molecules"] = [(1, str(e)+traceback.format_exc())]
         responseData["arrows"] = []
         return HttpResponse(json.dumps(responseData))
 
 
-=======
-        responseData["molecules"] = [[1, str(traceback.format_exc())]]
-        responseData["arrows"] = []
-        return HttpResponse(json.dumps(responseData))
-
->>>>>>> 5cbe7f0f1325a5269efd9bc2ed7135455f6252d9
     
     
 def getSolutionData(request):

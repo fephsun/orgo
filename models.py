@@ -151,12 +151,8 @@ class SynthesisProblemModel(models.Model):
     solution = models.ForeignKey(SolutionModel, null=True, related_name="spSolution")
     molecules = models.ManyToManyField(MoleculeBoxModel, related_name="spMolecules")
     arrows = models.ManyToManyField(ArrowModel, related_name="spArrows")
-<<<<<<< HEAD
     target = models.ForeignKey(MoleculeBoxModel, null=True, related_name="spTarget")
-=======
-    target = models.ForeignKey(MoleculeBoxModel, null=True, on_delete=models.SET_NULL, related_name="spTarget")
     retain = models.BooleanField()  #If true, this molecule is never deleted.
->>>>>>> d209a6c007abaf6e4bf9887ebd5f1f56e4d08649
     
     #reactionSteps is a list of reactionsteps; the final one contains the target molecule.
     @classmethod

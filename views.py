@@ -476,9 +476,9 @@ def deleteMolecule(request):
                     markedAny = True
                     arrIdsToDelete += arrowModel.id
                     molIdsToDelete += arrowModel.pointTo.id
-                    debuggingString += "Arrow with IDs "+arrowModel.pointFrom.id+", "+arrowModel.pointTo.id+" WAS deleted.\n"
+                    debuggingString += "Arrow with IDs "+str(arrowModel.pointFrom.id)+", "+str(arrowModel.pointTo.id)+" WAS deleted.\n"
                 else:
-                    debuggingString += "Arrow with IDs "+arrowModel.pointFrom.id+", "+arrowModel.pointTo.id+" not deleted.\n"
+                    debuggingString += "Arrow with IDs "+str(arrowModel.pointFrom.id)+", "+str(arrowModel.pointTo.id)+" not deleted.\n"
             
             
         debuggingString += "No more loop! \n"
@@ -489,17 +489,16 @@ def deleteMolecule(request):
             a = models.ArrowModel.objects.get(id=id1)
             synthesis.arrows.remove(a)
             a.delete()
-            debuggingString += "Deleted arr: "+id1+"\n"
+            debuggingString += "Deleted arr: "+str(id1)+"\n"
         
         #Delete all molecule IDs you found
         for id1 in molIdsToDelete:
             a = models.MoleculeBoxModel.objects.get(id=id1)
             synthesis.arrows.remove(a)
             a.delete()
-            debuggingString += "Deleted mol: "+id1+"\n"
+            debuggingString += "Deleted mol: "+str(id1)+"\n"
             
-        e = StandardError()
-        e.reason = debuggingString
+        e = StandardError(debuggingString)
         raise e
         
         #Return new rendering of problem

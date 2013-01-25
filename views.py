@@ -515,7 +515,7 @@ def deleteMolecule(request):
         #Return new rendering of problem
         return getSynthesisData(request)
 
-    except StandardError:
+    except:
         responseData = dict()
         responseData["success"] = False
         responseData["molecules"] = [(1, traceback.format_exc())]

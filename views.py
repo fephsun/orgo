@@ -487,7 +487,7 @@ def deleteMolecule(request):
                     markedAny = True
                     arrIdsToDelete += [arrowModel.id]
                     molIdsToDelete += [arrowModel.pointTo.id]
-                    debuggingString += "Arrow with IDs "+arrowModel.pointFrom.id+", "+arrowModel.pointTo.id+" WAS deleted.\n"
+                    debuggingString += "Arrow with IDs "+str(arrowModel.pointFrom.id)+", "+str(arrowModel.pointTo.id)+" WAS deleted.\n"
                 else:
                     debuggingString += "Arrow with IDs "+str(arrowModel.pointFrom.id)+", "+str(arrowModel.pointTo.id)+" not deleted.\n"
             
@@ -515,7 +515,7 @@ def deleteMolecule(request):
             debuggingString += "Deleted mol: "+str(id1)+"\n"
             
         e = StandardError(debuggingString)
-        raise e
+        #raise e
         
         #Return new rendering of problem
         return getSynthesisData(request)
@@ -523,7 +523,7 @@ def deleteMolecule(request):
     except StandardError as e:
         responseData = dict()
         responseData["success"] = False
-        responseData["molecules"] = [(1, str(e)+traceback.format_exc())]
+        responseData["molecules"] = [(1, str(e))]
         responseData["arrows"] = []
         return HttpResponse(json.dumps(responseData))
 
@@ -728,7 +728,7 @@ def helperWaitPoll(request):
         chat = models.ChatPair.create(helpee=helpee, helper=request.user)
         chat.save()
         #Get the helpee's synthesis data.
-        out = getSynthesisData(helpee.profile.currentSynthesisProblem)
+        out = getSynthesisData(None, synthesis=helpee.profile.currentSynthesisProblem)
         out['target'] = helpee.profile.currentSynthesisProblem.target.svg #Need to send target separately.
         out['helpee'] = helpee.username
         out['chatPK'] = chat.pk

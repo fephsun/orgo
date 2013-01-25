@@ -200,25 +200,26 @@ def parseReagentsString(inpstring):
        
     return outp
     
-def makeStartingMaterial(mode):
+def makeStartingMaterial(mode, count=1):
     #Make starting material, based on classes of reactions selected.
-    molBoxes = []
+    molecules = []
     if ('10A Alkenes: halide addition' in mode) or ('10B Alkenes: other' in mode) or ('11 Alkynes' in mode):
-        for i in xrange(1):
-            molBoxes.append(MoleculeBox([randomGenerator.randomStart(endProb=0.3, maxBranchLength=10,
+        for i in xrange(count):
+            molecules.append(randomGenerator.randomStart(endProb=0.3, maxBranchLength=10,
             alkyneProb=0.1, alkeneProb=0.1,
-            BrProb=0.1, ClProb=0.1, OHProb=0.05)[0]]))
+            BrProb=0.1, ClProb=0.1, OHProb=0.05)[0])
+        molecules = removeDuplicates(molecules)
         if debug:
-            print "Starting material: " + str(smiles(molBoxes[0].molecules))
-        return molBoxes
+            print "Starting material: " + str(smiles(molecules))
+        return [MoleculeBox([molecule]) for molecule in molecules]
     
     
-def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30):
+def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30, count=2):
     #Mode controls the reagents that are legal, as well as the distribution of starting materials.
     legalRxns = []
     for reactionSet in mode:
         legalRxns += typeToReaction[reactionSet]
-    molBoxes = makeStartingMaterial(mode)
+    molBoxes = makeStartingMaterial(mode, count)
     reactions = [] #List of reactions that we want to keep
     
     #Each mode sets up its legal reactions and its starting materials.
@@ -231,7 +232,7 @@ def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30):
     newLegalRxns = []
     for reaction in legalRxns:
         if 'interesting' in reaction[2]:
-            newLegalRxns += [reaction]*10    #Change to increase/lessen emphasis
+            newLegalRxns += [reaction]*5    #Change to increase/lessen emphasis
         else:
             newLegalRxns.append(reaction)
     legalRxns = newLegalRxns
@@ -247,13 +248,13 @@ def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30):
         if sum([len(molBox.molecules) for molBox in molBoxes]) > 4:
             if debug:
                 print "Too many molecules!"
-            return None
+            return randomSynthesisProblemMake(mode, steps, maxLength, 1)
         for molBox in molBoxes:
             for molecule in molBox.molecules:
                 if len(molecule.atoms) > maxLength:
                     if debug:
                         print "Molecule too large!"
-                    return None
+                    return randomSynthesisProblemMake(mode, steps, maxLength, 1)
         newMolBoxes = []
         
         #Go through each molecule, and attempt a random reaction.
@@ -316,7 +317,7 @@ def randomSynthesisProblemMake(mode, steps = 20, maxLength = 30):
             molBoxes = newMolBoxes
     if len(reactions) == 0:
         print "Retry"
-        return randomSynthesisProblemMake(mode, steps, maxLength)
+        return randomSynthesisProblemMake(mode, steps, maxLength, 1)
     return reactions
                          
 

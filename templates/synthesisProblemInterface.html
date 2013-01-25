@@ -18,67 +18,84 @@
 <div id = "offscreen">
 
 
-<div id="topbar">
-<img src = "http://felixsun.scripts.mit.edu/orgo/static/logo.png" id = "logo"/>
+    <div id="topbar">
+        <img src = "http://felixsun.scripts.mit.edu/orgo/static/logo.png" id = "logo"/>
 
-<!--Eventually, these will be css-ified into fancy menu things-->
-<p>
-<a href="/orgo/renderSynthesis/"> Generate a new problem </a>
+        <!--Eventually, these will be css-ified into fancy menu things-->
+        <p>
+        <a href="/orgo/renderSynthesis/"> Generate a new problem </a>
 
-<a href="/orgo/" style="padding-left:20px"> Return to home </a>
+        <a href="/orgo/" style="padding-left:20px"> Return to home </a>
 
-<span class="fake-link" id="solutionDisplay"> Display solution </span>
-</p>
+        <span class="fake-link" id="solutionDisplay" style="padding-left:20px"> Display solution </span>
 
-<!--
-<div class="box" id="generateProblemBox">
-<form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
-    <input type="submit" value="Generate a new problem" class="btn"/>
-</form>
+        <a href="#" onclick="askForHelp()" style="padding-left:20px"> Ask for help </a>
+        
+        <a href="#" onclick="saveProblem()" style="padding-left:20px"> Share this problem </a>
+        </p>
 
-<form action = "/orgo/" method="post" class="form-horizontal">{% csrf_token %}
-    <input type="submit" value="Return to home" class="btn"/>
-</form>
-</div>
--->
-<div class="box" id="namebox">
-Welcome, {{Name}}
-</div>
+        <!--
+        <div class="box" id="generateProblemBox">
+        <form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
+            <input type="submit" value="Generate a new problem" class="btn"/>
+        </form>
 
-<div class="box" id="successbox">
-</div>
+        <form action = "/orgo/" method="post" class="form-horizontal">{% csrf_token %}
+            <input type="submit" value="Return to home" class="btn"/>
+        </form>
+        </div>
+        -->
+        <div class="box" id="namebox">
+        Welcome, {{Name}}
+        </div>
 
-
-</div>
-
-<div id = "main">
-
-<div id = "leftbar">
-<!--PUT FLOWCHART HERE-->
-</div>
-
-<div id="rightbar">
-
-<div id = "target">
-<h2>Target Molecule:</h2>
-{{TargetMolecule|safe}}
-</div>
-
-<div class="ui-widget" id="reagentTyper">
-<button type="button" onclick="updateReagents()" id = "addReagent">Add Reagent</button>
-<input id = "reagentTyperBox" />
-</div>
+        <div class="box" id="successbox">
+        </div>
 
 
-<ul id="reagentsHere">
-</ul>
+    </div>
 
-</div>
+    <div id = "main">
+
+        <div id = "leftbar">
+            <!--PUT FLOWCHART HERE-->
+        </div>
+
+        <div id="rightbar">
+
+            <div id = "target">
+            <h2>Target Molecule:</h2>
+            {{TargetMolecule|safe}}
+            </div>
+
+            <div class="ui-widget" id="reagentTyper">
+            <button type="button" onclick="updateReagents()" id = "addReagent">Add Reagent</button>
+            <input id = "reagentTyperBox" />
+            </div>
+
+
+            <ul id="reagentsHere">
+            </ul>
+
+
+        </div>
+
+    </div>
+    
+    <div id="chatbox">
+        <div id="helpbox">
+        </div>
+        <input type="text" name="input" id="input"></input>
+        <button id="submit">Submit</button>
+
+
+    </div>
 
 <div id = "bottombar">
 </div>
 
 </div>
+
 
 </div>
 

@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.utils.html import escape
 import json
 import traceback
+import forkit
 import orgo.engine.serverRender as serverRender
 import orgo.engine.reactions as reactions
 import orgo.engine.randomGenerator as randomGenerator
@@ -357,13 +358,17 @@ def renderOldSynthesis(request):
     return render(request, 'synthesisProblemInterface.html', {"TargetMolecule": synthesis.target.svg, "Name": request.user.username})
 
 def loadSynthesisFromId(request):
+    #Make a deep copy of the problem, and render it to the new user.
     if request.method != 'POST':
         #This should never happen.
         return
     loadId = request.POST['Id']
     synthesis = models.SynthesisProblemModel.objects.get(pk=loadId)
+    sCopy = forkit.tools.fork(synthesis, deep=True)
+    sCopy.retain = False
+    sCopy.save()
     profile = request.user.profile
-    profile.currentSynthesisProblem = synthesis
+    profile.currentSynthesisProblem = sCopy
     profile.save()
     return renderOldSynthesis(request)
 

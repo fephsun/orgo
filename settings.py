@@ -142,6 +142,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.admindocs',
     'orgo',
+    'forkit',
 )
 
 EMAIL_USE_TLS = True

@@ -45,12 +45,13 @@ class MoleculeBoxModel(models.Model):
     moleculeBox = PickledObjectField(null=True)
     svg = models.TextField(null=True)
     equalsTarget = models.BooleanField()
+    isStartingMaterial = models.BooleanField()
     
     #Call MoleculeBoxModel.create(moleculeBoxObject) to create a MoleculeBoxModel representing moleculeBoxObject
     #moleculeBoxObject is an instance of MoleculeBox
     @classmethod
-    def create(cls, moleculeBoxObject):
-        x = cls(moleculeBox = moleculeBoxObject, svg = moleculeBoxObject.stringList(), equalsTarget = False)
+    def create(cls, moleculeBoxObject, isStartingMaterial=False):
+        x = cls(moleculeBox = moleculeBoxObject, svg = moleculeBoxObject.stringList(), equalsTarget = False, isStartingMaterial = isStartingMaterial)
         return x
 
     #target is an instance of MoleculeBoxModel
@@ -160,7 +161,6 @@ class SynthesisProblemModel(models.Model):
     def create(cls, reactionSteps):
         
         assert len(reactionSteps) != 0
-        
         #target molecule should be the final step's product
         t = MoleculeBoxModel.create(reactionSteps[-1].productBox)
         t.save()
@@ -177,7 +177,7 @@ class SynthesisProblemModel(models.Model):
         
         #molecules should contain the starting materials, which aren't the product of any reaction
         for moleculebox in getStartingMoleculeBoxes(reactionSteps): #helper method defined in synthProblem
-            m = MoleculeBoxModel.create(moleculebox)
+            m = MoleculeBoxModel.create(moleculebox, isStartingMaterial=True)
             m.checkIfEqualsTarget(t)
             m.save()
             try:

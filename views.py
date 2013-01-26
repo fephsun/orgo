@@ -156,36 +156,9 @@ def renderSmiles(request, molecule):
 
     
 
-##What is still needed for this to be working?
-    ##Need to have proper fields in problemInterface.html to replace
-    ##Need to convert lists of molecules + reactionsteps to html
-    ##Need to fix addReagent method so as to get rid of reagentBoxes altogether
-    ##Eventually: also pass in synthesis solutions, somehow
-    ##Eventually: how does the frontend know which synthesis problem it's working on?
-##def renderProblem(request):
-##    #Makes C#C
-##    c67 = Atom("C")
-##    c68 = Atom("C")
-##    ethylene = Molecule(c67)
-##    ethylene.addAtom(c68, c67, 3)
-##
-##    #Makes C-C-Br
-##    c69 = Atom("C")
-##    br70 = Atom("Br")
-##    c71 = Atom("C")
-##    bromoethane = Molecule(c69)
-##    bromoethane.addAtom(c71, c69, 1)
-##    bromoethane.addAtom(br70, c69, 1)
-##    
-##    ##Replace this temporary code with a randomly generated synthesis problem, eventually
-##    start = MoleculeBox([ethylene])
-##    target = MoleculeBox([bromoethane])
-##    #reactionStep = ReactionStep(start)
-##    #reactionStep.addReagent(parseReagentString("H2 cat Lindlar"))
-##    #reactionSteps = [reactionStep]
-##    #problemSolution = SynthesisSolution([reactionStep, ReactionStep(reactionStep.productBox).addReagent(parseReagentString("HBr in CH2Cl2"))])  
-##    return render(request, 'problemInterface.html', {"TargetMolecule":moleculeBoxHtml(target), "StartMolecule":moleculeBoxHtml(start)})
-    
+reagentAutocomplete='''['H2', 'Hydrogen', 'Pd/C', 'Palladium/Carbon catalyst', 'EtOH', 'Ethanol', 'Ethyl alcohol', 'C2H5OH', 'HF', 'Hydrogen fluoride', 'Hydrofluoric acid', 'HBr', 'Hydrogen bromide', 'Hydrobromic acid', 'HCl', 'Hydrogen chloride', 'Hydrochloric acid', 'HI', 'Hydrogen iodide', 'Hydroiodic acid', 'CH2Cl2', 'Dichloromethane', 'Fluorine', 'F2', 'Bromine', 'Br2', 'Chlorine', 'Cl2', 'Iodine', 'I2', 'ROOR', 'tBuOOtBu', 'Peroxide', 'Tert-butyl peroxide', 'Di-tert-butyl peroxide', 'mCPBA', 'PhCO3H', 'RCO3H', 'H2SO4', 'Sulfuric acid', 'H2O', 'Water', 'HOH', 'H20', 'HgSO4', 'Hg2+', 'Mercury sulfate', 'BH3', 'Borane', 'THF', 'Tetrahydrofuran', 'NaOH', 'Sodium hydroxide', 'Hydroxide', 'OH-', 'H2O2', 'Hydrogen peroxide', 'OsO4', 'Osmium tetroxide', 'Osmium oxide', 'NMO', 'NMMO', 'N-Methylmorpholine N-oxide', 'Acetone', 'Propanone', '(CH3)2CO', 'Ozone', 'O3', 'Dimethyl sulfide', 'Methylthiomethane', 'Me2S', 'Zn', 'Zinc', 'Lindlar catalyst', 'cat. Lindlar', 'Sodium', 'Na', 'NH3', 'Ammonia', 'Sodium amide', 'Sodamide', 'NaNH2', 'Amide', '1 equivalent', 'One equivalent', 'heat', 'hv', 'light', 'hnu', 'tert-butoxide', 'KOtBu', 'Potassium tert-butoxide', 'KOC(CH3)3']''' 
+
+reactionAutocomplete=''''''
     
 @login_required    
 def renderOldNameReagent(request):
@@ -193,7 +166,19 @@ def renderOldNameReagent(request):
     step = profile.currentNameReagentProblem
     if step == None:
         return renderNameReagent(request)
-    return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg, "TargetMolecule": step.productBox.svg, "Name": request.user.username})
+    autocompleteType = profile.autocompleteType
+    if autocompleteType == "Reactions":
+        autocomplete = reactionAutocomplete
+    elif autocompleteType == "Reagents":
+        autocomplete = reagentAutocomplete
+    elif autocompleteType == "None":
+        autocomplete = ""
+    else:
+        return loggedInHome(request, debug = "An invalid autocomplete mode was picked.")
+    return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg, 
+                                                     "TargetMolecule": step.productBox.svg, 
+                                                     "Name": request.user.username,
+                                                     "Autocomplete": autocomplete})
     
 
 @login_required
@@ -210,17 +195,20 @@ def renderNameReagent(request):
         pass
         
        
-    modes = checkboxUpdate(request)
+    modes, autocomplete = checkboxUpdate(request)
     if modes == []:
         #Error - at least one mode must be selected!
         return loggedInHome(request, debug = "You must pick at least one reaction type!")
-        
+    
     problem = generateNameReagentProblem(modes)
     step = models.ReactionStepModel.create(problem)
     step.save()
     profile.currentNameReagentProblem = step
     profile.save()
-    return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg, "TargetMolecule": step.productBox.svg, "Name": request.user.username})
+    return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg,
+                                                     "TargetMolecule": step.productBox.svg, 
+                                                     "Name": request.user.username,
+                                                     "Autocomplete": autocomplete})
         
         
 def checkboxUpdate(request): 
@@ -243,12 +231,33 @@ def checkboxUpdate(request):
                         reagentType = models.ReagentType.create(name = name)
                         reagentType.save()
                     profile.savedReagentTypes.add(reagentType)
+                    
+        autocompleteType = checkboxes.cleaned_data["autocomplete"]
+        if autocompleteType == "Reactions":
+            autocomplete = reactionAutocomplete
+        elif autocompleteType == "Reagents":
+            autocomplete = reagentAutocomplete
+        elif autocompleteType == "None":
+            autocomplete = ""
+        else:
+            return loggedInHome(request, debug = "An invalid autocomplete mode was picked.")
+        profile.autocompleteType = autocompleteType
+        profile.save()
     else:
         #User clicked on "new problem"
         #Load up the user's reagent preferences.
         for reagentTypeInstance in profile.savedReagentTypes.all():
             modes.append(reagentTypeInstance.name)
-    return modes
+        autocompleteType = profile.autocompleteType
+        if autocompleteType == "Reactions":
+            autocomplete = reactionAutocomplete
+        elif autocompleteType == "Reagents":
+            autocomplete = reagentAutocomplete
+        elif autocompleteType == "None":
+            autocomplete = ""
+        else:
+            return loggedInHome(request, debug = "An invalid autocomplete mode was picked.")
+    return modes, autocomplete
 
 
     
@@ -345,9 +354,6 @@ def makeReagentHtml(request):
         tb = traceback.format_exc()
         return HttpResponse(str(tb))
         
-        
-        
-        
 ###Some methods for displaying and operating with giant synthesis problems.
 @login_required
 def renderOldSynthesis(request):
@@ -355,7 +361,18 @@ def renderOldSynthesis(request):
     synthesis = profile.currentSynthesisProblem
     if synthesis == None:
         return renderSynthesis(request)
-    return render(request, 'synthesisProblemInterface.html', {"TargetMolecule": synthesis.target.svg, "Name": request.user.username})
+    autocompleteType = profile.autocompleteType
+    if autocompleteType == "Reactions":
+        autocomplete = reactionAutocomplete
+    elif autocompleteType == "Reagents":
+        autocomplete = reagentAutocomplete
+    elif autocompleteType == "None":
+        autocomplete = ""
+    else:
+        return loggedInHome(request, debug = "An invalid autocomplete mode was picked.")
+    return render(request, 'synthesisProblemInterface.html', {"TargetMolecule": synthesis.target.svg, 
+                                                              "Name": request.user.username,
+                                                              "Autocomplete": autocomplete})
 
 def loadSynthesisFromId(request):
     #Make a deep copy of the problem, and render it to the new user.
@@ -393,7 +410,7 @@ def renderSynthesis(request):
         except:
             pass
     
-    modes = checkboxUpdate(request)
+    modes, autocomplete = checkboxUpdate(request)
     if modes == []:
         #Error - at least one mode must be selected!
         return loggedInHome(request, debug = "You must pick at least one reaction type!")
@@ -405,7 +422,9 @@ def renderSynthesis(request):
     profile.currentSynthesisProblem = synthesis
     profile.save()
     
-    return render(request, 'synthesisProblemInterface.html', {"TargetMolecule": synthesis.target.svg, "Name": request.user.username})
+    return render(request, 'synthesisProblemInterface.html', {"TargetMolecule": synthesis.target.svg, 
+                                                              "Name": request.user.username,
+                                                              "Autocomplete": autocomplete})
 
     
 

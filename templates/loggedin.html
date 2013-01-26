@@ -1,3 +1,5 @@
+{% load orgo_filters %}
+
 <html>
 <head>
 <script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"> </script>
@@ -13,10 +15,6 @@
 <p>
 <a href="/orgo/chat/volunteertohelp"> Help others </a>
 </p>
-
-<p>
-<a href="/orgo/chat/helpeestatictest"> Test the ask for help thing </a>
-</p>
  
  <h2> Naming Reagents </h2>
  <form action = "/orgo/namereagent/resume/" method="post" class="form-horizontal">{% csrf_token %}
@@ -24,7 +22,13 @@
 </form>
 <form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
     {% for field in ChooseReagentsForm %}
-        {{field}}{{field.label_tag}}
+        {% if field.field.widget|is_checkbox %}
+            {{field}}{{field.label_tag}}
+        {% else %}
+            {{field.label_tag}}
+            <br />
+            {{field}}
+        {% endif %}
         <br />
     {% endfor %}
     <input type="submit" value="Generate new" class="btn"/>
@@ -36,13 +40,23 @@
 </form>
 <form action = "/orgo/renderSynthesis/" method="post" class="form-horizontal">{% csrf_token %}
     {% for field in ChooseReagentsForm %}
-        {{field}}{{field.label_tag}}
+        {% if field.field.widget|is_checkbox %}
+            {{field}}{{field.label_tag}}
+        {% else %}
+            {{field.label_tag}}
+            <br />
+            {{field}}
+        {% endif %}
         <br />
     {% endfor %}
     <input type="submit" value="Generate new" class="btn"/>
 </form>
-
-
+<h4> Load Shared Problem </h4>
+<form action = "/orgo/loadSynthesisFromId/" method="post" class="form-horizontal">{% csrf_token %}
+    Problem ID: <input type="text" name="Id">
+    <br />
+    <input type="submit" value="Go" class="btn"/>
+</form>
 
 {{debug|safe}}
 

@@ -363,6 +363,7 @@ class UserProfile(models.Model):
     currentNameReagentProblem = models.ForeignKey(ReactionStepModel,   null=True, on_delete=models.SET_NULL)
     currentSynthesisProblem = models.ForeignKey(SynthesisProblemModel, null=True, on_delete=models.SET_NULL)
     savedReagentTypes = models.ManyToManyField(ReagentType)
+    autocompleteType = models.CharField(max_length=20, default="Reagents") #Too lazy to set up a choice field.
     accuracies = models.ManyToManyField(AccuracyModel)
     #savedProblem = models.ForeignKey(SynthesisProblemModel)
     
@@ -376,6 +377,9 @@ class ChooseReagentsForm(forms.Form):
         sortedNames = sorted(typeToReaction.items(), key=lambda thing: thing[0])
         for name, unused in sortedNames:
             self.fields[name] = forms.BooleanField(label=name, initial=True, required=False)
+    autocomplete = forms.ChoiceField(choices = (("Reactions", "Autocomplete reactions (Easy)"),
+                                       ("Reagents", "Autocomplete reagents (Medium)"),
+                                       ("None", "Autocomplete off (Hard)")))
             
 
 

@@ -14,6 +14,14 @@
   </head>
 <body>
 
+<script>
+$(document).ready(function(){
+    allSetup();
+    clientSetup({{Autocomplete|safe}});
+    redrawProblem();
+});
+</script>
+
 
 <div id = "offscreen">
 
@@ -51,6 +59,9 @@
 
         <div class="box" id="successbox">
         </div>
+        
+        <div class="box" id="savebox">
+        </div>
 
 
     </div>
@@ -60,11 +71,12 @@
         <div id = "leftbar">
             <!--PUT FLOWCHART HERE-->
         </div>
+        <div id="bigMolecule" class="bigMolecule">
+        </div>
 
         <div id="rightbar">
-
-            <div id = "target">
             <h2>Target Molecule:</h2>
+            <div id = "target">
             {{TargetMolecule|safe}}
             </div>
 
@@ -87,8 +99,10 @@
         </div>
         <input type="text" name="input" id="input"></input>
         <button id="submit">Submit</button>
-
-
+        <div style="float:right">
+            <button id="close">End chat</button>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </div>
     </div>
 
 <div id = "bottombar">
@@ -98,6 +112,8 @@
 
 
 </div>
+
+
 
 </body>
 

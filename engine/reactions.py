@@ -383,6 +383,10 @@ def tertButoxide(molecules):
         for carbon1 in molecule.atoms:
             if carbon1.element != 'C':
                 continue
+            #Make sure carbon1 isn't part of a double bond or ketone.
+            for neighbor, bo in carbon1.neighbors.items():
+                if bo > 1:
+                    continue 
             localHalogens = []
             for neighbor in carbon1.neighbors:
                 if (neighbor.element in halogens):
@@ -405,7 +409,17 @@ def tertButoxide(molecules):
     def reactAtPlace(molecule, bigListOfPlaces):
         candidates = []
         for things in bigListOfPlaces:
+            #Clone inputs, get on with it.
             Xmolecule, (ClCarbon, HCarbon, Cl) = listClone(molecule, things)
+            #Test for epoxides.  We don't deal with epoxides for now.  In reality, attacking an epoxide
+            #with KO-tBu results in addition and creation of an ether.
+            stop = False
+            for neighbor in ClCarbon.neighbors:
+                if neighbor in HCarbon.neighbors and neighbor.element == 'O':
+                    stop = True
+            if stop:
+                continue
+            #Test for chirality.
             if hasattr(HCarbon, "chiralA") and hasattr(ClCarbon, "chiralA"):
                 #Chiral.  We need to consider anti-periplanar.
                 #Looking down from the Cl to the other carbon,

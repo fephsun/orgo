@@ -172,31 +172,31 @@ def parseReagentsString(inpstring):
     #hacky
     #Make sure you don't count substrings if you're counting things they're part of.
     if (string.count("h2") != 0):
-        if string.count("ch2cl2") + string.count("nanh2") + string.count("h2o") + string.count("h20") + string.count("h2so4") == sum([string.count(x) for x in REAGENTS[H2][1]]):
+        if string.count("ch2cl2") + string.count("nanh2") + string.count("h2o") + string.count("h20") + string.count("h2so4") == sum([string.count(x.lower()) for x in REAGENTS[H2][1]]):
             outp[H2] = False
     if (string.count("ch2cl2") != 0):
-        if string.count("cl2") == sum([string.count(x) for x in REAGENTS[CH2CL2][1]]):
+        if string.count("cl2") == sum([string.count(x.lower()) for x in REAGENTS[CH2CL2][1]]):
             outp[CL2] = False
     if (string.count("na") != 0):
-        if string.count("naoh") + string.count("nanh2") == sum([string.count(x) for x in REAGENTS[NA][1]]):
+        if string.count("naoh") + string.count("nanh2") == sum([string.count(x.lower()) for x in REAGENTS[NA][1]]):
             outp[NA] = False
     if (string.count("hydrogen") != 0):
-        if (string.count("hydrogen fluoride") + string.count("hydrogen chloride") + string.count("hydrogen iodide") + string.count("hydrogen bromide") == sum([string.count(x) for x in REAGENTS[H2][1]])):
+        if (string.count("hydrogen fluoride") + string.count("hydrogen chloride") + string.count("hydrogen iodide") + string.count("hydrogen bromide") == sum([string.count(x.lower()) for x in REAGENTS[H2][1]])):
             outp[H2] = False
     if (string.count("hf") != 0):
-        if (string.count("thf") == sum([string.count(x) for x in REAGENTS[HF][1]])):
+        if (string.count("thf") == sum([string.count(x.lower()) for x in REAGENTS[HF][1]])):
             outp[HF] = False
     if (string.count("o3") != 0):
-        if (string.count("co3h") == sum([string.count(x) for x in REAGENTS[O3][1]])):
+        if (string.count("co3h") == sum([string.count(x.lower()) for x in REAGENTS[O3][1]])):
             outp[O3] = False
     if (string.count("one") != 0):
-        if (string.count("acetone") + string.count("propanone") + string.count("ozone") == sum([string.count(x) for x in REAGENTS[EQV1][1]])):
+        if (string.count("acetone") + string.count("propanone") + string.count("ozone") == sum([string.count(x.lower()) for x in REAGENTS[EQV1][1]])):
             outp[EQV1] = False
     if (string.count("h2o") != 0):
-        if (string.count("h2o2") == sum([string.count(x) for x in REAGENTS[H2O][1]])):
+        if (string.count("h2o2") == sum([string.count(x.lower()) for x in REAGENTS[H2O][1]])):
             outp[H2O] = False
     if (string.count("sodium amide") != 0):
-        if (string.count("sodium amide") == sum([string.count(x) for x in REAGENTS[NA][1]])):
+        if (string.count("sodium amide") == sum([string.count(x.lower()) for x in REAGENTS[NA][1]])):
             outp[NA] = False
        
     return outp

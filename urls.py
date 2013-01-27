@@ -39,7 +39,8 @@ urlpatterns = patterns('',
     url(r'^api/addMoleculeToMolecule/$', 'orgo.views.addMoleculeToMolecule', name = 'addMoleculeToMolecule'),
     url(r'^api/addReagentToMolecule/$', 'orgo.views.addReagentToMolecule', name = 'addReagentToMolecule'),
     url(r'^api/deleteMolecule/$', 'orgo.views.deleteMolecule', name = 'deleteMolecule'),
-    
+    url(r'^api/saveProblem/$', 'orgo.views.saveProblem', name = 'saveProblem'),
+    url(r'^loadSynthesisFromId/$', 'orgo.views.loadSynthesisFromId', name = 'loadSynthesisFromId'),
     
 
     # Uncomment the admin/doc line below to enable admin documentation:

@@ -1,16 +1,31 @@
+{% extends "base.html" %}
 {% load orgo_filters %}
 
-<html>
-<head>
+{% block jsimport %}
 <script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"> </script>
 <script type="text/javascript" src="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/raphael.js"></script>
 <script type="text/javascript" src="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/jquery.enumerable.js"></script>
 <script type="text/javascript" src="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/jquery.tufte-graph.js"></script>
-<link rel="stylesheet" href="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/tufte-graph.css" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
 
-</head>
-<h2> Welcome, {{name}} </h2>
- {{item1|safe}}
+{% block cssimport %}
+<link rel="stylesheet" href="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/tufte-graph.css" type="text/css" media="screen" charset="utf-8" />
+{% endblock %}
+
+{% block menuitems %}
+<li class="active"><a href="/orgo/">Home</a></li>
+<li><a href="#contact">About / FAQs</a></li>
+<li><a href="/orgo/logout/">Logout</a></li>
+{% endblock %}
+
+{% block signin %}
+<p class="navbar-text pull-right" style="color:#EEEEEE">
+Welcome, {{name}}
+</p>
+{% endblock %}
+
+{% block content %}
+
 
 <p>
 <a href="/orgo/chat/volunteertohelp"> Help others </a>
@@ -83,8 +98,4 @@ $(document).ready(function(){
     <input type="submit" value="Change" class="btn"/>
 </form>
 
-<h2>
-<a href ="/orgo/logout/"> Logout </a>
-</h2>
-
-</html>
+{% endblock %}

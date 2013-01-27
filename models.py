@@ -5,7 +5,7 @@ from orgo.engine.synthProblem import *
 import cPickle
 import django.forms as forms
 from django.forms import ModelForm
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.utils import timezone
 
@@ -285,6 +285,15 @@ class mySignUpForm(UserCreationForm):
         if commit:
             user.save()
         return user
+        
+class myAuthenticationForm(AuthenticationForm):
+    #Includes Twitter Bootstrap formatting, and grayed-out placeholder text.
+    username = forms.CharField(required = True, max_length = 100,
+            widget=forms.TextInput(attrs={'placeholder': 'User name',
+                                          'class': 'span2'}))
+    password = forms.CharField(required = True, 
+            widget = forms.PasswordInput(attrs={'placeholder': 'Password',
+                                                'class': 'span2'}))
 
     
 ###Can delete; this is me learning Django

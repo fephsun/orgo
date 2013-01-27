@@ -28,7 +28,7 @@ def home(request, debug = ""):
     svg = serverRender.render(outSmiles)
     return render(request, 'index.html', {'molecule': svg,
                                           'signUpForm': models.mySignUpForm,
-                                          'logInForm': forms.AuthenticationForm(),
+                                          'logInForm': models.myAuthenticationForm(),
                                           'debug':debug , 
                                           'resetPWForm': PasswordResetForm()})
 
@@ -181,30 +181,38 @@ def renderOldNameReagent(request):
                                                      "Autocomplete": autocomplete})
     
 
-@login_required
 def renderNameReagent(request):
-    profile = request.user.profile
-    #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
     try:
-        temp1 = profile.currentNameReagentProblem.productBox
-        temp2 = profile.currentNameReagentProblem.reactantBox
-        profile.currentNameReagentProblem.delete()
-        temp1.delete()
-        temp2.delete()
+        profile = request.user.profile
     except:
-        pass
+        #Anonymous user.
+        problem = generateNameReagentProblem(AlkeneAlkyneMode)
+        step = models.ReactionStepModel.create(problem)
+        step.save()
+        request.session['problem'] = step
+        autocomplete = reactionAutocomplete
+    else:
+        #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
+        try:
+            temp1 = profile.currentNameReagentProblem.productBox
+            temp2 = profile.currentNameReagentProblem.reactantBox
+            profile.currentNameReagentProblem.delete()
+            temp1.delete()
+            temp2.delete()
+        except:
+            pass
+            
+           
+        modes, autocomplete = checkboxUpdate(request)
+        if modes == []:
+            #Error - at least one mode must be selected!
+            return loggedInHome(request, debug = "You must pick at least one reaction type!")
         
-       
-    modes, autocomplete = checkboxUpdate(request)
-    if modes == []:
-        #Error - at least one mode must be selected!
-        return loggedInHome(request, debug = "You must pick at least one reaction type!")
-    
-    problem = generateNameReagentProblem(modes)
-    step = models.ReactionStepModel.create(problem)
-    step.save()
-    profile.currentNameReagentProblem = step
-    profile.save()
+        problem = generateNameReagentProblem(modes)
+        step = models.ReactionStepModel.create(problem)
+        step.save()
+        profile.currentNameReagentProblem = step
+        profile.save()
     return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg,
                                                      "TargetMolecule": step.productBox.svg, 
                                                      "Name": request.user.username,
@@ -268,12 +276,18 @@ def checkNameReagent(request):
     if request.method == 'POST':
       try:
         reagentsDict = parseReagentsString(request.POST['reagents'])
-        profile = request.user.profile
-        reactant = profile.currentNameReagentProblem.reactantBox.moleculeBox
-        target = profile.currentNameReagentProblem.productBox.moleculeBox
+        try:
+            problem = request.user.profile.currentNameReagentProblem
+            anonymous = False
+        except:
+            #User is anonymous.
+            problem = request.session['problem']
+            anonymous = True
+        reactant = problem.reactantBox.moleculeBox
+        target = problem.productBox.moleculeBox
         testStep = ReactionStep(reactant)
         #If the problem is done, do nothing - don't let them get more points.
-        if profile.currentNameReagentProblem.done:
+        if problem.done:
             return HttpResponse("")
         testStep.addReagent(reagentsDict)
         correct, products = testStep.checkStep(target)
@@ -283,23 +297,28 @@ def checkNameReagent(request):
             responseData["product"] = products
         else:
             responseData["product"] = products.stringList()
-        #If we have the correct answer, free up some database space by deleting this stuff.
-        thisCatagory = profile.currentNameReagentProblem.catagory
-        try:
-            accModel = profile.accuracies.get(catagory=thisCatagory)
-        except:
-            accModel = models.AccuracyModel.create(catagory=thisCatagory)
-            accModel.save()
-            profile.accuracies.add(accModel)
-        if correct == True:
-            accModel.correct += 1
-            accModel.total += 1
-            accModel.save()
-            profile.currentNameReagentProblem.done = True
-            profile.currentNameReagentProblem.save()
+        if not anonymous:
+            #If we have the correct answer, free up some database space by deleting this stuff.
+            thisCatagory = profile.currentNameReagentProblem.catagory
+            try:
+                accModel = profile.accuracies.get(catagory=thisCatagory)
+            except:
+                accModel = models.AccuracyModel.create(catagory=thisCatagory)
+                accModel.save()
+                profile.accuracies.add(accModel)
+            if correct == True:
+                accModel.correct += 1
+                accModel.total += 1
+                accModel.save()
+                problem.done = True
+                problem.save()
+            else:
+                accModel.total += 1
+                accModel.save()
         else:
-            accModel.total += 1
-            accModel.save()
+            if correct == True:
+                problem.done = True
+                problem.save()
       except StandardError as e:
         responseData = dict()
         responseData["product"] = str(e)
@@ -309,11 +328,16 @@ def checkNameReagent(request):
       
 @csrf_exempt
 def showNRAnswer(request):
-    out = request.user.profile.currentNameReagentProblem.html
+    try:
+        problem = request.user.profile.currentNameReagentProblem
+    except:
+        #Anonymous user
+        problem = request.session['problem']
+    out = problem.html
     htmlOutput =  "<li class=\"reagent\" class = \"ui-state-default\" >"+out+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></li>"
     #Mark this problem as done.
-    request.user.profile.currentNameReagentProblem.done = True
-    request.user.profile.currentNameReagentProblem.save()
+    problem.done = True
+    problem.save()
     return HttpResponse(htmlOutput)
  
     
@@ -392,6 +416,7 @@ def loadSynthesisFromId(request):
 @login_required
 def renderSynthesis(request):
     profile = request.user.profile
+        
     #If the retain attribute is True, don't delete.
     if profile.currentSynthesisProblem == None or not(profile.currentSynthesisProblem.retain):
         #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
@@ -433,6 +458,8 @@ def getSynthesisData(request, synthesis=None):
     #molecules is an array of arrays: [ [idnumber, "<svg>...</svg>"], ... ]
     #arrows is an array of arrays: [ [idnumber1, idnumber2, "reagentText"], ...]
     #success   -- a boolean (true/false)
+    
+    #The "Return dictionary" mode is for the helper to see the same problem.
     if synthesis == None:
         mode = "Send to browser"
         synthesis = request.user.profile.currentSynthesisProblem

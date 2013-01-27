@@ -96,8 +96,7 @@ class Atom:
         #for traversing
         self.flag = 0
         #for ring-finding
-        self.rflag = 0 #0 if not part of a ring bond, <0 if otherwise
-        self.rAtom = 0 #0 if not part of a ring bond, the other-atom the bond is made with if otherwise
+        self.rflag = [] #empty if not part of a ring bond, nonempty if otherwise
         self.nRead = 0 #neighbors already read
         self.parentAtom = 0 #atom right before this one
         self.nonHNeighbors = []
@@ -226,6 +225,8 @@ def smiles(molecule):
     
         #flag current atom as "read" (flag = 1)
         curAtom.flag = 1
+        if debugSmiles:
+            print "Flagged "+str(curAtom)+" as read."
         
         #if there are neighbors left to read from this atom:
         if (curAtom.nRead < len(curAtom.nonHNeighbors)):
@@ -234,50 +235,64 @@ def smiles(molecule):
             if list(curAtom.nonHNeighbors)[curAtom.nRead] == curAtom.parentAtom:
                 #don't do anything but incrementing nRead
                 curAtom.nRead += 1
+                if debugSmiles:
+                    print "Nope, not progressing to parent."
                 
             #else,
             else:
                 if list(curAtom.nonHNeighbors)[curAtom.nRead].nRead == 0:
-                #if the next atom has not been traversed yet:
+                #if the next atom has not been traversed already:
                     curAtom.nRead += 1
                     list(curAtom.nonHNeighbors)[curAtom.nRead - 1].parentAtom = curAtom
                     curAtom = list(curAtom.nonHNeighbors)[curAtom.nRead - 1]
                     #increment current atom's nRead counter
                     #make the next atom the current atom:
                     #make the old atom the next atom's parent
+                    if debugSmiles:
+                        print "Progressing..."
 
                 else:
-                #if the next atom has been traversed yet:
+                #if the next atom has been traversed already:
                     #it's a ring!
                     ringsfound += 1
-                    curAtom.rflag = ringsfound
-                    list(curAtom.nonHNeighbors)[curAtom.nRead].rflag = ringsfound
+                    curAtom.rflag += [(ringsfound, list(curAtom.nonHNeighbors)[curAtom.nRead])]
+                    list(curAtom.nonHNeighbors)[curAtom.nRead].rflag += [(ringsfound, curAtom)]
                     curAtom.nRead += 1
-                    curAtom.rAtom = list(curAtom.nonHNeighbors)[curAtom.nRead - 1]
-                    list(curAtom.nonHNeighbors)[curAtom.nRead - 1].rAtom = curAtom
                     #increment ringsfound
                     #set rflag on both atoms to ringsfound
                     #increment current atom's nRead counter
                     #make sure the atoms know who each other is
+                    if debugSmiles:
+                        print "Ring "+str(ringsfound)+" found! "+str(curAtom.rflag)+", "+str(list(curAtom.nonHNeighbors)[curAtom.nRead - 1])
                 
         #if not:
             #go backwards to parent atom:
             #set curAtom to its parent atom
         else:
+            if debugSmiles:
+                print "Regressing to "+str(curAtom.parentAtom)+" from "+str(curAtom)
             curAtom = curAtom.parentAtom
             
             
     #Traverse twice to generate the SMILES.
             
+        
+    if debugSmiles:
+        for atom in molecule.atoms:
+            print ""
+            print atom.element
+            print atom
+            print atom.rflag
+            print atom.nonHNeighbors
+        
     outp = subsmiles(molecule, molecule.atoms[0], 0)
 
     #Reset all old flags.    
     for atom in molecule.atoms:
         atom.flag = 0
-        atom.rflag = 0
+        atom.rflag = []
         atom.nRead = 0
         atom.parentAtom = 0
-        atom.rAtom = 0
         atom.nonHNeighbors = []
 
     return outp
@@ -290,9 +305,9 @@ def subsmiles(molecule, startAtom, parentAtom):
 
     if debugSmiles:
         if parentAtom != 0:
-            print "\t\t\t [ Entering subsmiles with "+startAtom.element+" from "+parentAtom.element
+            print "\t\t\t [ Entering subsmiles with "+str((startAtom.element, startAtom, startAtom.rflag))+" from "+str((parentAtom.element, parentAtom, parentAtom.rflag))
         else:
-            print "\t\t\t [ Entering subsmiles with "+startAtom.element+"..."
+            print "\t\t\t [ Entering subsmiles with "+str((startAtom.element, startAtom, startAtom.rflag))+"..."
     
     #Flag the current atom.
     startAtom.flag = 2
@@ -323,8 +338,8 @@ def subsmiles(molecule, startAtom, parentAtom):
         for ind in range(3):
             atom = atomsToLink[ind]
             if (atom != None) and (atom != parentAtom):
-                if atom == startAtom.rAtom:
-                    outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + str(startAtom.rflag) + ")"
+                if atom in [rf[1] for rf in startAtom.rflag]:
+                    outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + str(startAtom.rflag[[rf[1] for rf in startAtom.rflag].index(atom)][0]) + ")"
                 elif atom.flag == 1:
                     outp += "(" + begin[ind] + bondSymbols[startAtom.nonHNeighbors[atom]] + subsmiles(molecule, atom, startAtom) + ")"
         if debugSmiles:
@@ -399,10 +414,19 @@ def subsmiles(molecule, startAtom, parentAtom):
     #Recursion is your friend.
     #Be sure to specify the base case (when zero non-parent non-ring atoms are available to bond to)
     #In the base case, this loop won't even be entered.
+    if debugSmiles:
+        print "\t\t\t"+str([(atom.element, atom, atom.rflag) for atom in toAdd])
     for atom in toAdd:
-        if (startAtom.rflag != 0) and (atom == startAtom.rAtom):
-            add = str(startAtom.rflag)
+        if (startAtom.rflag != []) and (atom in [rf[1] for rf in startAtom.rflag]) :
+            add = str(startAtom.rflag[[rf[1] for rf in startAtom.rflag].index(atom)][0])
+            if debugSmiles:
+                print "Flagged as a ring bond -- "+startAtom.element+" to "+atom.element
+        #elif atom.flag == 2:
+            #You *really* don't want to enter subsmiles to this atom
+            #pass
         else:
+            if debugSmiles:
+                print "Entering subsmiles, since "+str(startAtom.rflag != [])+" and "+str((atom in [rf[1] for rf in startAtom.rflag]))
             add = subsmiles(molecule, atom, startAtom)
                 
         outp += "(" +bondSymbols[startAtom.nonHNeighbors[atom]] + add + ")"

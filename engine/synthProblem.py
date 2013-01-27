@@ -552,5 +552,15 @@ KOCCH33: ("KOC(CH<sub>3</sub>)<sub>3</sub>", ("tert-butoxide", "KOC(CH3)3", "OC(
 
 #Debugging
 if __name__ == "__main__":
-    print randomSynthesisProblemMake(AlkeneAlkyneMode)
+    for reaction in REACTIONS:
+        out = ""
+        for reagent in reaction[0]:
+            out += REAGENTS[reagent[0]][1][0] + " "
+        print out
+
+
+
+
+
+
 

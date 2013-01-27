@@ -784,8 +784,9 @@ def hydroborate1(molecules):
             for pairing in mkvCarbons:
                 newMolecules += synAdd(molecule, pairing[0], pairing[1], None, boron)
         else: #Alkyne
+        #NO. NOT CARBONYL-ADD.
             for pairing in mkvCarbons:
-                newMolecules += carbonylAdd(molecule, pairing[1], pairing[0])
+                newMolecules += allTripleAdd(molecule, pairing[1, pairing[0], boron, None)
         return newMolecules
     
     return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
@@ -1264,5 +1265,31 @@ if __name__ == '__main__':
     ringTest2.addAtom(f81, c85, 1)
     c85.newChiralCenter(c86, (c89, c87, f81))
 
-    print smiles(tertButoxide([cycPentMol]))
+
+
+    c90 = Atom("C")
+    c91 = Atom("C")
+    c92 = Atom("C")
+    c93 = Atom("C")
+    c94 = Atom("C")
+    o95 = Atom("O")
+    ring = Molecule(c90)
+    ring.addAtom(c91, c90, 2)
+    ring.addAtom(c92, c91, 1)
+    ring.addAtom(c93, c92, 1)
+    ring.addAtom(c94, c93, 1)
+    ring.addBond(c90, c94, 1)
+
+    ring.addAtom(o95, c94, 1)
+    ring.addBond(c90, o95, 1)
+
     
+    c90.newCTCenter(c91, c94, None)
+    c91.newCTCenter(c90, c92, None)
+
+    
+    print smiles(ring)
+
+    #epox = epoxidate([ring])
+
+    #print smiles(epox)

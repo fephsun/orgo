@@ -369,10 +369,13 @@ def makeReagentHtml(request):
         reagentString = request.POST['reagentString']
         dict = parseReagentsString(reagentString)
         html = ""
-        for reagent in list(dict):
+        for reagent in dict:
             if dict[reagent]:
                 html += REAGENTS[reagent][0] + ", "
-        htmlOutput =  "<li class=\"reagent\" class = \"ui-state-default\" reagentString = \""+reagentString+"\">"+html[:-2]+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></li>"
+        if html == "":
+            htmlOutput = "<li class=\"reagent\" class = \"ui-state-default\" reagentString = \""+reagentString+"\">[no valid reagents]<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></li>"
+        else:
+            htmlOutput =  "<li class=\"reagent\" class = \"ui-state-default\" reagentString = \""+reagentString+"\">"+html[:-2]+"<img src=\"http://felixsun.scripts.mit.edu/orgo/static/arrow.png\"/></li>"
         return HttpResponse(htmlOutput)
     except:
         tb = traceback.format_exc()

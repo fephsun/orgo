@@ -49,12 +49,12 @@ $(document).ready(function(){
 <div id="bigMolecule" class="bigMolecule">
 </div>
 <div class="row">
-    <div id = "leftbar" class="span9">
+    <div id = "leftbar" class="span8">
         <!--PUT FLOWCHART HERE-->
     </div>
 
 
-    <div id="rightbar" class="span3">
+    <div id="rightbar" class="span4">
         <h2>Target Molecule:</h2>
         <div id = "target">
         {{TargetMolecule|safe}}

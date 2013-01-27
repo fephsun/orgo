@@ -786,7 +786,7 @@ def hydroborate1(molecules):
         else: #Alkyne
         #NO. NOT CARBONYL-ADD.
             for pairing in mkvCarbons:
-                newMolecules += allTripleAdd(molecule, pairing[1, pairing[0], boron, None)
+                newMolecules += allTripleAdd(molecule, pairing[1], pairing[0], boron, None)
         return newMolecules
     
     return react(molecules, findAlkeneAndAlkyne, reactAtPlace)

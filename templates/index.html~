@@ -1,6 +1,7 @@
-<html>
-<head>
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+{% extends "base.html" %}
+
+{% block jsimport %}
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"> </script>
 <script>
 setInterval(function() {
     $.ajax({
@@ -13,18 +14,29 @@ setInterval(function() {
     });
 }, 3000);
 </script>
-</head>
+{% endblock %}
+
+{% block menuitems %}
+<li class="active"><a href="/orgo/">Home</a></li>
+<li><a href="#contact">About / FAQs</a></li>
+{% endblock %}
+
+{% block signin %}
+<form action="/orgo/api/login/" method="post" class="navbar-form pull-right form-horizontal">{% csrf_token %}
+    {% for field in logInForm %}
+        {{field}}
+    {% endfor %}
+    <input type="submit" value="Sign in" class="btn"/>
+</form>
+{% endblock %}
+
+{% block content %}
 <h1> Hello world </h1>
 
 <div id="molecule">
 {{molecule|safe}} <!--The safe tag prevents character escaping -->
 </div>
 
-<h2> Log In </h2>
-<form action="/orgo/api/login/" method="post" class="form-horizontal">{% csrf_token %}
-    {{logInForm.as_p}}
-    <input type="submit" value="Submit" class="btn"/>
-</form>
 {{debug|safe}}
 
 <h2> Sign Up </h2>
@@ -35,20 +47,10 @@ setInterval(function() {
 
 <h2> Forgot Password? </h2>
 <form action="/orgo/api/resetPW/" method="post" class="form-horizontal">{% csrf_token %}
-    {{PasswordResetForm.as_p}}
+    {{resetPWForm.as_p}}
     <input type="submit" value="Reset" class="btn"/>
 </form>
 
-<!--Can delete; this is me learning Django-->
-<!--<h2> Something or another </h2>
-<form action = "/orgo/api/outpsmiles/" method="post" class="form-horizontal">{% csrf_token %}
-    {{outpSmilesForm.as_p}}
-    <input type="submit" value="Submit" class="btn"/>
-</form>
+<h2> <a href="/orgo/namereagent/"> Try a problem </a> </h2>
 
-<h2> Generate a problem </h2>
-<form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
-    <input type="submit" value="Generate!" class="btn"/>
-</form>-->
-
-</html>
+{% endblock %}

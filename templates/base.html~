@@ -12,7 +12,7 @@
   body {
     padding-top: 60px;
     padding-bottom: 40px;
-    background-color: #F6F6F6;
+    background-color: #E6E6E6;
   }
 </style>
 

@@ -145,12 +145,27 @@ def loggedInHome(request, debug = ""):
         else:
             graphList.append([1.0*accuracyObj.correct/accuracyObj.total, name, accuracyObj.correct, accuracyObj.total])
     graphList.sort(key=lambda item: item[1])
+    
+    #Load high scores.
+    bestUsers = models.UserProfile.objects.order_by('-correctSynths', 'user__username')[:10]
+    synthHighScore = ""
+    for i in xrange(10):
+        prof = bestUsers[i]
+        if prof==profile:
+            synthHighScore += "<b>"
+        synthHighScore += "<tr><td>"+i+"</td><td>"+prof.user.username+"</td><td>"+prof.correctSynths+"</td></tr>"
+        if prof==profile:
+            synthHighScore += "</b>"
+    if request.user.profile not in bestUsers:
+        userRank = models.UserProfile.objects.order_by('-correctSynths', 'user__username').index(profile)
+        synthHighScore += "<b><tr><td>"+userRank+"</td><td>"+request.user.username+"</td><td>"+profile.correctSynths+"</td></tr></b>"
 
     return render(request, 'loggedin.html', {'name': request.user.username, 
                                              'ChooseReagentsForm':models.ChooseReagentsForm(initial=initialValuesDict), 
                                              'debug': debug,
                                              'graphData': graphList,
-                                             'changePW': PasswordChangeForm(request.user)})
+                                             'changePW': PasswordChangeForm(request.user),
+                                             'synthHighScore': synthHighScore})
     
 ###Can delete; this is me learning Django
 def renderSmiles(request, molecule):

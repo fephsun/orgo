@@ -71,20 +71,20 @@ Welcome, {{name}}
 <div class="span6">
 <div style="padding:20px; margin-top:10px;">
 <h2> One-step Problems</h2>
-<form action = "/orgo/namereagent/resume/" method="post" class="form-horizontal">{% csrf_token %}
-    <input type="submit" value="Resume old" class="btn"/>
-</form>
-<form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
-    <input type="submit" value="Generate new" class="btn"/>
-</form>
+<!--<form action = "/orgo/namereagent/resume/" method="post" class="form-horizontal">{% csrf_token %}-->
+    <input type="submit" value="Resume old" name="namereagent_resume" class="btn"/>
+<!--</form>-->
+<!--<form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}-->
+    <input type="submit" value="Generate new" name="namereagent_new" class="btn"/>
+<!--</form>-->
 
 <h2> Synthesis Problems</h2>
-<form action = "/orgo/renderSynthesis/resume/" method="post" class="form-horizontal">{% csrf_token %}
-    <input type="submit" value="Resume old" class="btn"/>
-</form>
-<form action = "/orgo/renderSynthesis/" method="post" class="form-horizontal">{% csrf_token %}
-    <input type="submit" value="Generate new" class="btn"/>
-</form>   
+<!--<form action = "/orgo/renderSynthesis/resume/" method="post" class="form-horizontal">{% csrf_token %}-->
+    <input type="submit" value="Resume old" name="synthesis_resume" class="btn"/>
+<!--</form>-->
+<!--<form action = "/orgo/renderSynthesis/" method="post" class="form-horizontal">{% csrf_token %}-->
+    <input type="submit" value="Generate new" name="synthesis_new" class="btn"/>
+<!--</form>-->
 
 <h4> Load Saved</h4>
 <!--Problem loader-->
@@ -121,7 +121,9 @@ $(document).ready(function(){
         
 <h4>Reaction Settings</h4>
 <!--Settings checkboxes-->
+<form action = "/orgo/renderProblem/" method="post" class="form-horizontal">{% csrf_token %}
 {{ ChooseReagentsForm|bootstrap }}
+</form>
 </div>
 
 

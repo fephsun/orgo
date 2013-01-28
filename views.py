@@ -895,5 +895,19 @@ def saveProblem(request):
     
     
     
+@csrf-exempt 
+def renderProblem(request):
+    if 'synthesis_resume' in request.POST:
+        return renderOldSynthesis(request)
+    if 'synthesis_new' in request.POST:
+        return renderSynthesis(request)
+    if 'namereagent_resume' in request.POST:
+        return renderOldNameReagent(request)
+    if 'namereagent_new' in request.POST:
+        return renderNameReagent(request)
+    else:
+        raise StandardError("Not a valid problem rendering: "+str(request))
+    
+    
     
 

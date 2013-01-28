@@ -21,8 +21,6 @@ urlpatterns = patterns('',
     url(r'^api/showSingleStepAnswer/$', 'orgo.views.showNRAnswer', name='showNRAnswer'),   
     url(r'^api/outpsmiles/$', 'orgo.views.outpSmiles', name='outpSmiles'),  ###Can delete; this is me learning Django  
     url(r'^homeMoleculeChanger/$', 'orgo.views.homeMoleculeChanger', name='homeMoleculeChanger'),
-    url(r'^namereagent/$', 'orgo.views.renderNameReagent', name='renderNameReagent'),
-    url(r'^namereagent/resume/$', 'orgo.views.renderOldNameReagent', name='renderOldNameReagent'),
     url(r'^chat/helperpoll/$', 'orgo.views.helperWaitPoll', name='helperWaitPoll'),
     url(r'^chat/helpeepoll/$', 'orgo.views.helpeeWaitPoll', name='helpeeWaitPoll'),
     url(r'^chat/askforhelp/$', 'orgo.views.askForHelp', name='askForHelp'),
@@ -31,9 +29,13 @@ urlpatterns = patterns('',
     url(r'^chat/helpeechatpoll/$', 'orgo.views.helpeeChatPoll', name='helpeeChatPoll'),
     url(r'^chat/helperchatpoll/$', 'orgo.views.helperChatPoll', name='helperChatPoll'),
     
+    url(r'^renderProblem/$', 'orgo.views.renderProblem', name='renderProblem'),
     
     url(r'^renderSynthesis/$', 'orgo.views.renderSynthesis', name='renderSynthesis'),
     url(r'^renderSynthesis/resume/$', 'orgo.views.renderOldSynthesis', name='renderOldSynthesis'),
+    url(r'^namereagent/$', 'orgo.views.renderNameReagent', name='renderNameReagent'),
+    url(r'^namereagent/resume/$', 'orgo.views.renderOldNameReagent', name='renderOldNameReagent'),
+                       
     url(r'^api/getSynthesisData/$', 'orgo.views.getSynthesisData', name = 'getSynthesisData'),
     url(r'^api/displaySolution/$', 'orgo.views.getSolutionData', name = 'getSolutionData'),
     url(r'^api/addMoleculeToMolecule/$', 'orgo.views.addMoleculeToMolecule', name = 'addMoleculeToMolecule'),

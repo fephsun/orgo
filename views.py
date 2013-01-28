@@ -203,7 +203,7 @@ def renderNameReagent(request):
             pass
             
            
-        modes, autocomplete = checkboxUpdate(request)
+        modes, autocomplete = checkboxUpdate(request, profile)
         if modes == []:
             #Error - at least one mode must be selected!
             return loggedInHome(request, debug = "You must pick at least one reaction type!")
@@ -219,8 +219,8 @@ def renderNameReagent(request):
                                                      "Autocomplete": autocomplete})
         
         
-def checkboxUpdate(request): 
-    profile = request.user.profile       
+def checkboxUpdate(request, profile): 
+    #profile = request.user.profile
     modes = []
     if request.method == 'POST':
         #User filled out the checkboxes
@@ -239,7 +239,7 @@ def checkboxUpdate(request):
                         reagentType = models.ReagentType.create(name = name)
                         reagentType.save()
                     profile.savedReagentTypes.add(reagentType)
-                    
+       
         autocompleteType = checkboxes.cleaned_data["autocomplete"]
         if autocompleteType == "Reactions":
             autocomplete = reactionAutocomplete
@@ -419,7 +419,6 @@ def loadSynthesisFromId(request):
 @login_required
 def renderSynthesis(request):
     profile = request.user.profile
-        
     #If the retain attribute is True, don't delete.
     if profile.currentSynthesisProblem == None or not(profile.currentSynthesisProblem.retain):
         #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
@@ -437,8 +436,9 @@ def renderSynthesis(request):
             profile.currentSynthesisProblem.delete()
         except:
             pass
+    profile.save()
     
-    modes, autocomplete = checkboxUpdate(request)
+    modes, autocomplete = checkboxUpdate(request, profile)
     if modes == []:
         #Error - at least one mode must be selected!
         return loggedInHome(request, debug = "You must pick at least one reaction type!")

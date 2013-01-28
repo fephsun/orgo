@@ -30,7 +30,7 @@ def home(request, debug = ""):
                                           'signUpForm': models.mySignUpForm,
                                           'logInForm': models.myAuthenticationForm(),
                                           'debug':debug , 
-                                          'resetPWForm': PasswordResetForm()})
+                                          'resetPWForm': models.myPasswordResetForm()})
 
 def signUp(request):
     if request.method == 'POST':
@@ -94,6 +94,7 @@ def changePW(request):
         if request.POST['new_password1'] != request.POST['new_password2']:
             return loggedInHome(request, debug="Your two new passwords don't match.")
         request.user.set_password(request.POST['new_password1'])
+        request.user.save()
         return loggedInHome(request, debug="Password changed successfully.")
         #old_password, new_password1, new_password2
 
@@ -178,7 +179,8 @@ def renderOldNameReagent(request):
     return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg, 
                                                      "TargetMolecule": step.productBox.svg, 
                                                      "Name": request.user.username,
-                                                     "Autocomplete": autocomplete})
+                                                     "Autocomplete": autocomplete,
+                                                     "needsHelp": 0,})
     
 
 def renderNameReagent(request):
@@ -191,6 +193,7 @@ def renderNameReagent(request):
         step.save()
         request.session['problem'] = step
         autocomplete = reactionAutocomplete
+        tutorial = True
     else:
         #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
         try:
@@ -203,7 +206,7 @@ def renderNameReagent(request):
             pass
             
            
-        modes, autocomplete = checkboxUpdate(request, profile)
+        modes, autocomplete, tutorial = checkboxUpdate(request, profile)
         if modes == []:
             #Error - at least one mode must be selected!
             return loggedInHome(request, debug = "You must pick at least one reaction type!")
@@ -216,7 +219,8 @@ def renderNameReagent(request):
     return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg,
                                                      "TargetMolecule": step.productBox.svg, 
                                                      "Name": request.user.username,
-                                                     "Autocomplete": autocomplete})
+                                                     "Autocomplete": autocomplete,
+                                                     "needsHelp": int(tutorial),})
         
         
 def checkboxUpdate(request, profile): 
@@ -240,17 +244,22 @@ def checkboxUpdate(request, profile):
                         reagentType.save()
                     profile.savedReagentTypes.add(reagentType)
        
-        autocompleteType = checkboxes.cleaned_data["autocomplete"]
-        if autocompleteType == "Reactions":
-            autocomplete = reactionAutocomplete
-        elif autocompleteType == "Reagents":
-            autocomplete = reagentAutocomplete
-        elif autocompleteType == "None":
-            autocomplete = ""
+            autocompleteType = checkboxes.cleaned_data["autocomplete"]
+            if autocompleteType == "Reactions":
+                autocomplete = reactionAutocomplete
+            elif autocompleteType == "Reagents":
+                autocomplete = reagentAutocomplete
+            elif autocompleteType == "None":
+                autocomplete = ""
+            else:
+                return loggedInHome(request, debug = "An invalid autocomplete mode was picked.")
+            profile.autocompleteType = autocompleteType
+            profile.save()
+            
+            #Tutorial mode?
+            tutorial = checkboxes.cleaned_data["needsHelp"]
         else:
-            return loggedInHome(request, debug = "An invalid autocomplete mode was picked.")
-        profile.autocompleteType = autocompleteType
-        profile.save()
+            return loggedInHome(request, debug = "Invalid checkbox submission")
     else:
         #User clicked on "new problem"
         #Load up the user's reagent preferences.
@@ -265,7 +274,8 @@ def checkboxUpdate(request, profile):
             autocomplete = ""
         else:
             return loggedInHome(request, debug = "An invalid autocomplete mode was picked.")
-    return modes, autocomplete
+        tutorial = False
+    return modes, autocomplete, tutorial
 
 
     
@@ -298,6 +308,7 @@ def checkNameReagent(request):
         else:
             responseData["product"] = products.stringList()
         if not anonymous:
+            profile = request.user.profile
             #If we have the correct answer, free up some database space by deleting this stuff.
             thisCatagory = profile.currentNameReagentProblem.catagory
             try:
@@ -399,7 +410,8 @@ def renderOldSynthesis(request):
         return loggedInHome(request, debug = "An invalid autocomplete mode was picked.")
     return render(request, 'synthesisProblemInterface.html', {"TargetMolecule": synthesis.target.svg, 
                                                               "Name": request.user.username,
-                                                              "Autocomplete": autocomplete})
+                                                              "Autocomplete": autocomplete,
+                                                              "needsHelp": 0})
 
 def loadSynthesisFromId(request):
     #Make a deep copy of the problem, and render it to the new user.
@@ -436,9 +448,8 @@ def renderSynthesis(request):
             profile.currentSynthesisProblem.delete()
         except:
             pass
-    profile.save()
     
-    modes, autocomplete = checkboxUpdate(request, profile)
+    modes, autocomplete, tutorial = checkboxUpdate(request, profile)
     if modes == []:
         #Error - at least one mode must be selected!
         return loggedInHome(request, debug = "You must pick at least one reaction type!")
@@ -449,10 +460,10 @@ def renderSynthesis(request):
     synthesis.save()
     profile.currentSynthesisProblem = synthesis
     profile.save()
-    
     return render(request, 'synthesisProblemInterface.html', {"TargetMolecule": synthesis.target.svg, 
                                                               "Name": request.user.username,
-                                                              "Autocomplete": autocomplete})
+                                                              "Autocomplete": autocomplete,
+                                                              "needsHelp": int(tutorial)})
 
     
 

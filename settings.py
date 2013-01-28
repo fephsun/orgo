@@ -143,6 +143,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'orgo',
     'forkit',
+    'bootstrapform',
 )
 
 EMAIL_USE_TLS = True

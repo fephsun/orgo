@@ -384,9 +384,12 @@ def tertButoxide(molecules):
             if carbon1.element != 'C':
                 continue
             #Make sure carbon1 isn't part of a double bond or ketone.
+            OK = True
             for neighbor, bo in carbon1.neighbors.items():
                 if bo > 1:
-                    continue 
+                    OK = False
+            if not OK:
+                continue 
             localHalogens = []
             for neighbor in carbon1.neighbors:
                 if (neighbor.element in halogens):

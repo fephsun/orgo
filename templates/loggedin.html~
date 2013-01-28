@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load orgo_filters %}
+{% load bootstrap %}
 
 {% block jsimport %}
 <script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"> </script>
@@ -10,16 +11,46 @@
 
 {% block cssimport %}
 <link rel="stylesheet" href="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/tufte-graph.css" type="text/css" media="screen" charset="utf-8" />
+<style>
+.tabbable {
+    background-color:#F6F6F6;
+}
+.nav-tabs .active a {
+    background-color:#F6F6F6!important;
+}
+#popup {
+    background-color:white;
+    position: absolute;
+    left: -9999px;
+    top: 100px;
+    padding: 30px;
+    border: solid;
+}
+
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function popup(){
+    $("#popup").css("left", "300px");
+}
+
+function closePopup(P{
+    $("#popup").css("left", "-9999px");
+}
+</script>
 {% endblock %}
 
 {% block menuitems %}
 <li class="active"><a href="/orgo/">Home</a></li>
 <li><a href="#contact">About / FAQs</a></li>
 <li><a href="/orgo/logout/">Logout</a></li>
+<li><a href="#" onclick="popup()">Change Password</a></li>
 {% endblock %}
 
 {% block signin %}
-<p class="navbar-text pull-right active">
+<p class="navbar-text pull-right" style="color:#EEEEEE">
 Welcome, {{name}}
 </p>
 {% endblock %}
@@ -27,75 +58,76 @@ Welcome, {{name}}
 {% block content %}
 
 
-<p>
-<a href="/orgo/chat/volunteertohelp"> Help others </a>
-</p>
- 
- <h2> Naming Reagents </h2>
- <form action = "/orgo/namereagent/resume/" method="post" class="form-horizontal">{% csrf_token %}
-    <input type="submit" value="Resume old" class="btn"/>
-</form>
-<form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
-    {% for field in ChooseReagentsForm %}
-        {% if field.field.widget|is_checkbox %}
-            {{field}}{{field.label_tag}}
-        {% else %}
-            {{field.label_tag}}
+
+<div class="container">
+<div class="tabbable"> <!-- Only required for left/right tabs -->
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#tab1" data-toggle="tab"><h3>Synthesis Problems</h3></a></li>
+        <li><a href="#tab2" data-toggle="tab"><h3>One-Step Problems</h3></a></li>
+        <li><a href="#tab3" data-toggle="tab"><h3>Help Others</h3></a></li>
+    </ul>
+<div class="tab-content">
+    <div class="tab-pane active" id="tab1">
+        <form action = "/orgo/renderSynthesis/resume/" method="post" class="form-horizontal">{% csrf_token %}
+            <input type="submit" value="Resume old" class="btn"/>
+        </form>
+        <form action = "/orgo/renderSynthesis/" method="post" class="form-horizontal">{% csrf_token %}
+            {{ ChooseReagentsForm|bootstrap }}
+            <input type="submit" value="Generate new" class="btn"/>
+        </form>
+        <h4> Load Shared Problem </h4>
+        <form action = "/orgo/loadSynthesisFromId/" method="post" class="form-horizontal">{% csrf_token %}
+            Problem ID: <input type="text" name="Id">
             <br />
-            {{field}}
-        {% endif %}
-        <br />
-    {% endfor %}
-    <input type="submit" value="Generate new" class="btn"/>
-</form>
-
-  <h2> Synthesis Problems </h2>
-<form action = "/orgo/renderSynthesis/resume/" method="post" class="form-horizontal">{% csrf_token %}
-    <input type="submit" value="Resume old" class="btn"/>
-</form>
-<form action = "/orgo/renderSynthesis/" method="post" class="form-horizontal">{% csrf_token %}
-    {% for field in ChooseReagentsForm %}
-        {% if field.field.widget|is_checkbox %}
-            {{field}}{{field.label_tag}}
-        {% else %}
-            {{field.label_tag}}
-            <br />
-            {{field}}
-        {% endif %}
-        <br />
-    {% endfor %}
-    <input type="submit" value="Generate new" class="btn"/>
-</form>
-<h4> Load Shared Problem </h4>
-<form action = "/orgo/loadSynthesisFromId/" method="post" class="form-horizontal">{% csrf_token %}
-    Problem ID: <input type="text" name="Id">
-    <br />
-    <input type="submit" value="Go" class="btn"/>
-</form>
-
-{{debug|safe}}
-
-
-<div id="graph" class="graph" style="width:400; height:300">
-</div>
-
-<script>
-$(document).ready(function(){
-    $("#graph").tufteBar({
-        data: {{graphData|safe}},
-        axisLabel: function(index) {return this[1]},
-        barLabel: function(index) {
-            return Math.round(this[0]*100) + '&#37 ('+this[2]+'/'+this[3]+')'
-        },
-    });
+            <input type="submit" value="Go" class="btn"/>
+        </form>
+    </div>
     
-});
-</script>
+    <div class="tab-pane" id="tab2">
+         <form action = "/orgo/namereagent/resume/" method="post" class="form-horizontal">{% csrf_token %}
+            <input type="submit" value="Resume old" class="btn"/>
+        </form>
+        <form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
+            {{ ChooseReagentsForm|bootstrap }}
+            <input type="submit" value="Generate new" class="btn"/>
+        </form>
+        
+        <h2> How am I Doing?</h2>
+        <div id="graph" class="graph" style="width:400; height:300">
+        </div>
 
-<h2> Change Password </h2>
-<form action = "/orgo/api/changePW/" method="post" class="form-horizontal">{% csrf_token %}
-    {{changePW.as_p}}
-    <input type="submit" value="Change" class="btn"/>
-</form>
+        <script>
+        $(document).ready(function(){
+            $("#graph").tufteBar({
+                data: {{graphData|safe}},
+                axisLabel: function(index) {return this[1]},
+                barLabel: function(index) {
+                    return Math.round(this[0]*100) + '&#37 ('+this[2]+'/'+this[3]+')'
+                },
+            });
+            
+        });
+        </script>
+    </div>
+    
+    <div class="tab-pane" id="tab3">
+        <p>
+        <a href="/orgo/chat/volunteertohelp"> Help others </a>
+        </p>
+    </div>
 
+</div>
+{{debug|safe}}
+<div id="popup">
+    <h2> Change Password </h2>
+    <form action = "/orgo/api/changePW/" method="post" class="form-horizontal">{% csrf_token %}
+        {{changePW.as_p}}
+        <input type="submit" value="Change" class="btn"/>
+    </form>
+    <a href="#" onclick="closePopup()"> Cancel </a>
+</div>
+</div>
 {% endblock %}
+
+
+

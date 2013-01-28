@@ -74,6 +74,7 @@ def resetPW(request):
             return home(request, debug = "The email you entered does not correspond to any user.")
         password = User.objects.make_random_password()
         user.set_password(password)
+        user.save()
         subject = "Orgo - your new password"
         body = 'Hello '+user.username+''',
 Here is your new password: ''' + password + '''

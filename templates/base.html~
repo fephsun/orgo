@@ -4,11 +4,11 @@
 {% block jsimport %}
 {% endblock %}
 <script src="http://felixsun.scripts.mit.edu/orgo/bootstrap/js/bootstrap.min.js"></script>
+<!--Keeps the top bar from overlapping with content-->
 <style type="text/css">
   body {
     padding-top: 60px;
     padding-bottom: 40px;
-    background-color: #F6F6F6;
   }
 
 </style>
@@ -16,8 +16,12 @@
 {% endblock %}
 <link href="http://felixsun.scripts.mit.edu/orgo/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
 <link href="http://felixsun.scripts.mit.edu/orgo/bootstrap/css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
-<!--Keeps the top bar from overlapping with content-->
-
+<link rel="shortcut icon" href="http://felixsun.scripts.mit.edu/orgo/static/carbon.png" />
+<style>
+body {
+  background-color: #F6F6F6;
+}
+</style>
 {% block scripts %}
 {% endblock %}
 

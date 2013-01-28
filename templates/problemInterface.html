@@ -15,7 +15,7 @@
 {% block cssimport %}
 <link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.css">
 <link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.css">
-<title>5.12 Synthesis Practice</title>
+<title>5.12 Practice</title>
 <link rel="stylesheet" type="text/css" href = "http://felixsun.scripts.mit.edu/orgo/static/problemInterface.css"  />
 {% endblock %}
 
@@ -54,6 +54,14 @@ $(document).ready(function(){
 
 {% block content %}
 <div class="container">
+
+<div id="messageBox">
+    <div id="messageArea">
+    </div>
+    
+    <a href="#" onclick="$('#messageBox').css('display','none');"> Close </a>
+</div>
+
 <div class="row">
 <div id = "leftbar" class="span9">
 
@@ -94,7 +102,6 @@ $(document).ready(function(){
     <ul id="reagentsHere">
     </ul>
 
-    </div>
 
 </div>
 </div> <!--End row-->
@@ -126,7 +133,7 @@ Here are the reagents you just entered.  Drag them onto a molecule to do a react
 </p>
 </div>
 
-<div class="helperPopup wave3" id="reactedH">
+<div class="helperPopup wave3" id="reacted1StepH">
 <p>
 And here is your product!  If that was incorrect, simply drag a different set of reagents onto the starting
 molecule to try again.

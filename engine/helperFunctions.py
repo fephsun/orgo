@@ -336,13 +336,15 @@ def neighborCompare(a,b, compareDict):
         if CTFlag and OKFlag:
             #Makes sure that the hypothesized pairing follows the correct
             #cis-trans relationship
-            if a.CTotherC in compareDict and a.CTotherC.CTa in compareDict and a.CTotherC.CTb in compareDict:
-                # and a.CTotherC.CTa in compareDict
+            if a.CTotherC in compareDict and a.CTotherC.CTa in compareDict and a.CTotherC.CTb in compareDict:                    
                 if ((b.CTa == temp[a.CTa]) !=
                    (b.CTotherC.CTa == compareDict[a.CTotherC.CTa])) or\
                    ((b.CTb == temp[a.CTb]) !=
                     (b.CTotherC.CTb == compareDict[a.CTotherC.CTb])):
                     OKFlag = False
+                #If any C has 2 hydrogens, the matching is automatically correct, as there is no stereochem.
+                if (a.CTa == None and a.CTb == None) or (a.CTotherC.CTa == None and a.CTotherC.CTb == None):
+                    OKFlag = True
 
         del(temp[None])
         if (temp not in out) and OKFlag:

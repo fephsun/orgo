@@ -174,8 +174,8 @@ def parseReagentsString(inpstring):
     if (string.count("h2") != 0):
         if string.count("ch2cl2") + string.count("nanh2") + string.count("h2o") + string.count("h20") + string.count("h2so4") == sum([string.count(x.lower()) for x in REAGENTS[H2][1]]):
             outp[H2] = False
-    if (string.count("ch2cl2") != 0):
-        if string.count("cl2") == sum([string.count(x.lower()) for x in REAGENTS[CH2CL2][1]]):
+    if (string.count("cl2") != 0):
+        if string.count("ch2cl2") == sum([string.count(x.lower()) for x in REAGENTS[CL2][1]]):
             outp[CL2] = False
     if (string.count("na") != 0):
         if string.count("naoh") + string.count("nanh2") == sum([string.count(x.lower()) for x in REAGENTS[NA][1]]):
@@ -477,6 +477,7 @@ REACTIONS = (
 (((CL2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "Cl")), ('10A Alkenes: halide addition',)),
 (((HBR,), (ROOR,), (HEAT, LIGHT)), (lambda x: lambda o: radicalhydrohalogenate(x+o, "Br")), ('10A Alkenes: halide addition',)),
 (((RCO3H,), (CH2CL2,)), (lambda x: lambda o: epoxidate(x+o)), ('10B Alkenes: other',)),
+(((H2SO4,), (H2O,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")), True)), ('10B Alkenes: other',)),
 (((H2SO4,), (ETOH,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, ethanol, True)), ('10B Alkenes: other','illegal')),
 (((H2SO4,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x, o, True)), ('10B Alkenes: other','add')),
 (((H2SO4,), (H2O,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")))), ('10B Alkenes: other',)),
@@ -503,7 +504,7 @@ REACTIONS = (
 (((LINDLAR,), (H2,)), (lambda x: lambda o: lindlar(x+o)), ('11 Alkynes',)),
 (((NANH2,), (NH3,)), (lambda x: lambda o: alkyneDeprotonate(x+o)), ('11 Alkynes',)),
 (((KOCCH33,),), (lambda x: lambda o: tertButoxide(x+o)), ('10B Alkenes: other', 'interesting')),
-((), (lambda x: lambda o: acetylideAdd(x, o)),('11 Alkynes',))
+((), (lambda x: lambda o: acetylideAdd(x+o, x+o)),('11 Alkynes','add'))
 )
 
 

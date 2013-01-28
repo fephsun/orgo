@@ -33,6 +33,12 @@ $(document).ready(function(){
     } else {
         tutorial = 0;
     }
+    
+    onSuccess = function(){
+        $("#successbox").html("<div style=\"color:#00FF00\">SUCCESS!</div>");
+        $("#messageArea").html("<h2 style='color:green'>Congrats!</h2> <br /> <a href='/orgo/renderSynthesis/'> Do another </a><br /><a href='/orgo/'> Back to home </a>");
+        $("#messageBox").css('display', "block");
+    }
 });
 </script>
 {% endblock %}
@@ -56,8 +62,17 @@ $(document).ready(function(){
 
 {% block content %}
 <div class="container">
+
 <div id="bigMolecule" class="bigMolecule">
 </div>
+
+<div id="messageBox">
+    <div id="messageArea">
+    </div>
+    
+    <a href="#" onclick="$('#messageBox').css('display','none');"> Close </a>
+</div>
+
 <div class="row">
     <div id = "leftbar" class="span9">
         <!--PUT FLOWCHART HERE-->

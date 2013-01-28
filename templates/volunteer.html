@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% block jsimport %}
+<script>
+    var onSuccess;
+</script>
 <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
 <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
 <script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"></script>
@@ -19,6 +22,20 @@
 {% endblock %}
 
 {% block scripts %}
+<!--A dump for text that the js needs to load.-->
+<script id="dump" language="text">
+
+    <h2>Helper Lounge</h2>
+    <p>
+    Look for users who need help below.  To help someone, click on their username.
+    </p>
+    <div id="queue">
+    </div>
+
+    <div id="debug">
+    </div>
+</script>
+
 <script>
 var state = "Waiting";
 var pk = 0;
@@ -79,7 +96,7 @@ function connectHelpee(userId) {
             jsonObject = $.parseJSON(data);
             state = "Chatting";
             pk = jsonObject.chatPK;
-            $("#helperChatbox").html("You are now helping "+jsonObject.helpee+". <br />");
+            $("#helperChatbox").html("You are now helping "+jsonObject.helpee+". <br / >");
             $("#chatbox").css("margin-left", "100px");
             $("#target").html(jsonObject.target);
             allSetup();
@@ -107,23 +124,46 @@ function update(data) {
         $("#debug").html(data);
         $("#helperChatbox").html("Session dropped.  Did the other user log out?");
         state = "Waiting";
+        $("#leftbar").html($("#dump").html());
+        setTimeout(getQueue(), REFRESH);
         return;
     }
     drawAllTheThings(data);
     for (i=0; i<jsonObject['length']; i++) {
-        $("#helperChatbox").append(jsonObject[i] + "<br />");
+        $("#helperChatbox").append(jsonObject[i] + "<br / >");
     }
 }
+
+function onSuccess() {
+    $("#successbox").html("<div style=\"color:#00FF00\">SUCCESS!</div>");
+    $("#messageArea").html("<h2 style='color:green'>Thank you!</h2> <br / > <a href='/orgo/renderSynthesis/orgo/chat/volunteertohelp/'> Help more people  </a><br / ><a href='/orgo/'> Back to home </a>");
+    $("#messageBox").css('display', "block");
+}
+
 </script>
 {% endblock %}
 
 
 {% block content %}
 <div class="container">
+
+<div id="messageBox">
+    <div id="messageArea">
+    </div>
+    
+    <a href="#" onclick="$('#messageBox').css('display','none');"> Close </a>
+</div>
+
 <div id="bigMolecule" class="bigMolecule">
 </div>
+
+
 <div class="row">
     <div id="leftbar" class="span9">
+        <h2>Helper Lounge</h2>
+        <p>
+        Look for users who need help below.  To help someone, click on their username.
+        </p>
         <div id="queue">
         </div>
 

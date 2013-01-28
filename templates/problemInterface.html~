@@ -94,12 +94,11 @@ $(document).ready(function(){
     <ul id="reagentsHere">
     </ul>
 
-    </div>
 
 </div>
 </div> <!--End row-->
 
-<div style="helperPopup wave1" id="startingMoleculeH">
+<div class="helperPopup wave1" id="startingMoleculeH">
 <p>
 This is your starting molecule.  Click on it to get a better view, if you would like.
 </p>
@@ -113,7 +112,7 @@ the easy autocomplete mode, the autocomplete will help you with this.
 </p>
 </div>
 
-<div style="helperPopup wave1" id="targetMoleculeH">
+<div class="helperPopup wave1" id="targetMoleculeH">
 <p>
 Your goal is to find the combination of reagents that transforms the starting molecule into this,
 the target molecule.
@@ -126,7 +125,7 @@ Here are the reagents you just entered.  Drag them onto a molecule to do a react
 </p>
 </div>
 
-<div class="helperPopup wave3" id="reactedH">
+<div class="helperPopup wave3" id="reacted1StepH">
 <p>
 And here is your product!  If that was incorrect, simply drag a different set of reagents onto the starting
 molecule to try again.

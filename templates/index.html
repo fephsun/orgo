@@ -19,6 +19,7 @@ setInterval(function() {
 
 
 {% block cssimport %}
+<title>Welcome to 5.12</title>
 <style type="text/css">
     .flasks {
         width: 100%;
@@ -45,8 +46,8 @@ setInterval(function() {
         border-radius: 10px;
         padding: 20px;
         background-color: #F6F6F6;
-        background: rgba(225, 225, 225, 0.6);
-        height: 250px;
+        background: rgba(225, 225, 225, 0.85);
+        height: 350px;
     }
     
     .transparent {
@@ -83,17 +84,20 @@ setInterval(function() {
                 <div class="control-group" style="margin-top: 25px"></div>
                 <div class="row">
                 <div class="span4 mini-hero-unit">
-                <h4>Practice</h4>
+                <h2>Practice</h2>
                 Quiz yourself on the reagents required to perform each reaction. Build up a solid mastery of that daunting dictionary of reactions needed to excel at synthesis problems.
+                
+                <div style="margin-top: 25px"></div>
+                <div class="centerer"><a class="btn btn-primary" href="/orgo/namereagent/"><i class="icon-pencil icon-white" style="color:white"></i> Try it!</a></div>
                 </div>
                 
                 <div class="span4 mini-hero-unit">
-                <h4>Synthesize</h4>
+                <h2>Synthesize</h2>
                 Challenge your chemical abilities with randomly-generated synthesis problems. Add reagents, and watch as the as the synthesis unfolds to produce your target molecule.
                 </div>
                 
                 <div class="span4 mini-hero-unit">
-                <h4>Share</h4>
+                <h2>Share</h2>
                 Help others out. Share your understanding of organic chemistry by helping others with synthesis problems, and earn points. Save interesting synthesis problems you come across, to show to your friends. 
                 
                 
@@ -103,16 +107,17 @@ setInterval(function() {
                 <div class="row">
                 <div class="span8"></div>
                 <div class="span4">
-                <div class="control-group" style="margin-top: 48px"></div> <!--spacing.-->
+                <div class="control-group" style="margin-top: 30px"></div> <!--spacing.-->
                 
-                <div class="centerer"><a class="btn btn-primary btn-large" href="/orgo/namereagent/"><i class="icon-zoom-in icon-white" style="color:white"></i>Try it!</a></div>
+                <!--old location of button-->
+                
+                
                 </div>
                 </div>
                 
                 
                 
             </div>
-        
             <div class="span4">
                 <div class="control-group" style="margin-top: 15px"></div> <!--spacing.-->
                 <div>
@@ -122,7 +127,7 @@ setInterval(function() {
                     </form>
                 </div>
                 <div style="margin-top: 0px"></div> <!--spacing.-->
-                <div class="hero-unit transparent">
+                <div class="transparent mini-hero-unit" style="margin-left: 50px">
                     <h3>New User</h3>
                     <form action="/orgo/api/signup/" method="post" class="form-horizontal" style="width:100%">{% csrf_token %}
                         <div class="control-group" style="width:100%">{{signUpForm.username}}</div>
@@ -138,14 +143,14 @@ setInterval(function() {
 </div>
 </div>
 
-
+<!--
 <div class="hero-unit">
     <h1> Hello world </h1>
 
     <div id="molecule">
-    {{molecule|safe}} <!--The safe tag prevents character escaping -->
+    {{molecule|safe}} 
     </div>
-</div>
+</div>-->
 
 
 

@@ -164,6 +164,8 @@ class SynthesisProblemModel(models.Model):
     arrows = models.ManyToManyField(ArrowModel, related_name="spArrows")
     target = models.ForeignKey(MoleculeBoxModel, null=True, related_name="spTarget")
     retain = models.BooleanField()  #If true, this molecule is never deleted.
+    solverCredited = models.BooleanField(default=False)
+    helperCredited = models.BooleanField(default=False)
 
     
     #reactionSteps is a list of reactionsteps; the final one contains the target molecule.
@@ -385,6 +387,8 @@ class UserProfile(models.Model):
     savedReagentTypes = models.ManyToManyField(ReagentType)
     autocompleteType = models.CharField(max_length=20) #Too lazy to set up a choice field.
     accuracies = models.ManyToManyField(AccuracyModel)
+    correctSynths = models.SmallIntegerField(default=0)
+    assists = models.SmallIntegerField(default=0)
     
 #Auto-make a UserProfile for each user when needed
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])

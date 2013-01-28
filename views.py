@@ -503,6 +503,12 @@ def getSynthesisData(request, synthesis=None):
         responseData["molecules"] = moleculesOutput
         responseData["arrows"] = arrowsOutput
         if mode == "Send to browser":
+            #Increment score if solved.
+            if responseData["success"] and not synthesis.solverCredited:
+                request.user.profile.correctSynths += 1
+                request.user.profile.save()
+                synthesis.solverCredited = True
+                synthesis.save()
             return HttpResponse(json.dumps(responseData))
         elif mode == "Return dictionary":
             return responseData
@@ -865,7 +871,8 @@ def helperChatPoll(request):
     pk = int(request.POST['PK'])
 
     chat = models.ChatPair.objects.get(pk=pk)
-    out = getSynthesisData(None, synthesis=chat.helpee.profile.currentSynthesisProblem)
+    synthesis = chat.helpee.profile.currentSynthesisProblem
+    out = getSynthesisData(None, synthesis)
     if 'message' in request.POST:
         #A new message was sent.  Add it to the ChatPair.
         msg = escape(request.POST['message'])
@@ -884,6 +891,7 @@ def helperChatPoll(request):
         models.ChatPair.delete(chat)
         return HttpResponse(json.dumps(out))
     out['open'] = True
+    #Send all the new chat lines.
     newLines = list(chat.chatRecord.filter(helperSeen = False))
     newLines.sort(key=lambda x: x.postTime)
     out['length'] = len(newLines)
@@ -891,6 +899,12 @@ def helperChatPoll(request):
         out[i] = newLines[i].originator.username+ ": " + newLines[i].content
         newLines[i].helperSeen = True
         newLines[i].save()
+    #If the synthesis was just solved, give the helper credit
+    if out["success"] and not synthesis.helperCredited:
+        request.user.profile.assists += 1
+        request.user.profile.save()
+        synthesis.helperCredited = True
+        synthesis.save()
     return HttpResponse(json.dumps(out))
   except  BaseException as e:
     return HttpResponse(str(e))

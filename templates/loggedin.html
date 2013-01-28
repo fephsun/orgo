@@ -26,6 +26,12 @@
     padding: 30px;
     border: solid;
 }
+div.whitebox {
+    background-color:white;
+    border-radius: 10px;
+    margin:10px;
+    padding:20px;
+}
 
 </style>
 {% endblock %}
@@ -59,20 +65,75 @@ Welcome, {{name}}
 
 <div class="container">
 <div class="row">
+
+
+
 <div class="span6">
-<h2>Practice</h2>
-<h4> One-step Problems</h4>
+<div style="padding:20px; margin-top:10px;">
+<h2> One-step Problems</h2>
+<form action = "/orgo/namereagent/resume/" method="post" class="form-horizontal">{% csrf_token %}
+    <input type="submit" value="Resume old" class="btn"/>
+</form>
+<form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
+    <input type="submit" value="Generate new" class="btn"/>
+</form>
+
+<h2> Synthesis Problems</h2>
+<form action = "/orgo/renderSynthesis/resume/" method="post" class="form-horizontal">{% csrf_token %}
+    <input type="submit" value="Resume old" class="btn"/>
+</form>
+<form action = "/orgo/renderSynthesis/" method="post" class="form-horizontal">{% csrf_token %}
+    <input type="submit" value="Generate new" class="btn"/>
+</form>   
+
+<h4> Load Saved</h4>
+<!--Problem loader-->
+<form action = "/orgo/loadSynthesisFromId/" method="post" class="form-horizontal">{% csrf_token %}
+    <input type="text" placeholder="enter problem ID" name="Id">
+    <input type="submit" value="Go" class="btn"/>
+</form>
+   
+
 </div>
+</div>
+
+
+
 <div class="span6">
-<div class="span12">
+<div class="span6 whitebox">
 <h2>Progress</h2>
+<!--Graph-->
+<div id="graph" class="graph" style="width:400; height:300">
 </div>
-<div class="span12">
-<h2>Help Others</h2>
+<script>
+$(document).ready(function(){
+    $("#graph").tufteBar({
+        data: {{graphData|safe}},
+        axisLabel: function(index) {return this[1]},
+        barLabel: function(index) {
+            return Math.round(this[0]*100) + '&#37 ('+this[2]+'/'+this[3]+')'
+        },
+    });
+    
+});
+</script>
+        
+        
+<h4>Reaction Settings</h4>
+<!--Settings checkboxes-->
+{{ ChooseReagentsForm|bootstrap }}
+</div>
+
+
+<div class="span6 whitebox">
+<h4>Help Others</h4>
 </div>
 </div>
 </div>
 </div>
+
+
+
 
 
 
@@ -86,46 +147,15 @@ Welcome, {{name}}
     </ul>
 <div class="tab-content">
     <div class="tab-pane active" id="tab1">
-        <form action = "/orgo/renderSynthesis/resume/" method="post" class="form-horizontal">{% csrf_token %}
-            <input type="submit" value="Resume old" class="btn"/>
-        </form>
-        <form action = "/orgo/renderSynthesis/" method="post" class="form-horizontal">{% csrf_token %}
-            {{ ChooseReagentsForm|bootstrap }}
-            <input type="submit" value="Generate new" class="btn"/>
-        </form>
         <h4> Load Shared Problem </h4>
-        <form action = "/orgo/loadSynthesisFromId/" method="post" class="form-horizontal">{% csrf_token %}
-            Problem ID: <input type="text" name="Id">
-            <br />
-            <input type="submit" value="Go" class="btn"/>
-        </form>
+        
     </div>
     
     <div class="tab-pane" id="tab2">
-         <form action = "/orgo/namereagent/resume/" method="post" class="form-horizontal">{% csrf_token %}
-            <input type="submit" value="Resume old" class="btn"/>
-        </form>
-        <form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
-            {{ ChooseReagentsForm|bootstrap }}
-            <input type="submit" value="Generate new" class="btn"/>
-        </form>
+         
         
         <h2> How am I Doing?</h2>
-        <div id="graph" class="graph" style="width:400; height:300">
-        </div>
-
-        <script>
-        $(document).ready(function(){
-            $("#graph").tufteBar({
-                data: {{graphData|safe}},
-                axisLabel: function(index) {return this[1]},
-                barLabel: function(index) {
-                    return Math.round(this[0]*100) + '&#37 ('+this[2]+'/'+this[3]+')'
-                },
-            });
-            
-        });
-        </script>
+        
     </div>
     
     <div class="tab-pane" id="tab3">

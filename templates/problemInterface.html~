@@ -1,103 +1,153 @@
-<html>
-<head>
-  <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
-  <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
-  <script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"></script>
-  <script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.js"></script>
-  <script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.css">
-  <link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.css">
-    <title>5.12 Synthesis Practice</title>
-   <link rel="stylesheet" type="text/css" href = "http://felixsun.scripts.mit.edu/orgo/static/problemInterface.css"  />
-    <script src = "http://felixsun.scripts.mit.edu/orgo/static/problemInterface.js"> </script>
-  </head>
-<body>
+{% extends "base.html" %}
+
+{% block jsimport %}
+<script>
+    var tutorial;
+</script>
+<script src="http://code.jquery.com/jquery-1.8.3.js"></script>
+<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"></script>
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.js"></script>
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.js"></script>
+<script src = "http://felixsun.scripts.mit.edu/orgo/static/problemInterface.js"> </script>
+{% endblock %}
+
+{% block cssimport %}
+<link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.css">
+<link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.css">
+<title>5.12 Synthesis Practice</title>
+<link rel="stylesheet" type="text/css" href = "http://felixsun.scripts.mit.edu/orgo/static/problemInterface.css"  />
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function(){
+    setup({{Autocomplete|safe}});
+    if ({{needsHelp}}){
+        tutorial = 1;
+        $(".wave1").css("display", "block");
+    } else {
+        tutorial = 0;
+    }
+});
+</script>
+{% endblock %}
 
 
-<div id = "offscreen">
+{% block menuitems %}
+
+<li><a href="/orgo/namereagent/"> Generate a new problem </a></li>
+
+<li><a href="/orgo/" style="padding-left:20px"> Return to home </a></li>
+
+<li><a href="#" onclick="showAnswer()" style="padding-left:20px"> Show answer </a></li>
+
+{% endblock %}
 
 
-<div id="topbar">
-<img src = "http://felixsun.scripts.mit.edu/orgo/static/logo.png" id = "logo"/>
 
-<!--Eventually, these will be css-ified into fancy menu things-->
+
+{% block signin %}
+<span id="successbox" class="navbar-text pull-right">
+</span>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+<div class="row">
+<div id = "leftbar" class="span9">
+
+
+
+    <div id = "startingMolecule" class = "molecule">
+    {{ReactantMolecule|safe}}
+    </div>
+
+
+    <div id="reactionsHere" class="reaction">
+    </div>
+
+    <div id="productMolecule" class="molecule">
+    </div>
+
+
+    <div id = "bigMolecule" class="bigMolecule">
+
+    </div>
+
+</div>
+
+<div id="rightbar" class="span3">
+
+    <h2>Target Molecule:</h2>
+    <div id = "target">
+    {{TargetMolecule|safe}}
+    </div>
+
+
+    <div class="ui-widget" id="reagentTyper">
+    <button type="button" onclick="updateReagents()" id = "addReagent">Add Reagent</button>
+    <input id = "reagentTyperBox" />
+    </div>
+
+
+    <ul id="reagentsHere">
+    </ul>
+
+
+</div>
+</div> <!--End row-->
+
+<div class="helperPopup wave1" id="startingMoleculeH">
 <p>
-<a href="/orgo/namereagent/"> Generate a new problem </a>
-
-<a href="/orgo/" style="padding-left:20px"> Return to home </a>
-
-<a href="#" onclick="showAnswer()" style="padding-left:20px"> Show answer </a>
+This is your starting molecule.  Click on it to get a better view, if you would like.
 </p>
-
-<!--
-<div class="box" id="generateProblemBox">
-<form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}
-    <input type="submit" value="Generate a new problem" class="btn"/>
-</form>
-
-<form action = "/orgo/" method="post" class="form-horizontal">{% csrf_token %}
-    <input type="submit" value="Return to home" class="btn"/>
-</form>
-</div>
--->
-<div class="box" id="namebox">
-Welcome, {{Name}}
 </div>
 
-<div class="box" id="successbox">
+<div class="helperPopup wave1" id="inputH">
+<p>
+Type reagents into this box to add them to your reaction.  <b> Go ahead and try "H2 PdC EtOH".</b>  Make sure you have
+all the reagents you need for a reaction, including catalysts and solvents when necessary.  If you picked 
+the easy autocomplete mode, the autocomplete will help you with this.
+</p>
 </div>
 
-
+<div class="helperPopup wave1" id="targetMoleculeH">
+<p>
+Your goal is to find the combination of reagents that transforms the starting molecule into this,
+the target molecule.
+</p>
 </div>
 
-<div id = "main">
-
-<div id = "leftbar">
-
-
-
-<div id = "startingMolecule" class = "molecule">
-{{ReactantMolecule|safe}}
+<div class="helperPopup wave2" id="reagentsH">
+<p>
+Here are the reagents you just entered.  Drag them onto a molecule to do a reaction.
+</p>
 </div>
 
-
-<div id="reactionsHere" class="reaction">
+<div class="helperPopup wave3" id="reacted1StepH">
+<p>
+And here is your product!  If that was incorrect, simply drag a different set of reagents onto the starting
+molecule to try again.
+</p>
 </div>
 
-<div id="productMolecule" class="molecule">
+<div class="helperPopup wave3" id="topbarH">
+<p>
+Stuck?  "Display solution" shows an answer.
+</p>
 </div>
 
-
-<div id = "bigMolecule" class="bigMolecule">
-
-</div>
-
-</div>
-
-<div id="rightbar">
-
-<h2>Target Molecule:</h2>
-<div id = "target">
-{{TargetMolecule|safe}}
-</div>
-
-
-<div class="ui-widget" id="reagentTyper">
-<button type="button" onclick="updateReagents()" id = "addReagent">Add Reagent</button>
-<input id = "reagentTyperBox" />
-</div>
-
-
-<ul id="reagentsHere">
-</ul>
-
+<div class="helperPopup wave3" id="doneH">
+<p>
+That's it for the tutorial!  Happy syntheses!
+</p>
+<p>
+<a href="#" onclick="closeTutorial()"> Close tutorial </a>
+</p>
 </div>
 
 </div>
 
-</div>
+{% endblock %}
 
-</body>
-
-
-</html>

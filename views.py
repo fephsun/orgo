@@ -30,7 +30,7 @@ def home(request, debug = ""):
                                           'signUpForm': models.mySignUpForm,
                                           'logInForm': models.myAuthenticationForm(),
                                           'debug':debug , 
-                                          'resetPWForm': PasswordResetForm()})
+                                          'resetPWForm': models.myPasswordResetForm()})
 
 def signUp(request):
     if request.method == 'POST':
@@ -74,6 +74,7 @@ def resetPW(request):
             return home(request, debug = "The email you entered does not correspond to any user.")
         password = User.objects.make_random_password()
         user.set_password(password)
+        user.save()
         subject = "Orgo - your new password"
         body = 'Hello '+user.username+''',
 Here is your new password: ''' + password + '''
@@ -94,6 +95,7 @@ def changePW(request):
         if request.POST['new_password1'] != request.POST['new_password2']:
             return loggedInHome(request, debug="Your two new passwords don't match.")
         request.user.set_password(request.POST['new_password1'])
+        request.user.save()
         return loggedInHome(request, debug="Password changed successfully.")
         #old_password, new_password1, new_password2
 
@@ -143,12 +145,27 @@ def loggedInHome(request, debug = ""):
         else:
             graphList.append([1.0*accuracyObj.correct/accuracyObj.total, name, accuracyObj.correct, accuracyObj.total])
     graphList.sort(key=lambda item: item[1])
+    
+    #Load high scores.
+    bestUsers = models.UserProfile.objects.order_by('-correctSynths', 'user__username')[:10]
+    synthHighScore = ""
+    for i in xrange(10):
+        prof = bestUsers[i]
+        if prof==profile:
+            synthHighScore += "<b>"
+        synthHighScore += "<tr><td>"+i+"</td><td>"+prof.user.username+"</td><td>"+prof.correctSynths+"</td></tr>"
+        if prof==profile:
+            synthHighScore += "</b>"
+    if request.user.profile not in bestUsers:
+        userRank = models.UserProfile.objects.order_by('-correctSynths', 'user__username').index(profile)
+        synthHighScore += "<b><tr><td>"+userRank+"</td><td>"+request.user.username+"</td><td>"+profile.correctSynths+"</td></tr></b>"
 
     return render(request, 'loggedin.html', {'name': request.user.username, 
                                              'ChooseReagentsForm':models.ChooseReagentsForm(initial=initialValuesDict), 
                                              'debug': debug,
                                              'graphData': graphList,
-                                             'changePW': PasswordChangeForm(request.user)})
+                                             'changePW': PasswordChangeForm(request.user),
+                                             'synthHighScore': synthHighScore})
     
 ###Can delete; this is me learning Django
 def renderSmiles(request, molecule):
@@ -178,7 +195,8 @@ def renderOldNameReagent(request):
     return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg, 
                                                      "TargetMolecule": step.productBox.svg, 
                                                      "Name": request.user.username,
-                                                     "Autocomplete": autocomplete})
+                                                     "Autocomplete": autocomplete,
+                                                     "needsHelp": 0,})
     
 
 def renderNameReagent(request):
@@ -191,6 +209,7 @@ def renderNameReagent(request):
         step.save()
         request.session['problem'] = step
         autocomplete = reactionAutocomplete
+        tutorial = True
     else:
         #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
         try:
@@ -203,7 +222,7 @@ def renderNameReagent(request):
             pass
             
            
-        modes, autocomplete = checkboxUpdate(request)
+        modes, autocomplete, tutorial = checkboxUpdate(request, profile)
         if modes == []:
             #Error - at least one mode must be selected!
             return loggedInHome(request, debug = "You must pick at least one reaction type!")
@@ -216,11 +235,12 @@ def renderNameReagent(request):
     return render(request, 'problemInterface.html', {"ReactantMolecule": step.reactantBox.svg,
                                                      "TargetMolecule": step.productBox.svg, 
                                                      "Name": request.user.username,
-                                                     "Autocomplete": autocomplete})
+                                                     "Autocomplete": autocomplete,
+                                                     "needsHelp": int(tutorial),})
         
         
-def checkboxUpdate(request): 
-    profile = request.user.profile       
+def checkboxUpdate(request, profile): 
+    #profile = request.user.profile
     modes = []
     if request.method == 'POST':
         #User filled out the checkboxes
@@ -239,18 +259,23 @@ def checkboxUpdate(request):
                         reagentType = models.ReagentType.create(name = name)
                         reagentType.save()
                     profile.savedReagentTypes.add(reagentType)
-                    
-        autocompleteType = checkboxes.cleaned_data["autocomplete"]
-        if autocompleteType == "Reactions":
-            autocomplete = reactionAutocomplete
-        elif autocompleteType == "Reagents":
-            autocomplete = reagentAutocomplete
-        elif autocompleteType == "None":
-            autocomplete = ""
+       
+            autocompleteType = checkboxes.cleaned_data["autocomplete"]
+            if autocompleteType == "Reactions":
+                autocomplete = reactionAutocomplete
+            elif autocompleteType == "Reagents":
+                autocomplete = reagentAutocomplete
+            elif autocompleteType == "None":
+                autocomplete = ""
+            else:
+                return loggedInHome(request, debug = "An invalid autocomplete mode was picked.")
+            profile.autocompleteType = autocompleteType
+            profile.save()
+            
+            #Tutorial mode?
+            tutorial = checkboxes.cleaned_data["needsHelp"]
         else:
-            return loggedInHome(request, debug = "An invalid autocomplete mode was picked.")
-        profile.autocompleteType = autocompleteType
-        profile.save()
+            return loggedInHome(request, debug = "Invalid checkbox submission")
     else:
         #User clicked on "new problem"
         #Load up the user's reagent preferences.
@@ -265,7 +290,8 @@ def checkboxUpdate(request):
             autocomplete = ""
         else:
             return loggedInHome(request, debug = "An invalid autocomplete mode was picked.")
-    return modes, autocomplete
+        tutorial = False
+    return modes, autocomplete, tutorial
 
 
     
@@ -298,6 +324,7 @@ def checkNameReagent(request):
         else:
             responseData["product"] = products.stringList()
         if not anonymous:
+            profile = request.user.profile
             #If we have the correct answer, free up some database space by deleting this stuff.
             thisCatagory = profile.currentNameReagentProblem.catagory
             try:
@@ -399,7 +426,8 @@ def renderOldSynthesis(request):
         return loggedInHome(request, debug = "An invalid autocomplete mode was picked.")
     return render(request, 'synthesisProblemInterface.html', {"TargetMolecule": synthesis.target.svg, 
                                                               "Name": request.user.username,
-                                                              "Autocomplete": autocomplete})
+                                                              "Autocomplete": autocomplete,
+                                                              "needsHelp": 0})
 
 def loadSynthesisFromId(request):
     #Make a deep copy of the problem, and render it to the new user.
@@ -419,7 +447,6 @@ def loadSynthesisFromId(request):
 @login_required
 def renderSynthesis(request):
     profile = request.user.profile
-        
     #If the retain attribute is True, don't delete.
     if profile.currentSynthesisProblem == None or not(profile.currentSynthesisProblem.retain):
         #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
@@ -438,7 +465,7 @@ def renderSynthesis(request):
         except:
             pass
     
-    modes, autocomplete = checkboxUpdate(request)
+    modes, autocomplete, tutorial = checkboxUpdate(request, profile)
     if modes == []:
         #Error - at least one mode must be selected!
         return loggedInHome(request, debug = "You must pick at least one reaction type!")
@@ -449,10 +476,10 @@ def renderSynthesis(request):
     synthesis.save()
     profile.currentSynthesisProblem = synthesis
     profile.save()
-    
     return render(request, 'synthesisProblemInterface.html', {"TargetMolecule": synthesis.target.svg, 
                                                               "Name": request.user.username,
-                                                              "Autocomplete": autocomplete})
+                                                              "Autocomplete": autocomplete,
+                                                              "needsHelp": int(tutorial)})
 
     
 
@@ -491,6 +518,12 @@ def getSynthesisData(request, synthesis=None):
         responseData["molecules"] = moleculesOutput
         responseData["arrows"] = arrowsOutput
         if mode == "Send to browser":
+            #Increment score if solved.
+            if responseData["success"] and not synthesis.solverCredited:
+                request.user.profile.correctSynths += 1
+                request.user.profile.save()
+                synthesis.solverCredited = True
+                synthesis.save()
             return HttpResponse(json.dumps(responseData))
         elif mode == "Return dictionary":
             return responseData
@@ -853,7 +886,8 @@ def helperChatPoll(request):
     pk = int(request.POST['PK'])
 
     chat = models.ChatPair.objects.get(pk=pk)
-    out = getSynthesisData(None, synthesis=chat.helpee.profile.currentSynthesisProblem)
+    synthesis = chat.helpee.profile.currentSynthesisProblem
+    out = getSynthesisData(None, synthesis)
     if 'message' in request.POST:
         #A new message was sent.  Add it to the ChatPair.
         msg = escape(request.POST['message'])
@@ -872,6 +906,7 @@ def helperChatPoll(request):
         models.ChatPair.delete(chat)
         return HttpResponse(json.dumps(out))
     out['open'] = True
+    #Send all the new chat lines.
     newLines = list(chat.chatRecord.filter(helperSeen = False))
     newLines.sort(key=lambda x: x.postTime)
     out['length'] = len(newLines)
@@ -879,6 +914,12 @@ def helperChatPoll(request):
         out[i] = newLines[i].originator.username+ ": " + newLines[i].content
         newLines[i].helperSeen = True
         newLines[i].save()
+    #If the synthesis was just solved, give the helper credit
+    if out["success"] and not synthesis.helperCredited:
+        request.user.profile.assists += 1
+        request.user.profile.save()
+        synthesis.helperCredited = True
+        synthesis.save()
     return HttpResponse(json.dumps(out))
   except  BaseException as e:
     return HttpResponse(str(e))

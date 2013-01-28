@@ -384,9 +384,12 @@ def tertButoxide(molecules):
             if carbon1.element != 'C':
                 continue
             #Make sure carbon1 isn't part of a double bond or ketone.
+            OK = True
             for neighbor, bo in carbon1.neighbors.items():
                 if bo > 1:
-                    continue 
+                    OK = False
+            if not OK:
+                continue 
             localHalogens = []
             for neighbor in carbon1.neighbors:
                 if (neighbor.element in halogens):
@@ -1158,28 +1161,24 @@ if __name__ == '__main__':
     chiralMol2.addAtom(c32, c31, 1)
     c30.newChiralCenter(c31, (None, c33, br30))
 
-    #Makes C/C=C/C
+    #Makes C/C=C
     c40 = Atom("C")
     c41 = Atom("C")
     mol4 = Molecule(c40)
     mol4.addAtom(c41, c40, 2)
     c42 = Atom("C")
-    c43 = Atom("C")
     mol4.addAtom(c42, c40, 1)
-    mol4.addAtom(c43, c41, 1)
-    c40.newCTCenter(c41, c42, None)
-    c41.newCTCenter(c40, c43, None)
+    c40.newCTCenter(c41, None, c42)
+    c41.newCTCenter(c40, None, None)
 
-    #Makes Br/Br\C=C
+    #Makes C\C=C
     c45 = Atom("C")
     c46 = Atom("C")
     mol4alt = Molecule(c45)
     mol4alt.addAtom(c46, c45, 2)
-    br40 = Atom("Br")
-    br41 = Atom("Br")
-    mol4alt.addAtom(br41, c45, 1)
-    mol4alt.addAtom(br40, c45, 1)
-    c45.newCTCenter(c46, br41, br40)
+    c47 = Atom("C")
+    mol4alt.addAtom(c47, c45, 1)
+    c45.newCTCenter(c46, c47, None)
     c46.newCTCenter(c45, None, None)
 
     #        c50
@@ -1288,8 +1287,4 @@ if __name__ == '__main__':
     c91.newCTCenter(c90, c92, None)
 
     
-    print smiles(ring)
-
-    #epox = epoxidate([ring])
-
-    #print smiles(epox)
+    print moleculeCompare(mol4, mol4alt)

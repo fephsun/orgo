@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 
 {% block jsimport %}
+<script>
+    var tutorial;
+    var onSuccess;
+</script>
 <script src="http://code.jquery.com/jquery-1.8.3.js"></script>
 <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
 <script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"></script>
@@ -23,6 +27,19 @@ $(document).ready(function(){
     allSetup();
     clientSetup({{Autocomplete|safe}});
     redrawProblem();
+    
+    if ({{needsHelp}}){
+        tutorial = 1; //Tracks the progress of the help dialogs.
+        $(".wave1").css("display", "block");
+    } else {
+        tutorial = 0;
+    }
+    
+    onSuccess = function(){
+        $("#successbox").html("<div style=\"color:#00FF00\">SUCCESS!</div>");
+        $("#messageArea").html("<h2 style='color:green'>Congrats!</h2> <br /> <a href='/orgo/renderSynthesis/'> Do another </a><br /><a href='/orgo/'> Back to home </a>");
+        $("#messageBox").css('display', "block");
+    }
 });
 </script>
 {% endblock %}
@@ -45,9 +62,18 @@ $(document).ready(function(){
 
 
 {% block content %}
+<div class="container">
 
 <div id="bigMolecule" class="bigMolecule">
 </div>
+
+<div id="messageBox">
+    <div id="messageArea">
+    </div>
+    
+    <a href="#" onclick="$('#messageBox').css('display','none');"> Close </a>
+</div>
+
 <div class="row">
     <div id = "leftbar" class="span9">
         <!--PUT FLOWCHART HERE-->
@@ -76,7 +102,7 @@ $(document).ready(function(){
 
 
 <div id="chatbox">
-    <div id="helpbox">
+    <div id="helpbox" class="messageWindow">
     </div>
     <input type="text" name="input" id="input"></input>
     <button id="submit">Submit</button>
@@ -86,11 +112,85 @@ $(document).ready(function(){
     </div>
 </div>
 
+<div class="helperPopup wave1" id="startingMoleculeH">
+<p>
+Your starting molecule is here.  Usually, you will have one; occasionally, you will have two.
+</p>
+</div>
+
+<div class="helperPopup wave1" id="targetMoleculeH">
+<p>
+Over here are your target molecules.  Your goal is to find a series of reactions that produce these targets.
+If you would like a closer look at these (or any other) molecules, click on the image.
+</p>
+</div>
+
+<div class="helperPopup wave1" id="inputH">
+<p>
+Type reagents into this box to add them to your reaction.  <b> Go ahead and try "H2 PdC EtOH".</b>  Make sure you have
+all the reagents you need for a reaction, including catalysts and solvents when necessary.  If you picked 
+the easy autocomplete mode, the autocomplete will help you with this.
+</p>
+</div>
+
+<div class="helperPopup wave2" id="reagentsH">
+<p>
+Here are the reagents you just entered.  Drag them onto a molecule to do a reaction.
+</p>
+</div>
+
+<div class="helperPopup wave3" id="reactedH">
+<p>
+And here is your product!  You can drag reagents onto this product to continue your synthesis.
+</p>
+<p>
+To delete this product, drag it to the right side of the screen (around "Target Molecule").
+</p>
+<p>
+You can also drag a molecule onto another molecule to combine them, and set up for
+an addition reaction.
+</p>
+</div>
+
+<div class="helperPopup wave3" id="topbarH">
+<p>
+If you are stuck, other users of the site may be able to help you!  Click "Ask for help" to be
+connected to humans who can walk you through the problem.
+</p>
+<p>
+Still stuck?  "Display solution" shows an answer.
+</p>
+<p>
+If you would like a friend to see this problem, click "Share this problem" and send him/her the
+problem ID that pops up.
+</p>
+</div>
+
 <div id = "bottombar">
 </div>
 
+<div class="helperPopup wave3" id="doneH">
+<p>
+That's it for the tutorial!  Happy syntheses!
+</p>
+<p>
+<a href="#" onclick="closeTutorial()"> Close tutorial </a>
+</p>
+</div>
+
 </div>
 
 
-
 {% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+

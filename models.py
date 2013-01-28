@@ -5,7 +5,7 @@ from orgo.engine.synthProblem import *
 import cPickle
 import django.forms as forms
 from django.forms import ModelForm
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm
 from django.contrib.auth.models import User
 from django.utils import timezone
 
@@ -164,6 +164,8 @@ class SynthesisProblemModel(models.Model):
     arrows = models.ManyToManyField(ArrowModel, related_name="spArrows")
     target = models.ForeignKey(MoleculeBoxModel, null=True, related_name="spTarget")
     retain = models.BooleanField()  #If true, this molecule is never deleted.
+    solverCredited = models.BooleanField(default=False)
+    helperCredited = models.BooleanField(default=False)
 
     
     #reactionSteps is a list of reactionsteps; the final one contains the target molecule.
@@ -272,18 +274,29 @@ class ReactionStepModel(models.Model):
         return x
 
     
-
+class myPasswordResetForm(PasswordResetForm):
+    email = forms.EmailField(required = True, widget=forms.TextInput(attrs={'placeholder':'email address'}))
+    
     
         
 class mySignUpForm(UserCreationForm):
     #Just like the default user registration form, except with an email blank.
-    email = forms.EmailField(required = True)
+    email = forms.EmailField(required = True, widget=forms.TextInput(attrs={'placeholder':'email address'}))
+    
+    #Override the default HTML widgets for these inherited attributes
+    username = forms.RegexField(required = True, regex=r'^[\w.@+-]+$', widget=forms.TextInput(attrs={'placeholder':'username'}))
+    password1 = forms.CharField(required = True, widget=forms.PasswordInput(attrs={'placeholder':'password'}))
+    password2 = forms.CharField(required = True, widget=forms.PasswordInput(attrs={'placeholder':'confirm password'}))
+    
     def save(self, commit=True):
         user = super(UserCreationForm, self).save(commit = False)
         user.set_password(self.cleaned_data["password1"])
         user.email = self.cleaned_data["email"]
         if commit:
             user.save()
+            
+
+            
         return user
         
 class myAuthenticationForm(AuthenticationForm):
@@ -372,9 +385,10 @@ class UserProfile(models.Model):
     currentNameReagentProblem = models.ForeignKey(ReactionStepModel,   null=True, on_delete=models.SET_NULL)
     currentSynthesisProblem = models.ForeignKey(SynthesisProblemModel, null=True, on_delete=models.SET_NULL)
     savedReagentTypes = models.ManyToManyField(ReagentType)
-    autocompleteType = models.CharField(max_length=20, default="Reagents") #Too lazy to set up a choice field.
+    autocompleteType = models.CharField(max_length=20) #Too lazy to set up a choice field.
     accuracies = models.ManyToManyField(AccuracyModel)
-    #savedProblem = models.ForeignKey(SynthesisProblemModel)
+    correctSynths = models.SmallIntegerField(default=0)
+    assists = models.SmallIntegerField(default=0)
     
 #Auto-make a UserProfile for each user when needed
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
@@ -389,6 +403,7 @@ class ChooseReagentsForm(forms.Form):
     autocomplete = forms.ChoiceField(choices = (("Reactions", "Autocomplete reactions (Easy)"),
                                        ("Reagents", "Autocomplete reagents (Medium)"),
                                        ("None", "Autocomplete off (Hard)")))
+    needsHelp = forms.BooleanField(label="Tutorial mode", initial=False, required=False)
             
 
 

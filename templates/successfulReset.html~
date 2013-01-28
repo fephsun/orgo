@@ -5,6 +5,14 @@
 <li><a href="#contact">About / FAQs</a></li>
 {% endblock %}
 
+{% block signin %}
+<form action="/orgo/api/login/" method="post" class="navbar-form pull-right form-horizontal">{% csrf_token %}
+    {% for field in logInForm %}
+        {{field}}
+    {% endfor %}
+    <input type="submit" value="Sign in" class="btn"/>
+</form>
+{% endblock %}
 
 {% block content %}
 <div class="container">

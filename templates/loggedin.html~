@@ -10,6 +10,7 @@
 {% endblock %}
 
 {% block cssimport %}
+<title>Carbonate</title>
 <link rel="stylesheet" href="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/tufte-graph.css" type="text/css" media="screen" charset="utf-8" />
 <style>
 .tabbable {
@@ -72,16 +73,14 @@ $(document).ready(function(){
 {% endblock %}
 
 {% block menuitems %}
-<li><a href="/orgo/reactions/">Reactions</a></li>
-<li><a href="/orgo/renderSynthesis/">New synthesis</a></li>
-<li><a href="/orgo/namereagent/">New one-step problem</a></li>
-<li><a href="/orgo/logout/">Logout</a></li>
-<li><a href="#" onclick="popup()">Change Password</a></li>
+<li class="headnavbar"><a href="/orgo/reactions/">Reactions</a></li>
+<li class="headnavbar"><a href="/orgo/logout/">Logout</a></li>
+<li class="headnavbar"><a href="#" onclick="popup()">Change Password</a></li>
 {% endblock %}
 
 {% block signin %}
-<p class="navbar-text pull-right" style="color:#EEEEEE">
-Welcome, {{name}}
+<p class="headnavbar navbar-text pull-right" style="color:#EEEEEE">
+Welcome, {{name}}!
 </p>
 {% endblock %}
 
@@ -101,8 +100,8 @@ Welcome, {{name}}
     <br />
     <div class="whitebox">
     <h3>Reaction Settings</h3>
-    <span style="color:red">{{debug|safe}}</span>
     <!--Settings checkboxes-->
+        <span style="color:red" >{{debug|safe}}</span>
     <div style="position:relative; left:-178px">
         <form action = "/orgo/renderProblem/" method="post" class="form-horizontal" id="settingsForm">
         {% crispy ChooseReagentsForm ChooseReagentsForm.helper %}
@@ -115,7 +114,8 @@ Welcome, {{name}}
 <div class="span4">
     <div class="greybox">
     <h3> Synthesis Problems</h3>
-    <p> To generate the most interesting syntheses, we recommend checking all three reaction types below. </p>
+    <p> To generate the most interesting syntheses, we recommend checking all three reaction types in "Reaction Settings." </p>
+    <input type="submit" value="Tutorial" name="synthesis_tutorial" class="btn" form="settingsForm"/>
     <input type="submit" value="Resume" name="synthesis_resume" class="btn" form="settingsForm"/>
     <input type="submit" value="New" name="synthesis_new" class="btn btn-primary" form="settingsForm"/>
 
@@ -129,6 +129,7 @@ Welcome, {{name}}
 
     <div class="greybox">
     <h3> One-step Problems</h3>
+        <input type="submit" value="Tutorial" name="namereagent_tutorial" class="btn" form="settingsForm"/>
         <input type="submit" value="Resume" name="namereagent_resume" class="btn" form="settingsForm"/>
         <input type="submit" value="New" name="namereagent_new" class="btn btn-primary" form="settingsForm"/>
     </div>

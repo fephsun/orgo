@@ -13,6 +13,7 @@
 {% endblock %}
 
 {% block cssimport %}
+<title>Carbonate - One-Step Problem</title>
 <link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.css">
 <link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.css">
 <title>Reagents Practice</title>
@@ -36,9 +37,9 @@ $(document).ready(function(){
 
 {% block menuitems %}
 
-<li><a href="/orgo/reactions/">Reactions</a></li>
-<li><a href="/orgo/namereagent/">New problem</a></li>
-<li><a href="#" onclick="showAnswer()" style="padding-left:20px"> Show answer </a></li>
+<li class="headnavbar"><a href="/orgo/reactions/">Reactions</a></li>
+<li class="headnavbar"><a href="/orgo/namereagent/">New problem</a></li>
+<li class="headnavbar"><a href="#" onclick="showAnswer()" style="padding-left:20px"> Show answer </a></li>
 
 {% endblock %}
 
@@ -78,7 +79,6 @@ $(document).ready(function(){
 
 
     <div id = "bigMolecule" class="bigMolecule">
-
     </div>
 
 </div>
@@ -140,7 +140,7 @@ molecule to try again.
 
 <div class="helperPopup wave3" id="topbarH">
 <p>
-Stuck?  "Display solution" shows an answer.
+Stuck?  Click "Show answer".
 </p>
 </div>
 

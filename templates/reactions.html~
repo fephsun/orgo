@@ -10,7 +10,6 @@
 {% endblock %}
 
 {% block cssimport %}
-<title>Carbonate - Reactions</title>
 <style>
 
 div.sample {

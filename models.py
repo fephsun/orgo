@@ -402,7 +402,7 @@ class ChooseReagentsForm(forms.Form):
         self.helper.form_tag = False
         super(ChooseReagentsForm, self).__init__(*args, **kwargs)
         sortedNames = sorted(typeToReaction.items(), key=lambda thing: thing[0])
-        fieldsetOut = ['Hi', 'needsHelp', 'autocomplete']
+        fieldsetOut = ['Hi', 'autocomplete']
         for name, unused in sortedNames:
             fieldsetOut.append(name)
             self.fields[name] = forms.BooleanField(label=name, initial=True, required=False)
@@ -410,7 +410,6 @@ class ChooseReagentsForm(forms.Form):
     autocomplete = forms.ChoiceField(choices = (("Reactions", "Autocomplete reactions (Easy)"),
                                        ("Reagents", "Autocomplete reagents (Medium)"),
                                        ("None", "Autocomplete off (Hard)")), label="")
-    needsHelp = forms.BooleanField(label="Tutorial mode", initial=False, required=False)
             
 
 

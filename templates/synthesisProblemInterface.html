@@ -15,6 +15,7 @@
 {% endblock %}
 
 {% block cssimport %}
+<title>Carbonate - Synthesis Problem</title>
 <link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.css">
 <link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.css">
 <title>Synthesis Practice</title>
@@ -36,7 +37,7 @@ $(document).ready(function(){
     }
     
     onSuccess = function(){
-        $("#successbox").html("<div style=\"color:#00FF00\">SUCCESS!</div>");
+        $("#successbox").html("<div style=\"color:#00FF00\" class=\"headnavbar\">SUCCESS!</div>");
         //$("#messageArea").html("<h2 style='color:green'>Congrats!</h2> <br /> <a href='/orgo/renderSynthesis/'> Do another </a><br /><a href='/orgo/'> Back to home </a>");
         $("#reagentsHere").html("<div style=\"border-radius: 10px; padding:20px; background-color: #181818; margin-top:50px; font-color:#00FF00\"><h3 style='color:#999999'>Congrats!</h3> <br /> <a href='/orgo/renderSynthesis/'> Do another </a><br /><a href='/orgo/'> Back to home </a></div>");
         //$("#messageBox").css('display', "block");
@@ -46,11 +47,11 @@ $(document).ready(function(){
 {% endblock %}
 
 {% block menuitems %}
-<li><a href="/orgo/reactions/">Reactions</a></li>
-<li><a href="/orgo/renderSynthesis/">New synthesis</a></li>
-<li><a href="#" onclick="askForHelp()">Ask for help</a></li>
-<li><a href="#" onclick="solutionDisplay()">Display solution</a></li>
-<li><a href="#" onclick="saveProblem()">Share this problem</a></li>
+<li class="headnavbar"><a href="/orgo/reactions/">Reactions</a></li>
+<li class="headnavbar"><a href="/orgo/renderSynthesis/">New synthesis</a></li>
+<li class="headnavbar"><a href="#" onclick="askForHelp()">Ask for help</a></li>
+<li class="headnavbar"><a href="#" onclick="solutionDisplay()">Display solution</a></li>
+<li class="headnavbar"><a href="#" onclick="saveProblem()">Save this problem</a></li>
 
 {% endblock %}
 
@@ -80,7 +81,7 @@ $(document).ready(function(){
 
 
     <div id="rightbar" class="span3">
-        <h2>Target Molecule:</h2>
+        <h2>Target:</h2>
         <div id = "target">
         {{TargetMolecule|safe}}
         </div>
@@ -104,7 +105,7 @@ $(document).ready(function(){
     <div id="helpbox" class="messageWindow">
     </div>
     <input type="text" name="input" id="input"></input>
-    <button id="submit">Submit</button>
+    <button id="submit" style="margin-bottom:13px;">Submit</button>
     <div style="float:right">
         <button id="close">End chat</button>
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -160,7 +161,7 @@ connected to humans who can walk you through the problem.
 Still stuck?  "Display solution" shows an answer.
 </p>
 <p>
-If you would like a friend to see this problem, click "Share this problem" and send him/her the
+If you would like a friend to see this problem, click "Save this problem" and send him/her the
 problem ID that pops up.
 </p>
 </div>

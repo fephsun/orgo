@@ -1,10 +1,9 @@
 {% extends "base.html" %}
-{% load bootstrap %}
 
 {% block jsimport %}
 <script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"> </script>
 <script>
-setInterval(function() {
+/*setInterval(function() {
     $.ajax({
         type: "POST",
         url: "/orgo/homeMoleculeChanger/",
@@ -13,13 +12,13 @@ setInterval(function() {
             $("#molecule").html(data);
         },
     });
-}, 3000);
+}, 3000);*/
 </script>
 {% endblock %}
 
 
 {% block cssimport %}
-<title>Welcome to 5.12</title>
+<title>Carbonate</title>
 <style type="text/css">
     .flasks {
         width: 100%;
@@ -47,7 +46,7 @@ setInterval(function() {
         padding: 20px;
         background-color: #F6F6F6;
         background: rgba(225, 225, 225, 0.95);
-        height: 350px;
+        height: 320px;
     }
     
     .transparent {
@@ -61,8 +60,8 @@ setInterval(function() {
 
 
 {% block menuitems %}
-<li class="active"><a href="/orgo/">Home</a></li>
-<li><a href="/orgo/reactions/">Reactions</a></li>
+<li class="headnavbar"><a href="/orgo/reactions/">Reactions</a></li>
+<li class="headnavbar"><a href="/orgo/namereagent/">Try it!</a></li>
 {% endblock %}
 
 {% block signin %}
@@ -76,8 +75,8 @@ setInterval(function() {
 
 {% block content %}
 <div class="flasks">
-<div class="row-fluid">
-    <div class="container">
+<div class="row-fluid" >
+    <div class="container" style="width:1000px">
             <div class="span8">
             <div class="control-group" style="margin-top: 25px"></div> <!--spacing.-->
                 <h1>Ace the organic chemistry exam.</h1>
@@ -93,12 +92,12 @@ setInterval(function() {
                 
                 <div class="span4 mini-hero-unit">
                 <h2>Synthesize</h2>
-                Challenge your chemical abilities with randomly-generated synthesis problems. Add reagents, and watch as the as the synthesis unfolds to produce your target molecule. Compete to become a grandmaster of the art of synthesis.
+                Challenge your chemical abilities with <b>randomly-generated synthesis problems</b>. Add reagents, and watch as the as the synthesis unfolds to produce your target molecule. Compete to become a grandmaster of the art of synthesis.
                 </div>
                 
                 <div class="span4 mini-hero-unit">
                 <h2>Share</h2>
-                Help others out. Use your understanding of organic chemistry to help others with their synthesis problems, and earn points. Save interesting synthesis problems you discover, to show to your friends. 
+                Help others out. Use your understanding of organic chemistry to <b>help others</b> with their synthesis problems, and earn points. <b>Save</b> interesting synthesis problems you discover, to show to your friends. 
                 
                 
                 </div>
@@ -152,6 +151,27 @@ setInterval(function() {
     </div>
 </div>-->
 
+
+<div class="centerer">
+
+
+
+
+<div class="row">
+<div class="span9">
+An MIT 6.470 project by Felix Sun and Chelsea Voss. 2013.
+<br />
+Contact us: <a href="">carbonate@mit.edu</a></div>
+<div class="span1"><a href="https://www.djangoproject.com/"><img src="http://felixsun.scripts.mit.edu/orgo/static/django.png" align="middle"></img></a></div>
+<div class="span1"><a href="http://openbabel.org/wiki/Main_Page"><img src="http://felixsun.scripts.mit.edu/orgo/static/babel.png" align="middle"></img></a></div>
+<div class="span1"><a href="http://jquery.com/"><img src="http://felixsun.scripts.mit.edu/orgo/static/jquery.png" align="middle"></img></a></div>
+
+</div>
+
+<br />
+<br />
+
+</div>
 
 
 

@@ -77,6 +77,10 @@ function getQueue() {
             out = ""
             //Data contains a list of waiting users.
             nameArray = data.split(" ")
+            if (data.length == 0) {
+                //No users - display a message saying so.
+                out = "No one is looking for help right now.  Maybe someone will ask in a little while.";
+            }
             for (i=0; i<nameArray.length; i++) {
                 out += '<a href="#" onclick="connectHelpee(this.id)" id="'+nameArray[i]+'">'+nameArray[i]+'</a> <br / >'
             }
@@ -149,8 +153,10 @@ function onSuccess() {
 
 
 {% block menuitems %}
-<li><a href="/orgo/reactions/">Reactions</a></li>
-<li><a href="/orgo/logout/">Logout</a></li>
+<li class="headnavbar"><a href="/orgo/reactions/">Reactions</a></li>
+<li class="headnavbar"><a href="/orgo/renderSynthesis/">New synthesis</a></li>
+<li class="headnavbar"><a href="/orgo/namereagent/">New one-step problem</a></li>
+<li class="headnavbar"><a href="/orgo/logout/">Logout</a></li>
 {% endblock %}
 
 

@@ -162,6 +162,7 @@ def loggedInHome(request, debug = ""):
         for index, prof in enumerate(models.UserProfile.objects.order_by('-correctSynths', 'user__username')):
             if prof == profile:
                 synthHighScore += "<tr><td>"+str(index+1)+"</td><td><b>"+request.user.username+"</b></td><td>"+str(profile.correctSynths)+"</td></tr>"
+        synthHighScore += "<tr><td></td><td>...</td><td></td></tr>"
         
     #Load most helpful.
     mostHelpful = models.UserProfile.objects.order_by('-assists', 'user__username')[:5]
@@ -179,6 +180,7 @@ def loggedInHome(request, debug = ""):
         for index, prof in enumerate(models.UserProfile.objects.order_by('-assists', 'user__username')):
             if prof == profile:
                 helpHighScore += "<tr><td>"+str(index+1)+"</td><td><b>"+request.user.username+"</b></td><td>"+str(profile.assists)+"</td></tr>"
+        helpHighScore += "<tr><td></td><td>...</td><td></td></tr>"
     return render(request, 'loggedin.html', {'name': request.user.username, 
                                              'ChooseReagentsForm':models.ChooseReagentsForm(initial=initialValuesDict), 
                                              'debug': debug,
@@ -202,8 +204,6 @@ def renderOldNameReagent(request):
     profile = request.user.profile
     try:
         step = profile.currentNameReagentProblem
-        if step == None or step.done:
-            return renderNameReagent(request)
     except:
         return renderNameReagent(request)
     autocompleteType = profile.autocompleteType
@@ -222,7 +222,7 @@ def renderOldNameReagent(request):
                                                      "needsHelp": 0,})
     
 
-def renderNameReagent(request):
+def renderNameReagent(request, tutorial=False):
     try:
         profile = request.user.profile
     except:
@@ -249,7 +249,7 @@ def renderNameReagent(request):
             pass
             
            
-        modes, autocomplete, tutorial = checkboxUpdate(request, profile)
+        modes, autocomplete = checkboxUpdate(request, profile)
         if modes == []:
             #Error - at least one mode must be selected!
             return loggedInHome(request, debug = "You must pick at least one reaction type!")
@@ -298,11 +298,8 @@ def checkboxUpdate(request, profile):
                 return loggedInHome(request, debug = "An invalid autocomplete mode was picked.")
             profile.autocompleteType = autocompleteType
             profile.save()
-            
-            #Tutorial mode?
-            tutorial = checkboxes.cleaned_data["needsHelp"]
         else:
-            return ([], None, None)
+            return ([], None)
     else:
         #User clicked on "new problem"
         #Load up the user's reagent preferences.
@@ -316,9 +313,8 @@ def checkboxUpdate(request, profile):
         elif autocompleteType == "None":
             autocomplete = ""
         else:
-            return ([], None, None)
-        tutorial = False
-    return modes, autocomplete, tutorial
+            return ([], None)
+    return modes, autocomplete
 
 
     
@@ -441,8 +437,6 @@ def renderOldSynthesis(request):
     profile = request.user.profile
     try:
         synthesis = profile.currentSynthesisProblem
-        if synthesis == None or synthesis.solverCredited == True:
-            return renderSynthesis(request)
     except:
         return renderSynthesis(request)
     autocompleteType = profile.autocompleteType
@@ -469,6 +463,13 @@ def loadSynthesisFromId(request):
         synthesis = models.SynthesisProblemModel.objects.get(pk=loadId)
     except:
         return loggedInHome(request, debug="Invalid ID number.")
+
+    #We may need to unassociate this problem from the old user.
+    tempManager = synthesis.userprofile_set.all()
+    if len(tempManager) != 0:
+        oldUserP = tempManager[0]
+        oldUserP.currentSynthesisProblem = None
+        oldUserP.save()
     sCopy = forkit.tools.fork(synthesis, deep=True)
     sCopy.retain = False
     sCopy.save()
@@ -478,7 +479,7 @@ def loadSynthesisFromId(request):
     return renderOldSynthesis(request)
 
 @login_required
-def renderSynthesis(request):
+def renderSynthesis(request, tutorial = False):
     profile = request.user.profile
     try:
         profile.currentSynthesisProblem
@@ -504,7 +505,7 @@ def renderSynthesis(request):
             except:
                 pass
     
-    modes, autocomplete, tutorial = checkboxUpdate(request, profile)
+    modes, autocomplete = checkboxUpdate(request, profile)
     if modes == []:
         #Error - at least one mode must be selected!
         return loggedInHome(request, debug = "You must pick at least one reaction type!")
@@ -983,10 +984,14 @@ def renderProblem(request):
         return renderOldSynthesis(request)
     if 'synthesis_new' in request.POST:
         return renderSynthesis(request)
+    if 'synthesis_tutorial' in request.POST:
+        return renderSynthesis(request, tutorial=True)
     if 'namereagent_resume' in request.POST:
         return renderOldNameReagent(request)
     if 'namereagent_new' in request.POST:
         return renderNameReagent(request)
+    if 'namereagent_tutorial' in request.POST:
+        return renderNameReagent(request, tutorial=True)
     else:
         return renderSynthesis(request)
     

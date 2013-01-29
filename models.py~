@@ -277,7 +277,7 @@ class ReactionStepModel(models.Model):
 
     
 class myPasswordResetForm(PasswordResetForm):
-    email = forms.EmailField(required = True, widget=forms.TextInput(attrs={'placeholder':'email address'}))
+    email = forms.EmailField(required = True, widget=forms.TextInput(attrs={'placeholder':'email address', 'size':'2'}))
     
     
         
@@ -409,7 +409,7 @@ class ChooseReagentsForm(forms.Form):
         self.helper.layout = Layout(Fieldset(*fieldsetOut))  #The * means "turn list into arguments"
     autocomplete = forms.ChoiceField(choices = (("Reactions", "Autocomplete reactions (Easy)"),
                                        ("Reagents", "Autocomplete reagents (Medium)"),
-                                       ("None", "Autocomplete off (Hard)")), widget=forms.Select())
+                                       ("None", "Autocomplete off (Hard)")), label="")
     needsHelp = forms.BooleanField(label="Tutorial mode", initial=False, required=False)
             
 

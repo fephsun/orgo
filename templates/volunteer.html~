@@ -132,16 +132,27 @@ function update(data) {
     for (i=0; i<jsonObject['length']; i++) {
         $("#helperChatbox").append(jsonObject[i] + "<br / >");
     }
+    //Scroll to bottom.
+    if (jsonObject['length'] != 0) {
+        $("#helperChatbox").scrollTop($("#helperChatbox").prop("scrollHeight")-$("#helperChatbox").height());
+    }
 }
 
 function onSuccess() {
     $("#successbox").html("<div style=\"color:#00FF00\">SUCCESS!</div>");
-    $("#messageArea").html("<h2 style='color:green'>Thank you!</h2> <br / > <a href='/orgo/renderSynthesis/orgo/chat/volunteertohelp/'> Help more people  </a><br / ><a href='/orgo/'> Back to home </a>");
+    $("#messageArea").html("<h2 style='color:green'>Thank you!</h2> <br / > <a href='/orgo/chat/volunteertohelp/'> Help more people  </a><br / ><a href='/orgo/'> Back to home </a>");
     $("#messageBox").css('display', "block");
 }
 
 </script>
 {% endblock %}
+
+
+{% block menuitems %}
+<li><a href="/orgo/reactions/">Reactions</a></li>
+<li><a href="/orgo/logout/">Logout</a></li>
+{% endblock %}
+
 
 
 {% block content %}

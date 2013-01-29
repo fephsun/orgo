@@ -1,10 +1,9 @@
 {% extends "base.html" %}
-{% load bootstrap %}
 
 {% block jsimport %}
 <script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"> </script>
 <script>
-setInterval(function() {
+/*setInterval(function() {
     $.ajax({
         type: "POST",
         url: "/orgo/homeMoleculeChanger/",
@@ -13,7 +12,7 @@ setInterval(function() {
             $("#molecule").html(data);
         },
     });
-}, 3000);
+}, 3000);*/
 </script>
 {% endblock %}
 
@@ -61,9 +60,8 @@ setInterval(function() {
 
 
 {% block menuitems %}
-<li class="active"><a href="/orgo/">Home</a></li>
-<li><a href="faq">FAQs</a></li>
-<li><a href="reactions">Reactions</a></li>
+<li><a href="/orgo/reactions/">Reactions</a></li>
+<li><a href="/orgo/namereagent/">Try it!</a></li>
 {% endblock %}
 
 {% block signin %}
@@ -81,7 +79,7 @@ setInterval(function() {
     <div class="container">
             <div class="span8">
             <div class="control-group" style="margin-top: 25px"></div> <!--spacing.-->
-                <h1>Ace the organic chemistry exam.</h1>
+                <h1>&nbsp&nbsp&nbsp&nbspAce the organic chemistry exam.</h1>
                 <div class="control-group" style="margin-top: 25px"></div>
                 <div class="row">
                 <div class="span4 mini-hero-unit">
@@ -153,6 +151,27 @@ setInterval(function() {
     </div>
 </div>-->
 
+
+<div class="centerer">
+
+
+
+
+<div class="row">
+<div class="span9">
+An MIT 6.470 project by Felix Sun and Chelsea Voss. 2013.
+<br />
+Contact us: <a href="">carbonate@mit.edu</a></div>
+<div class="span1"><a href="https://www.djangoproject.com/"><img src="http://felixsun.scripts.mit.edu/orgo/static/django.png" align="middle"></img></a></div>
+<div class="span1"><a href="http://openbabel.org/wiki/Main_Page"><img src="http://felixsun.scripts.mit.edu/orgo/static/babel.png" align="middle"></img></a></div>
+<div class="span1"><a href="http://jquery.com/"><img src="http://felixsun.scripts.mit.edu/orgo/static/jquery.png" align="middle"></img></a></div>
+
+</div>
+
+<br />
+<br />
+
+</div>
 
 
 

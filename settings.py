@@ -143,7 +143,7 @@ INSTALLED_APPS = (
     'django.contrib.admindocs',
     'orgo',
     'forkit',
-    'bootstrapform',
+    'crispy_forms',
 )
 
 EMAIL_USE_TLS = True

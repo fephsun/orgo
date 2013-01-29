@@ -25,7 +25,6 @@ urlpatterns = patterns('',
     url(r'^chat/helpeepoll/$', 'orgo.views.helpeeWaitPoll', name='helpeeWaitPoll'),
     url(r'^chat/askforhelp/$', 'orgo.views.askForHelp', name='askForHelp'),
     url(r'^chat/volunteertohelp/$', 'orgo.views.volunteerToHelp', name='volunteerToHelp'),
-    url(r'^chat/helpeestatictest/$', 'orgo.views.helpeeStaticTest', name='helpeeStaticTest'), #This is temporary
     url(r'^chat/helpeechatpoll/$', 'orgo.views.helpeeChatPoll', name='helpeeChatPoll'),
     url(r'^chat/helperchatpoll/$', 'orgo.views.helperChatPoll', name='helperChatPoll'),
     

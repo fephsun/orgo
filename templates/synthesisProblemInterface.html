@@ -17,7 +17,7 @@
 {% block cssimport %}
 <link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.min.css">
 <link rel="stylesheet" type="text/css" href="http://felixsun.scripts.mit.edu/orgo/static/jquery-ui-1.10.0.custom.css">
-<title>5.12 Synthesis Practice</title>
+<title>Synthesis Practice</title>
 <link rel="stylesheet" type="text/css" href = "http://felixsun.scripts.mit.edu/orgo/static/problemInterface.css"  />
 {% endblock %}
 
@@ -46,13 +46,11 @@ $(document).ready(function(){
 {% endblock %}
 
 {% block menuitems %}
-<li><a href="/orgo/renderSynthesis/"> New problem </a></li>
-
-<li><a href="#" onclick="solutionDisplay()"> Display solution </a></li>
-
-<li><a href="#" onclick="askForHelp()"> Ask for help </a></li>
-
-<li><a href="#" onclick="saveProblem()"> Share this problem </a></li>
+<li><a href="/orgo/reactions/">Reactions</a></li>
+<li><a href="/orgo/renderSynthesis/">New synthesis</a></li>
+<li><a href="#" onclick="askForHelp()">Ask for help</a></li>
+<li><a href="#" onclick="solutionDisplay()">Display solution</a></li>
+<li><a href="#" onclick="saveProblem()">Share this problem</a></li>
 
 {% endblock %}
 

@@ -3,6 +3,8 @@ from django.db import models
 import orgo.engine.orgoStructure as orgoStructure
 from orgo.engine.synthProblem import *
 import cPickle
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Fieldset
 import django.forms as forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm
@@ -275,7 +277,7 @@ class ReactionStepModel(models.Model):
 
     
 class myPasswordResetForm(PasswordResetForm):
-    email = forms.EmailField(required = True, widget=forms.TextInput(attrs={'placeholder':'email address'}))
+    email = forms.EmailField(required = True, widget=forms.TextInput(attrs={'placeholder':'email address', 'size':'2'}))
     
     
         
@@ -396,13 +398,18 @@ User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
 
 class ChooseReagentsForm(forms.Form):
     def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()  #For crispy-forms
+        self.helper.form_tag = False
         super(ChooseReagentsForm, self).__init__(*args, **kwargs)
         sortedNames = sorted(typeToReaction.items(), key=lambda thing: thing[0])
+        fieldsetOut = ['Hi', 'needsHelp', 'autocomplete']
         for name, unused in sortedNames:
+            fieldsetOut.append(name)
             self.fields[name] = forms.BooleanField(label=name, initial=True, required=False)
+        self.helper.layout = Layout(Fieldset(*fieldsetOut))  #The * means "turn list into arguments"
     autocomplete = forms.ChoiceField(choices = (("Reactions", "Autocomplete reactions (Easy)"),
                                        ("Reagents", "Autocomplete reagents (Medium)"),
-                                       ("None", "Autocomplete off (Hard)")))
+                                       ("None", "Autocomplete off (Hard)")), label="")
     needsHelp = forms.BooleanField(label="Tutorial mode", initial=False, required=False)
             
 

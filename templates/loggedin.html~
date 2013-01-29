@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load orgo_filters %}
-{% load bootstrap %}
+{% load crispy_forms_tags %}
 
 {% block jsimport %}
 <script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"> </script>
@@ -29,8 +29,20 @@
 div.whitebox {
     background-color:white;
     border-radius: 10px;
-    margin:10px;
     padding:20px;
+    padding-top:10px;
+    padding-bottom:10px;
+    left:-30px;
+}
+
+div.greybox {
+    background-color:transparent;
+    padding:20px;
+    left:-30px;
+}
+
+legend {
+    display: none;
 }
 
 </style>
@@ -60,8 +72,9 @@ $(document).ready(function(){
 {% endblock %}
 
 {% block menuitems %}
-<li class="active"><a href="/orgo/">Home</a></li>
-<li><a href="#contact">About / FAQs</a></li>
+<li><a href="/orgo/reactions/">Reactions</a></li>
+<li><a href="/orgo/renderSynthesis/">New synthesis</a></li>
+<li><a href="/orgo/namereagent/">New one-step problem</a></li>
 <li><a href="/orgo/logout/">Logout</a></li>
 <li><a href="#" onclick="popup()">Change Password</a></li>
 {% endblock %}
@@ -78,52 +91,53 @@ Welcome, {{name}}
 <div class="row">
 
 <div class="span4">
-    <div class="whitebox" style="position:relative; left:-20px">
+    <div class="whitebox">
         <h3>Help Others</h3>
         <p>
         Think you're good at organic chemistry?  <a href="/orgo/chat/volunteertohelp"> Other users need your help! </a>
         Guide them through synthesis problems and make your way up the leaderboard!
         </p>
     </div>
-    <h3>Your Accuracy</h3>
-    <p> One-step problems only </p>
-    <div id="plottything" class="graph" style="width:250px; height:300px">
-    </div>
+    <br />
+    <div class="whitebox">
+    <h3>Reaction Settings</h3>
+    <span style="color:red">{{debug|safe}}</span>
+    <!--Settings checkboxes-->
+    <div style="position:relative; left:-178px">
+        <form action = "/orgo/renderProblem/" method="post" class="form-horizontal" id="settingsForm">
+        {% crispy ChooseReagentsForm ChooseReagentsForm.helper %}
+        </form>
+    </div></div>
+    
     
 
 </div>
 <div class="span4">
-    <h3> One-step Problems</h3>
-    <!--<form action = "/orgo/namereagent/resume/" method="post" class="form-horizontal">{% csrf_token %}-->
-        <input type="submit" value="Resume old" name="namereagent_resume" class="btn" form="settingsForm"/>
-    <!--</form>-->
-    <!--<form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}-->
-        <input type="submit" value="Generate new" name="namereagent_new" class="btn" form="settingsForm"/>
-    <!--</form>-->
-
+    <div class="greybox">
     <h3> Synthesis Problems</h3>
-    <!--<form action = "/orgo/renderSynthesis/resume/" method="post" class="form-horizontal">{% csrf_token %}-->
-        <input type="submit" value="Resume old" name="synthesis_resume" class="btn" form="settingsForm"/>
-    <!--</form>-->
-    <!--<form action = "/orgo/renderSynthesis/" method="post" class="form-horizontal">{% csrf_token %}-->
-        <input type="submit" value="Generate new" name="synthesis_new" class="btn" form="settingsForm"/>
-    <!--</form>-->
+    <p> To generate the most interesting syntheses, we recommend checking all three reaction types below. </p>
+    <input type="submit" value="Resume" name="synthesis_resume" class="btn" form="settingsForm"/>
+    <input type="submit" value="New" name="synthesis_new" class="btn btn-primary" form="settingsForm"/>
 
-    <h4> Load Saved</h4>
+    <h6> Load Saved </h6>
     <!--Problem loader-->
     <form action = "/orgo/loadSynthesisFromId/" method="post" class="form-horizontal">{% csrf_token %}
         <input type="text" placeholder="enter problem ID" name="Id">
         <input type="submit" value="Go" class="btn"/>
     </form>
-       
-       
-       
-    <h3>Reaction Settings</h3>
-    <!--Settings checkboxes-->
-    <div style="position:relative; left:-72px">
-        <form action = "/orgo/renderProblem/" method="post" class="form-horizontal" id="settingsForm">{% csrf_token %}
-        {{ ChooseReagentsForm|bootstrap }}
-        </form>
+    </div>
+
+    <div class="greybox">
+    <h3> One-step Problems</h3>
+        <input type="submit" value="Resume" name="namereagent_resume" class="btn" form="settingsForm"/>
+        <input type="submit" value="New" name="namereagent_new" class="btn btn-primary" form="settingsForm"/>
+    </div>
+    <br />
+    <div class="greybox">
+    <h3>Your Accuracy</h3>
+    <p> One-step problems only </p>
+    <div id="plottything" class="graph" style="width:250px; height:300px">
+    </div>
     </div>
 
 </div>
@@ -198,7 +212,6 @@ Welcome, {{name}}
     </div>
 
 </div>-->
-{{debug|safe}}
 <div id="popup">
     <h3> Change Password </h3>
     <form action = "/orgo/api/changePW/" method="post" class="form-horizontal">{% csrf_token %}

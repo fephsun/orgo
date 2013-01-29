@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load orgo_filters %}
-{% load bootstrap %}
 
 {% block jsimport %}
 <script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"> </script>
@@ -27,10 +26,17 @@ div.samples {
 }
 
 div.listedItem {
-    margin: 50px;
     border-radius: 10px;
     background-color: #E0E0E0;
     padding: 20px;
+}
+body { 
+    padding-top: 65px; 
+    position: relative;
+}
+
+div.spacer {
+    padding-top:65px;
 }
 
 </style>
@@ -39,15 +45,20 @@ div.listedItem {
 {% block scripts %}
 <script>
 
+$("document").ready(function() {
+    $("div.listedItem").each(function(x,y) {
+        $("#putLinksHere").append(
+            "<li><a href=\"#" + x + "\"><i class=\"icon-chevron-right\"></i> " + ($("h2", $(y)).html()) + "</a></li>"
+        );
+    });
+});
 
 </script>
 {% endblock %}
 
 {% block menuitems %}
-<li class="active"><a href="/orgo/">Home</a></li>
-<li><a href="faq">FAQs</a></li>
-<li><a href="reactions">Reactions</a></li>
-<li><a href="/orgo/logout/">Logout</a></li>
+<li class="active"><a href="/orgo/reactions/">Reactions</a></li>
+<li><a href="/orgo/namereagent/">Try it!</a></li>
 {% endblock %}
 
 {% block signin %}
@@ -65,17 +76,25 @@ Welcome, {{name}}
 <!--Fancy header here.-->
 
 <!--Linkful sidebar, too.-->
+<div class="span3 bs-docs-sidebar"  data-offset-top="200"> 
+    <ul class="well nav nav-list bs-docs-sidenav" id="putLinksHere" data-target=".bs-docs-sidebar" data-spy="affix">
+          <li class="nav-header">Reactions</li>
+    </ul>
+</div>
 
+      
+<div class="span9 container">
+<h1>Reactions</h1>
 
 <p>Supported reactions are currently limited to <b>Unit 1</b> and <b>Unit 2</b> of <b><a href="http://ocw.mit.edu/courses/chemistry/5-12-organic-chemistry-i-spring-2003/index.htm">MIT 5.12</a></b>.</p>
-<br />
 
 
-<h1>Reactions</h1>
+
 <div id="reactions">
+<div class="spacer" id="0">
 <div class="listedItem">
 <h2>Hydrogenation</h2>
-<i><h4>H<sub>2</sub> cat. Pd|C in ethanol</h4></i>
+<i><h4>H<sub>2</sub> cat. Pd/C in ethanol</h4></i>
 <p><b>Regiochemistry:</b> None</p>
 <p><b>Stereochemistry:</b> Syn addition</p>
 <p>Alkenes and alkynes are candidates for this reaction. Pd|C refers to palladium on carbon, a catalyst used in hydrogenation reactions. This reaction 
@@ -130,10 +149,11 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
 
-
+<div class="spacer" id="1">
 <div class="listedItem">
 <h2>Hydrohalogenation</h2>
 <i><h4>HX in CH<sub>2</sub>Cl<sub>2</sub> (either 1 equiv. or excess)</h4></i>
@@ -194,10 +214,10 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
-
-
+<div class="spacer" id="2">
 <div class="listedItem">
 <h2>Halogenation</h2>
 <i><h4>X<sub>2</sub> in CH<sub>2</sub>Cl<sub>2</sub></h4></i>
@@ -230,7 +250,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow">Br<sub>2</sub> in CH<sub>2</sub>Cl<sub>2<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">Br<sub>2</sub> in CH<sub>2</sub>Cl<sub>2</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -283,9 +303,10 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
-
+<div class="spacer" id="3">
 <div class="listedItem">
 <h2>Free-Radical Hydrohalogenation</h2>
 <i><h4>HBr cat. peroxide, with heat or light</h4></i>
@@ -343,10 +364,10 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
-
-
+<div class="spacer" id="4">
 <div class="listedItem">
 <h2>Epoxidation</h2>
 <i><h4>mCPBA or RCO<sub>3</sub>H, in CH<sub>2</sub>Cl<sub>2</sub></h4></i>
@@ -379,7 +400,7 @@ x="10.000000" y="20.000000" ></text>
 </svg>
 
 </div>
-<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">mCPBA in CH<sub>2</sub>Cl<sub>2</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -431,10 +452,10 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
-
-
+<div class="spacer" id="5">
 <div class="listedItem">
 <h2>Tert-butoxide Elimination</h2>
 <i><h4>KOC(CH<sub>3</sub>)<sub>3</sub></h4></i>
@@ -461,7 +482,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">Tert-butoxide in DMSO<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -483,12 +504,12 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
-
-
+<div class="spacer" id="6">
 <div class="listedItem">
-<h2>Acid-catalyzed Hydration of Alkenes</h2>
+<h2>Hydration of Alkenes</h2>
 <i><h4>H<sub>2</sub>SO<sub>4</sub> in H<sub>2</sub>O; or H<sub>2</sub>SO<sub>4</sub> in ROH</h4></i>
 <p><b>Regiochemistry:</b> Oxygen is attached to the more substituted carbon</p>
 <p><b>Stereochemistry:</b> None (neither syn nor anti)</p>
@@ -518,7 +539,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">H<sub>2</sub>SO<sub>4</sub> in H<sub>2</sub>O<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -565,7 +586,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">H<sub>2</sub>SO<sub>4</sub> in ethanol<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -595,9 +616,10 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
-
+<div class="spacer" id="7">
 <div class="listedItem">
 <h2>Hydration of Alkynes</h2>
 <i><h4>H<sub>2</sub>SO<sub>4</sub> in H<sub>2</sub>O, HgSO<sub>4</sub> accels; or H<sub>2</sub>SO<sub>4</sub> in ROH, HgSO<sub>4</sub> accels</h4></i>
@@ -629,7 +651,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">H<sub>2</sub>SO<sub>4</sub> in H<sub>2</sub>O, HgSO<sub>4</sub> accels.<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -653,10 +675,10 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
-
-
+<div class="spacer" id="8">
 <div class="listedItem">
 <h2>Halohydration</h2>
 <i><h4>X<sub>2</sub> in H<sub>2</sub>O, or X<sub>2</sub> in ROH</h4></i>
@@ -687,7 +709,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">Br<sub>2</sub> in H<sub>2</sub>O<br/><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -740,10 +762,10 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
-
-
+<div class="spacer" id="9">
 <div class="listedItem">
 <h2>Hydroboration-Oxidation</h2>
 <p><b>Regiochemistry:</b> -OH is attached to less substituted carbon</p>
@@ -779,7 +801,7 @@ x="10.000000" y="20.000000" ></text>
 </svg>
 
 </div>
-<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">BH<sub>3</sub> in THF<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -831,7 +853,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">NaOH and H<sub>2</sub>O<sub>2</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -883,9 +905,10 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
-
+<div class="spacer" id="10">
 <div class="listedItem">
 <h2>Dihydroxylation</h2>
 <i><h4>cat. OsO<sub>4</sub>, NMO, acetone or H<sub>2</sub>O</h4></i>
@@ -917,7 +940,7 @@ x="10.000000" y="20.000000" ></text>
 </svg>
 
 </div>
-<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">cat. OsO<sub>4</sub>, NMO, in acetone<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -969,9 +992,10 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
-
+<div class="spacer" id="11">
 <div class="listedItem">
 <h2>Ozonolysis</h2>
 <i><h4>O<sub>3</sub> with Me<sub>2</sub>S or Zn, in CH<sub>2</sub>Cl<sub>2</sub></h4></i>
@@ -1002,7 +1026,7 @@ x="10.000000" y="20.000000" ></text>
 <title> - OBDepict</title>
 </svg>
 </div>
-<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">O<sub>3</sub> with Me<sub>2</sub>S, in CH<sub>2</sub>Cl<sub>2</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -1030,9 +1054,10 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
-
+<div class="spacer" id="12">
 <div class="listedItem">
 <h2>Lindlar Reduction</h2>
 <i><h4>H<sub>2</sub> cat. Lindlar</h4></i>
@@ -1065,7 +1090,7 @@ x="10.000000" y="20.000000" ></text>
 </svg>
 
 </div>
-<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">H<sub>2</sub> cat. Lindlar<br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -1088,9 +1113,10 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
-
+<div class="spacer" id="13">
 <div class="listedItem">
 <h2>Sodium-Ammonia Reduction</h2>
 <i><h4>Na, in NH<sub>3 (L)</sub></h4></i>
@@ -1123,7 +1149,7 @@ x="10.000000" y="20.000000" ></text>
 </svg>
 
 </div>
-<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">Na, in NH<sub>3 (L)</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -1146,9 +1172,10 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
-
+<div class="spacer" id="14">
 <div class="listedItem">
 <h2>Forming an Acetylide</h2>
 <i><h4>NaNH<sub>2</sub> in NH<sub>3</sub></h4></i>
@@ -1177,7 +1204,7 @@ x="10.000000" y="20.000000" ></text>
 </svg>
 
 </div>
-<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample arrow">NaNH<sub>2</sub> in NH<sub>3</sub><br /><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
 <div class="sample">
 <!--SVG here-->
 <?xml version="1.0"?>
@@ -1200,12 +1227,13 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
-
+<div class="spacer" id="15">
 <div class="listedItem">
 <h2>Acetylide Addition</h2>
-<i><h4></h4></i>
+<i><h4>(no reagents needed)</h4></i>
 <p><b>Regiochemistry:</b> None</p>
 <p><b>Stereochemistry:</b> None</p>
 <p>Acetylides, once formed, can be used to form carbon-carbon bonds. The nucleophilic acetylide displaces a leaving group such as chloride or iodide in a substitution reaction, if the leaving group is attached to a primary alkyl group. A molecule of the form R-CH<sub>2</sub>-Br will suffice. </p>
@@ -1260,11 +1288,13 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
+</div>
 
 
-
+<div class="spacer" id="16">
 <div class="listedItem">
 <h2>Tautomerization</h2>
+<i><h4>(no reagents needed)</h4></i>
 <p>Not so much a reaction, as more of an automatic process. Hydroxyl groups attached to double bonds (<i>enols</i>) will tautomerize, resulting in a ketone or an aldehyde.</p>
 <p><i>Read more: <a href="http://en.wikipedia.org/wiki/Keto-enol_tautomerism">enol tautomerization</a>, <a href="http://en.wikipedia.org/wiki/Tautomer">tautomers</a></i></p>
 
@@ -1322,13 +1352,12 @@ x="10.000000" y="20.000000" ></text>
 </div>
 </div>
 </div>
-
+</div>
+<div class="spacer"></div>
 
 </div>
 
-</div>
-
-
+<!--
 <h1>Terminology</h1>
 <div id="terminology">
 <h4>Regiochemistry</h4>
@@ -1345,7 +1374,9 @@ x="10.000000" y="20.000000" ></text>
 <h4>Hydroxyl</h4>
 <h4>Carbonyl</h4>
 </div>
+-->
 
+</div>
 {% endblock %}
 
 

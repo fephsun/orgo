@@ -74,6 +74,7 @@ def resetPW(request):
             return home(request, debug = "The email you entered does not correspond to any user.")
         password = User.objects.make_random_password()
         user.set_password(password)
+        user.save()
         subject = "Orgo - your new password"
         body = 'Hello '+user.username+''',
 Here is your new password: ''' + password + '''
@@ -144,12 +145,47 @@ def loggedInHome(request, debug = ""):
         else:
             graphList.append([1.0*accuracyObj.correct/accuracyObj.total, name, accuracyObj.correct, accuracyObj.total])
     graphList.sort(key=lambda item: item[1])
-
+    
+    #Load high scores.
+    bestUsers = models.UserProfile.objects.order_by('-correctSynths', 'user__username')[:5]
+    synthHighScore = ""
+    for i in xrange(min(5, len(bestUsers))):
+        prof = bestUsers[i]
+        if prof==profile:
+            synthHighScore += "<tr><td>"+str(i+1)+"</td><td><b>"+prof.user.username+"</b></td><td>"+str(prof.correctSynths)+"</td></tr>"
+        else:
+            synthHighScore += "<tr><td>"+str(i+1)+"</td><td>"+prof.user.username+"</td><td>"+str(prof.correctSynths)+"</td></tr>"
+    if request.user.profile not in bestUsers:
+        #Insert a gap in the table
+        synthHighScore += "<tr><td></td><td>...</td><td></td></tr>"
+        #Find rank of user.
+        for index, prof in enumerate(models.UserProfile.objects.order_by('-correctSynths', 'user__username')):
+            if prof == profile:
+                synthHighScore += "<tr><td>"+str(index+1)+"</td><td><b>"+request.user.username+"</b></td><td>"+str(profile.correctSynths)+"</td></tr>"
+        
+    #Load most helpful.
+    mostHelpful = models.UserProfile.objects.order_by('-assists', 'user__username')[:5]
+    helpHighScore = ""
+    for i in xrange(min(5, len(mostHelpful))):
+        prof = mostHelpful[i]
+        if prof==profile:
+            helpHighScore += "<tr><td>"+str(i+1)+"</td><td><b>"+prof.user.username+"</b></td><td>"+str(prof.assists)+"</td></tr>"
+        else:
+            helpHighScore += "<tr><td>"+str(i+1)+"</td><td>"+prof.user.username+"</td><td>"+str(prof.assists)+"</td></tr>"
+    if request.user.profile not in mostHelpful:
+        #Insert a gap in the table
+        helpHighScore += "<tr><td></td><td>...</td><td></td></tr>"
+        #Find rank of user.
+        for index, prof in enumerate(models.UserProfile.objects.order_by('-assists', 'user__username')):
+            if prof == profile:
+                helpHighScore += "<tr><td>"+str(index+1)+"</td><td><b>"+request.user.username+"</b></td><td>"+str(profile.assists)+"</td></tr>"
     return render(request, 'loggedin.html', {'name': request.user.username, 
                                              'ChooseReagentsForm':models.ChooseReagentsForm(initial=initialValuesDict), 
                                              'debug': debug,
                                              'graphData': graphList,
-                                             'changePW': PasswordChangeForm(request.user)})
+                                             'changePW': PasswordChangeForm(request.user),
+                                             'synthHighScore': synthHighScore,
+                                             'helpHighScore': helpHighScore})
     
 ###Can delete; this is me learning Django
 def renderSmiles(request, molecule):
@@ -164,8 +200,11 @@ reactionAutocomplete='''['H2SO4 H2O HgSO4 ','H2 PdC EtOH ','HBr CH2Cl2 ','HF CH2
 @login_required    
 def renderOldNameReagent(request):
     profile = request.user.profile
-    step = profile.currentNameReagentProblem
-    if step == None:
+    try:
+        step = profile.currentNameReagentProblem
+        if step == None or step.done:
+            return renderNameReagent(request)
+    except:
         return renderNameReagent(request)
     autocompleteType = profile.autocompleteType
     if autocompleteType == "Reactions":
@@ -193,7 +232,11 @@ def renderNameReagent(request):
         step.save()
         request.session['problem'] = step
         autocomplete = reactionAutocomplete
-        tutorial = True
+        if 'tutorial' in request.session:
+            tutorial = False
+        else:
+            tutorial = True
+            request.session['tutorial'] = True
     else:
         #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
         try:
@@ -259,7 +302,7 @@ def checkboxUpdate(request, profile):
             #Tutorial mode?
             tutorial = checkboxes.cleaned_data["needsHelp"]
         else:
-            return loggedInHome(request, debug = "Invalid checkbox submission")
+            return ([], None, None)
     else:
         #User clicked on "new problem"
         #Load up the user's reagent preferences.
@@ -396,8 +439,11 @@ def makeReagentHtml(request):
 @login_required
 def renderOldSynthesis(request):
     profile = request.user.profile
-    synthesis = profile.currentSynthesisProblem
-    if synthesis == None:
+    try:
+        synthesis = profile.currentSynthesisProblem
+        if synthesis == None or synthesis.solverCredited == True:
+            return renderSynthesis(request)
+    except:
         return renderSynthesis(request)
     autocompleteType = profile.autocompleteType
     if autocompleteType == "Reactions":
@@ -419,7 +465,10 @@ def loadSynthesisFromId(request):
         #This should never happen.
         return
     loadId = request.POST['Id']
-    synthesis = models.SynthesisProblemModel.objects.get(pk=loadId)
+    try:
+        synthesis = models.SynthesisProblemModel.objects.get(pk=loadId)
+    except:
+        return loggedInHome(request, debug="Invalid ID number.")
     sCopy = forkit.tools.fork(synthesis, deep=True)
     sCopy.retain = False
     sCopy.save()
@@ -431,23 +480,29 @@ def loadSynthesisFromId(request):
 @login_required
 def renderSynthesis(request):
     profile = request.user.profile
-    #If the retain attribute is True, don't delete.
-    if profile.currentSynthesisProblem == None or not(profile.currentSynthesisProblem.retain):
-        #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
-        try:
-            for arrowModel in profile.currentSynthesisProblem.arrows.all():
-                arrowModel.delete()
-            for moleculeModel in profile.currentSynthesisProblem.molecules.all():
-                moleculeModel.delete()
-            for arrowModel in profile.currentSynthesisProblem.solution.arrows.all():
-                arrowModel.delete()
-            for moleculeModel in profile.currentSynthesisProblem.solution.molecules.all():
-                moleculeModel.delete()
-            profile.currentSynthesisProblem.solution.delete()
-            profile.currentSynthesisProblem.target.delete()
-            profile.currentSynthesisProblem.delete()
-        except:
-            pass
+    try:
+        profile.currentSynthesisProblem
+    except:
+        #Oops, accidentally deleted it.
+        pass
+    else:
+        #If the retain attribute is True, don't delete.
+        if profile.currentSynthesisProblem == None or not(profile.currentSynthesisProblem.retain):
+            #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
+            try:
+                for arrowModel in profile.currentSynthesisProblem.arrows.all():
+                    arrowModel.delete()
+                for moleculeModel in profile.currentSynthesisProblem.molecules.all():
+                    moleculeModel.delete()
+                for arrowModel in profile.currentSynthesisProblem.solution.arrows.all():
+                    arrowModel.delete()
+                for moleculeModel in profile.currentSynthesisProblem.solution.molecules.all():
+                    moleculeModel.delete()
+                profile.currentSynthesisProblem.solution.delete()
+                profile.currentSynthesisProblem.target.delete()
+                profile.currentSynthesisProblem.delete()
+            except:
+                pass
     
     modes, autocomplete, tutorial = checkboxUpdate(request, profile)
     if modes == []:
@@ -502,6 +557,13 @@ def getSynthesisData(request, synthesis=None):
         responseData["molecules"] = moleculesOutput
         responseData["arrows"] = arrowsOutput
         if mode == "Send to browser":
+            #Increment score if solved.
+            if responseData["success"] and not synthesis.solverCredited:
+                profile = request.user.profile
+                profile.correctSynths += 1
+                profile.save()
+                synthesis.solverCredited = True
+                synthesis.save()
             return HttpResponse(json.dumps(responseData))
         elif mode == "Return dictionary":
             return responseData
@@ -864,7 +926,8 @@ def helperChatPoll(request):
     pk = int(request.POST['PK'])
 
     chat = models.ChatPair.objects.get(pk=pk)
-    out = getSynthesisData(None, synthesis=chat.helpee.profile.currentSynthesisProblem)
+    synthesis = chat.helpee.profile.currentSynthesisProblem
+    out = getSynthesisData(None, synthesis)
     if 'message' in request.POST:
         #A new message was sent.  Add it to the ChatPair.
         msg = escape(request.POST['message'])
@@ -883,6 +946,7 @@ def helperChatPoll(request):
         models.ChatPair.delete(chat)
         return HttpResponse(json.dumps(out))
     out['open'] = True
+    #Send all the new chat lines.
     newLines = list(chat.chatRecord.filter(helperSeen = False))
     newLines.sort(key=lambda x: x.postTime)
     out['length'] = len(newLines)
@@ -890,6 +954,13 @@ def helperChatPoll(request):
         out[i] = newLines[i].originator.username+ ": " + newLines[i].content
         newLines[i].helperSeen = True
         newLines[i].save()
+    #If the synthesis was just solved, give the helper credit
+    if out["success"] and not synthesis.helperCredited:
+        profile = request.user.profile
+        profile.assists += 1
+        profile.save()
+        synthesis.helperCredited = True
+        synthesis.save()
     return HttpResponse(json.dumps(out))
   except  BaseException as e:
     return HttpResponse(str(e))
@@ -906,5 +977,25 @@ def saveProblem(request):
     
     
     
+@csrf_exempt 
+def renderProblem(request):
+    if 'synthesis_resume' in request.POST:
+        return renderOldSynthesis(request)
+    if 'synthesis_new' in request.POST:
+        return renderSynthesis(request)
+    if 'namereagent_resume' in request.POST:
+        return renderOldNameReagent(request)
+    if 'namereagent_new' in request.POST:
+        return renderNameReagent(request)
+    else:
+        return renderSynthesis(request)
     
+    
+    
+@csrf_exempt
+def renderFaq(request):
+    return render(request, 'faq.html', {'name': request.user.username})
 
+@csrf_exempt
+def renderReactions(request):
+    return render(request, 'reactions.html', {'name': request.user.username})

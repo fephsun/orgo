@@ -3,6 +3,8 @@ from django.db import models
 import orgo.engine.orgoStructure as orgoStructure
 from orgo.engine.synthProblem import *
 import cPickle
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Fieldset
 import django.forms as forms
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm
@@ -164,6 +166,8 @@ class SynthesisProblemModel(models.Model):
     arrows = models.ManyToManyField(ArrowModel, related_name="spArrows")
     target = models.ForeignKey(MoleculeBoxModel, null=True, related_name="spTarget")
     retain = models.BooleanField()  #If true, this molecule is never deleted.
+    solverCredited = models.BooleanField(default=False)
+    helperCredited = models.BooleanField(default=False)
 
     
     #reactionSteps is a list of reactionsteps; the final one contains the target molecule.
@@ -385,6 +389,8 @@ class UserProfile(models.Model):
     savedReagentTypes = models.ManyToManyField(ReagentType)
     autocompleteType = models.CharField(max_length=20) #Too lazy to set up a choice field.
     accuracies = models.ManyToManyField(AccuracyModel)
+    correctSynths = models.SmallIntegerField(default=0)
+    assists = models.SmallIntegerField(default=0)
     
 #Auto-make a UserProfile for each user when needed
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
@@ -392,14 +398,19 @@ User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
 
 class ChooseReagentsForm(forms.Form):
     def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()  #For crispy-forms
+        self.helper.form_tag = False
         super(ChooseReagentsForm, self).__init__(*args, **kwargs)
         sortedNames = sorted(typeToReaction.items(), key=lambda thing: thing[0])
+        fieldsetOut = ['Hi', 'needsHelp', 'autocomplete']
         for name, unused in sortedNames:
+            fieldsetOut.append(name)
             self.fields[name] = forms.BooleanField(label=name, initial=True, required=False)
+        self.helper.layout = Layout(Fieldset(*fieldsetOut))  #The * means "turn list into arguments"
     autocomplete = forms.ChoiceField(choices = (("Reactions", "Autocomplete reactions (Easy)"),
                                        ("Reagents", "Autocomplete reagents (Medium)"),
-                                       ("None", "Autocomplete off (Hard)")))
-    needsHelp = forms.BooleanField(label="Tutorial mode", initial=False)
+                                       ("None", "Autocomplete off (Hard)")), widget=forms.Select())
+    needsHelp = forms.BooleanField(label="Tutorial mode", initial=False, required=False)
             
 
 

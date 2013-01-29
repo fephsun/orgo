@@ -132,6 +132,10 @@ function update(data) {
     for (i=0; i<jsonObject['length']; i++) {
         $("#helperChatbox").append(jsonObject[i] + "<br / >");
     }
+    //Scroll to bottom.
+    if (jsonObject['length'] != 0) {
+        $("#helperChatbox").scrollTop($("#helperChatbox").prop("scrollHeight")-$("#helperChatbox").height());
+    }
 }
 
 function onSuccess() {
@@ -142,6 +146,15 @@ function onSuccess() {
 
 </script>
 {% endblock %}
+
+
+{% block menuitems %}
+<li><a href="/orgo/reactions/">Reactions</a></li>
+<li><a href="/orgo/renderSynthesis/">New synthesis</a></li>
+<li><a href="/orgo/namereagent/">New one-step problem</a></li>
+<li><a href="/orgo/logout/">Logout</a></li>
+{% endblock %}
+
 
 
 {% block content %}

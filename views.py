@@ -147,7 +147,7 @@ def loggedInHome(request, debug = ""):
     graphList.sort(key=lambda item: item[1])
     
     #Load high scores.
-    bestUsers = models.UserProfile.objects.order_by('-correctSynths', 'user__username')[:10]
+    bestUsers = models.UserProfile.objects.order_by('-correctSynths', 'user__username')[:5]
     synthHighScore = ""
     for i in xrange(min(5, len(bestUsers))):
         prof = bestUsers[i]
@@ -156,13 +156,15 @@ def loggedInHome(request, debug = ""):
         else:
             synthHighScore += "<tr><td>"+str(i+1)+"</td><td>"+prof.user.username+"</td><td>"+str(prof.correctSynths)+"</td></tr>"
     if request.user.profile not in bestUsers:
+        #Insert a gap in the table
+        synthHighScore += "<tr><td></td><td>...</td><td></td></tr>"
         #Find rank of user.
         for index, prof in enumerate(models.UserProfile.objects.order_by('-correctSynths', 'user__username')):
             if prof == profile:
                 synthHighScore += "<tr><td>"+str(index+1)+"</td><td><b>"+request.user.username+"</b></td><td>"+str(profile.correctSynths)+"</td></tr>"
         
     #Load most helpful.
-    mostHelpful = models.UserProfile.objects.order_by('-assists', 'user__username')[:10]
+    mostHelpful = models.UserProfile.objects.order_by('-assists', 'user__username')[:5]
     helpHighScore = ""
     for i in xrange(min(5, len(mostHelpful))):
         prof = mostHelpful[i]
@@ -171,6 +173,8 @@ def loggedInHome(request, debug = ""):
         else:
             helpHighScore += "<tr><td>"+str(i+1)+"</td><td>"+prof.user.username+"</td><td>"+str(prof.assists)+"</td></tr>"
     if request.user.profile not in mostHelpful:
+        #Insert a gap in the table
+        helpHighScore += "<tr><td></td><td>...</td><td></td></tr>"
         #Find rank of user.
         for index, prof in enumerate(models.UserProfile.objects.order_by('-assists', 'user__username')):
             if prof == profile:
@@ -298,7 +302,7 @@ def checkboxUpdate(request, profile):
             #Tutorial mode?
             tutorial = checkboxes.cleaned_data["needsHelp"]
         else:
-            return loggedInHome(request, debug = "Invalid checkbox submission")
+            return ([], None, None)
     else:
         #User clicked on "new problem"
         #Load up the user's reagent preferences.
@@ -312,7 +316,7 @@ def checkboxUpdate(request, profile):
         elif autocompleteType == "None":
             autocomplete = ""
         else:
-            return loggedInHome(request, debug = "An invalid autocomplete mode was picked.")
+            return ([], None, None)
         tutorial = False
     return modes, autocomplete, tutorial
 
@@ -476,13 +480,13 @@ def loadSynthesisFromId(request):
 @login_required
 def renderSynthesis(request):
     profile = request.user.profile
-    #If the retain attribute is True, don't delete.
     try:
         profile.currentSynthesisProblem
     except:
         #Oops, accidentally deleted it.
         pass
     else:
+        #If the retain attribute is True, don't delete.
         if profile.currentSynthesisProblem == None or not(profile.currentSynthesisProblem.retain):
             #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
             try:
@@ -977,8 +981,12 @@ def saveProblem(request):
 def renderProblem(request):
     if 'synthesis_resume' in request.POST:
         return renderOldSynthesis(request)
+    if 'synthesis_new' in request.POST:
+        return renderSynthesis(request)
     if 'namereagent_resume' in request.POST:
         return renderOldNameReagent(request)
+    if 'namereagent_new' in request.POST:
+        return renderNameReagent(request)
     else:
         return renderSynthesis(request)
     

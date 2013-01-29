@@ -180,8 +180,11 @@ reactionAutocomplete='''['H2SO4 H2O HgSO4 ','H2 PdC EtOH ','HBr CH2Cl2 ','HF CH2
 @login_required    
 def renderOldNameReagent(request):
     profile = request.user.profile
-    step = profile.currentNameReagentProblem
-    if step == None:
+    try:
+        step = profile.currentNameReagentProblem
+        if step == None:
+            return renderNameReagent(request)
+    except:
         return renderNameReagent(request)
     autocompleteType = profile.autocompleteType
     if autocompleteType == "Reactions":
@@ -412,8 +415,11 @@ def makeReagentHtml(request):
 @login_required
 def renderOldSynthesis(request):
     profile = request.user.profile
-    synthesis = profile.currentSynthesisProblem
-    if synthesis == None:
+    try:
+        synthesis = profile.currentSynthesisProblem
+        if synthesis == None:
+            return renderSynthesis(request)
+    except:
         return renderSynthesis(request)
     autocompleteType = profile.autocompleteType
     if autocompleteType == "Reactions":
@@ -947,7 +953,7 @@ def renderProblem(request):
     if 'namereagent_new' in request.POST:
         return renderNameReagent(request)
     else:
-        raise StandardError("Not a valid problem rendering: "+str(request))
+        return renderSynthesis(request)
     
     
     

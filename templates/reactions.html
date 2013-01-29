@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% load orgo_filters %}
+{% load bootstrap %}
+
+{% block jsimport %}
+<script src="http://felixsun.scripts.mit.edu/orgo/static/jquery-1.9.0.js"> </script>
+<script type="text/javascript" src="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/raphael.js"></script>
+<script type="text/javascript" src="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/jquery.enumerable.js"></script>
+<script type="text/javascript" src="http://felixsun.scripts.mit.edu/orgo/static/tufte-graph/jquery.tufte-graph.js"></script>
+<title>Reactions - 5.12 Practice</title>
+{% endblock %}
+
+{% block cssimport %}
+<style>
+
+div.sample {
+    float:left;
+}
+
+div.sample.arrow {
+    margin-top:80px;
+    margin-bottom:83px;
+}
+
+div.samples {
+    margin: 0 auto; 
+    text-align: center;
+}
+
+div.listedItem {
+    margin-top: 25px
+}
+
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+
+</script>
+{% endblock %}
+
+{% block menuitems %}
+<li class="active"><a href="/orgo/">Home</a></li>
+<li><a href="faq">FAQs</a></li>
+<li><a href="reactions">Reactions</a></li>
+<li><a href="/orgo/logout/">Logout</a></li>
+{% endblock %}
+
+{% block signin %}
+<p class="navbar-text pull-right" style="color:#EEEEEE">
+Welcome, {{name}}
+</p>
+{% endblock %}
+
+
+
+
+
+{% block content %}
+
+<!--Fancy header here.-->
+
+<!--Linkful sidebar, too.-->
+
+
+<p>Supported reactions are currently limited to <b>Unit 1</b> and <b>Unit 2</b> of <b><a href="http://ocw.mit.edu/courses/chemistry/5-12-organic-chemistry-i-spring-2003/index.htm">MIT 5.12</a></b>.</p>
+<br />
+<h1>Reactions</h1>
+
+<div id="reactions">
+<div class="listedItem">
+<h2>Hydrogenation</h2>
+<i><h4>H<sub>2</sub> cat. Pd|C in ethanol</h4></i>
+<p><b>Regiochemistry:</b> None</p>
+<p><b>Stereochemistry:</b> Syn addition</p>
+<p>Alkenes and alkynes are candidates for this reaction. Pd|C refers to palladium on carbon, a catalyst used in hydrogenation reactions. This reaction 
+adds two or four hydrogens to the alkene or alkyne, converting it all the way to a single bond.</p>
+<p><i>Read more: <a href=""></a>, <a href=""></a></i></p>
+
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+</div>
+<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+</div>
+</div>
+</div>
+
+
+
+
+<div class="listedItem">
+<h2>Hydrohalogenation</h2>
+<i><h4>HX in CH<sub>2</sub>Cl<sub>2</sub> (either 1 equiv. or excess)</h4></i>
+<p><b>Regiochemistry:</b> X added to Markovnikov carbon</p>
+<p><b>Stereochemistry:</b> None (neither syn nor anti)</p>
+<p></p>
+<p>NOTE: It is possible to specify that you want to add only one equivalent of HX to the reactant. For alkynes, this results in addition only once.</p>
+<p><i>Read more: <a href=""></a>, <a href=""></a></i></p>
+
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+</div>
+<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+</div>
+</div>
+</div>
+
+
+
+
+<div class="listedItem">
+<h2></h2>
+<i><h4></h4></i>
+<p><b>Regiochemistry:</b> </p>
+<p><b>Stereochemistry:</b> </p>
+<p></p>
+<p><i>Read more: <a href=""></a>, <a href=""></a></i></p>
+
+<br />
+<div class="samples row">
+<div class="sample">
+<!--SVG here-->
+</div>
+<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<!--SVG here-->
+</div>
+</div>
+</div>
+
+
+
+
+<div class="listedItem">
+<h2>Tautomerization</h2>
+<p>Not so much a reaction, as more of an automatic process. Hydroxyl groups attached to double bonds (<i>enols</i>) will tautomerize, resulting in a ketone or an aldehyde.</p>
+<p><i>Read more: <a href="http://en.wikipedia.org/wiki/Keto-enol_tautomerism">enol tautomerization</a>, <a href="http://en.wikipedia.org/wiki/Tautomer">tautomers</a></i></p>
+
+<br />
+<div class="samples">
+<div class="sample">
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="183.923" height="180" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="109.3" y1="100.0" x2="109.3" y2="127.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="109.3" y1="100.0" x2="132.7" y2="86.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="107.8" y1="102.6" x2="73.1" y2="82.6" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="110.8" y1="97.4" x2="76.1" y2="77.4" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="74.6" y1="80.0" x2="74.6" y2="53.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="74.6" y1="80.0" x2="51.3" y2="93.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="103.282032" y="148.000000" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >OH</text>
+<text x="139.923048" y="88.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="163.923048" y="91.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="70.641016" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="94.641016" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="14.000000" y="108.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="111.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="108.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+</div>
+<div class="sample arrow"><img src="http://felixsun.scripts.mit.edu/orgo/static/arrow.png"> </img></div>
+<div class="sample">
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cml="http://www.xml-cml.org/schema" width="180" height="180" x="0" y="0" font-family="sans-serif" stroke="rgb(0,0,0)" stroke-width="1"  stroke-linecap="round">
+<rect x="0%" y="0%" width="100%" height="100%" stroke-width="0" fill-opacity="0"  />
+<line x1="112.3" y1="100.0" x2="112.3" y2="127.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="106.3" y1="100.0" x2="106.3" y2="127.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="109.3" y1="100.0" x2="132.7" y2="86.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="109.3" y1="100.0" x2="74.6" y2="80.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="74.6" y1="80.0" x2="74.6" y2="53.0" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<line x1="74.6" y1="80.0" x2="51.3" y2="93.5" stroke="rgb(0,0,0)"  stroke-width="1.0"/>
+<text x="103.282032" y="148.000000" fill="rgb(255,12,12)"  stroke="rgb(255,12,12)" stroke-width="1" font-size="16" >O</text>
+<text x="139.923048" y="88.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="163.923048" y="91.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="70.641016" y="48.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >CH</text>
+<text x="94.641016" y="51.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="14.000000" y="108.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >H</text>
+<text x="26.000000" y="111.680000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="13" >3</text>
+<text x="32.500000" y="108.000000" fill="rgb(102,102,102)"  stroke="rgb(102,102,102)" stroke-width="1" font-size="16" >C</text>
+<text font-size="18.000000" fill ="black" font-family="sans-serif"
+x="10.000000" y="20.000000" ></text>
+<title> - OBDepict</title>
+</svg>
+
+</div>
+</div>
+</div>
+
+
+</div>
+
+<h1>Terminology</h1>
+<div id="terminology">
+Markovnikov
+anti-Markovnikov
+Syn addition
+Anti addition
+Regiochemistry
+Stereochemistry
+</div>
+
+{% endblock %}
+
+
+
+

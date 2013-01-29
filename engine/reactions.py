@@ -267,17 +267,30 @@ def halogenate1eq(molecules, halogen):
         print halogen
         
     #Reacts one equivalent of X2 with a molecule containing one alkyne and no alkenes.  Will
-    #not do anything (e.g. will return the input molecules) if there are multiple alkynes or any
-    #alkenes.
+    #not do anything (e.g. will return the input molecules) if there are multiple alk*nes.
     #Creates a trans alkene.
+    #CHANGED: Made this compatible with both alkynes and alkenes.
     def findPlace(molecule):
-        if findAlkene(molecule) != None:
-            return None
-        if len(findAlkynes(molecule)) != 1:
-            return None
-        return findAlkyne(molecule)  
-    def reactAtPlace(molecule, place):
-        return tripleAdd(molecule, place[0], place[1], Atom(halogen), Atom(halogen), 'trans')
+        if len(findAlkynes(molecule) + findAlkenes(molecule)) != 1:
+            return None 
+        a = findAlkyne(molecule) 
+        if a != None:
+            return (a, 3)
+        a = findAlkene(molecule)
+        if a != None:
+            return (a, 2)
+        return None
+        
+    def reactAtPlace(molecule, placeTuple):
+        #Check if you are reacting at an alkene or an alkyne.
+        if placeTuple == None:
+            return []
+        place, case = placeTuple
+        if case == 3:
+            return tripleAdd(molecule, place[0], place[1], Atom(halogen), Atom(halogen), 'trans')
+        if case == 2:
+            return antiAdd(molecule, place[0], place[1], Atom(halogen), Atom(halogen))
+        
     return react(molecules, findPlace, reactAtPlace)
 
 """Free-radical hydrohalogenation

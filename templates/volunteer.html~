@@ -125,6 +125,7 @@ function update(data) {
         $("#helperChatbox").html("Session dropped.  Did the other user log out?");
         state = "Waiting";
         $("#leftbar").html($("#dump").html());
+        setTimeout(getQueue(), REFRESH);
         return;
     }
     drawAllTheThings(data);

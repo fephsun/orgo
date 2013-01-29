@@ -36,6 +36,11 @@ urlpatterns = patterns('',
     url(r'^namereagent/$', 'orgo.views.renderNameReagent', name='renderNameReagent'),
     url(r'^namereagent/resume/$', 'orgo.views.renderOldNameReagent', name='renderOldNameReagent'),
                        
+                       
+    url(r'^reactions/$', 'orgo.views.renderReactions', name='renderReactions'),
+    url(r'^faq/$', 'orgo.views.renderFaq', name='renderFaq'),
+    
+    
     url(r'^api/getSynthesisData/$', 'orgo.views.getSynthesisData', name = 'getSynthesisData'),
     url(r'^api/displaySolution/$', 'orgo.views.getSolutionData', name = 'getSolutionData'),
     url(r'^api/addMoleculeToMolecule/$', 'orgo.views.addMoleculeToMolecule', name = 'addMoleculeToMolecule'),

@@ -149,23 +149,39 @@ def loggedInHome(request, debug = ""):
     #Load high scores.
     bestUsers = models.UserProfile.objects.order_by('-correctSynths', 'user__username')[:10]
     synthHighScore = ""
-    for i in xrange(min(10, len(bestUsers))):
+    for i in xrange(min(5, len(bestUsers))):
         prof = bestUsers[i]
         if prof==profile:
-            synthHighScore += "<b>"
-        synthHighScore += "<tr><td>"+str(i+1)+"</td><td>"+prof.user.username+"</td><td>"+str(prof.correctSynths)+"</td></tr>"
-        if prof==profile:
-            synthHighScore += "</b>"
+            synthHighScore += "<tr><td>"+str(i+1)+"</td><td><b>"+prof.user.username+"</b></td><td>"+str(prof.correctSynths)+"</td></tr>"
+        else:
+            synthHighScore += "<tr><td>"+str(i+1)+"</td><td>"+prof.user.username+"</td><td>"+str(prof.correctSynths)+"</td></tr>"
     if request.user.profile not in bestUsers:
-        userRank = models.UserProfile.objects.order_by('-correctSynths', 'user__username').index(profile)
-        synthHighScore += "<b><tr><td>"+str(userRank+1)+"</td><td>"+request.user.username+"</td><td>"+str(profile.correctSynths)+"</td></tr></b>"
-
+        #Find rank of user.
+        for index, prof in enumerate(models.UserProfile.objects.order_by('-correctSynths', 'user__username')):
+            if prof == profile:
+                synthHighScore += "<tr><td>"+str(index+1)+"</td><td><b>"+request.user.username+"</b></td><td>"+str(profile.correctSynths)+"</td></tr>"
+        
+    #Load most helpful.
+    mostHelpful = models.UserProfile.objects.order_by('-assists', 'user__username')[:10]
+    helpHighScore = ""
+    for i in xrange(min(5, len(mostHelpful))):
+        prof = mostHelpful[i]
+        if prof==profile:
+            helpHighScore += "<tr><td>"+str(i+1)+"</td><td><b>"+prof.user.username+"</b></td><td>"+str(prof.assists)+"</td></tr>"
+        else:
+            helpHighScore += "<tr><td>"+str(i+1)+"</td><td>"+prof.user.username+"</td><td>"+str(prof.assists)+"</td></tr>"
+    if request.user.profile not in mostHelpful:
+        #Find rank of user.
+        for index, prof in enumerate(models.UserProfile.objects.order_by('-assists', 'user__username')):
+            if prof == profile:
+                helpHighScore += "<tr><td>"+str(index+1)+"</td><td><b>"+request.user.username+"</b></td><td>"+str(profile.assists)+"</td></tr>"
     return render(request, 'loggedin.html', {'name': request.user.username, 
                                              'ChooseReagentsForm':models.ChooseReagentsForm(initial=initialValuesDict), 
                                              'debug': debug,
                                              'graphData': graphList,
                                              'changePW': PasswordChangeForm(request.user),
-                                             'synthHighScore': synthHighScore})
+                                             'synthHighScore': synthHighScore,
+                                             'helpHighScore': helpHighScore})
     
 ###Can delete; this is me learning Django
 def renderSmiles(request, molecule):
@@ -526,8 +542,9 @@ def getSynthesisData(request, synthesis=None):
         if mode == "Send to browser":
             #Increment score if solved.
             if responseData["success"] and not synthesis.solverCredited:
-                request.user.profile.correctSynths += 1
-                request.user.profile.save()
+                profile = request.user.profile
+                profile.correctSynths += 1
+                profile.save()
                 synthesis.solverCredited = True
                 synthesis.save()
             return HttpResponse(json.dumps(responseData))
@@ -922,8 +939,9 @@ def helperChatPoll(request):
         newLines[i].save()
     #If the synthesis was just solved, give the helper credit
     if out["success"] and not synthesis.helperCredited:
-        request.user.profile.assists += 1
-        request.user.profile.save()
+        profile = request.user.profile
+        profile.assists += 1
+        profile.save()
         synthesis.helperCredited = True
         synthesis.save()
     return HttpResponse(json.dumps(out))
@@ -957,4 +975,10 @@ def renderProblem(request):
     
     
     
+@csrf_exempt
+def renderFaq(request):
+    return render(request, 'faq.html', {'name': request.user.username})
 
+@csrf_exempt
+def renderReactions(request):
+    return render(request, 'reactions.html', {'name': request.user.username})

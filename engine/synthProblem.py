@@ -310,15 +310,16 @@ def randomSynthesisProblemStart(mode, steps = 20, maxLength = 30, count=2):
                 #Not a good reaction - that's OK, keep going
                 newMolBoxes.append(molBox)
                 
+        molBoxes = []
+        if len(newMolBoxes) == 1 or len(legalAddRxns)==0:
+            #No point in trying to fuse molecules if you only have one molecule to begin with.
+            molBoxes = newMolBoxes
+            continue
         #Now, try to fuse molecules?
         reagents, rxnFunction, ignore = legalAddRxns[random.randint(0, len(legalAddRxns)-1)]
         if debug:
             print "Trying fusion: "+str(reagents)
-        molBoxes = []
-        if len(newMolBoxes) == 1:
-            #No point in trying to fuse molecules if you only have one molecule to begin with.
-            molBoxes = newMolBoxes
-            continue
+
         for i in xrange(len(newMolBoxes)):
             for j in xrange(i+1,len(newMolBoxes)):
                 #Loop through all pairs of molecules.
@@ -463,6 +464,11 @@ KOCCH33 = 35
 REACTIONS = (
 (((H2SO4,), (H2O,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")), True)), ('10B Alkenes: other',)),
 (((H2,),(PDC,),(ETOH,)), (lambda x: lambda o: hydrogenate(x+o)), ('10A Alkenes: halide addition',)),
+(((HBR,), (ROOR,), (HEAT, LIGHT)), (lambda x: lambda o: radicalhydrohalogenate(x+o, "Br")), ('10A Alkenes: halide addition',)),
+(((HBR,),(CH2CL2,), (EQV1,)), (lambda x: lambda o: hydrohalogenate1eq(x+o, "Br")), ('10A Alkenes: halide addition',)),
+(((HF,),(CH2CL2,), (EQV1,)), (lambda x: lambda o: hydrohalogenate1eq(x+o, "F")), ('10A Alkenes: halide addition',)),
+(((HI,),(CH2CL2,), (EQV1,)), (lambda x: lambda o: hydrohalogenate1eq(x+o, "I")), ('10A Alkenes: halide addition',)),
+(((HCL,),(CH2CL2,), (EQV1,)), (lambda x: lambda o: hydrohalogenate1eq(x+o, "Cl")), ('10A Alkenes: halide addition',)),
 (((HBR,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "Br")), ('10A Alkenes: halide addition',)),
 (((HF,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "F")), ('10A Alkenes: halide addition',)),
 (((HI,),(CH2CL2,)), (lambda x: lambda o: hydrohalogenate(x+o, "I")), ('10A Alkenes: halide addition',)),
@@ -475,7 +481,6 @@ REACTIONS = (
 (((F2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "F")), ('10A Alkenes: halide addition',)),
 (((I2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "I")), ('10A Alkenes: halide addition',)),
 (((CL2,),(CH2CL2,)), (lambda x: lambda o: halogenate(x+o, "Cl")), ('10A Alkenes: halide addition',)),
-(((HBR,), (ROOR,), (HEAT, LIGHT)), (lambda x: lambda o: radicalhydrohalogenate(x+o, "Br")), ('10A Alkenes: halide addition',)),
 (((RCO3H,), (CH2CL2,)), (lambda x: lambda o: epoxidate(x+o)), ('10B Alkenes: other',)),
 (((H2SO4,), (H2O,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, Molecule(Atom("O")), True)), ('10B Alkenes: other',)),
 (((H2SO4,), (ETOH,), (HGSO4,)), (lambda x: lambda o: acidhydrate(x+o, ethanol, True)), ('10B Alkenes: other','illegal')),

@@ -94,20 +94,10 @@ Welcome, {{name}}
 </div>
 <div class="span4">
     <h3> One-step Problems</h3>
-    <!--<form action = "/orgo/namereagent/resume/" method="post" class="form-horizontal">{% csrf_token %}-->
-        <input type="submit" value="Resume old" name="namereagent_resume" class="btn" form="settingsForm"/>
-    <!--</form>-->
-    <!--<form action = "/orgo/namereagent/" method="post" class="form-horizontal">{% csrf_token %}-->
-        <input type="submit" value="Generate new" name="namereagent_new" class="btn" form="settingsForm"/>
-    <!--</form>-->
+        <input type="submit" value="Go" name="namereagent_resume" class="btn" form="settingsForm"/>
 
     <h3> Synthesis Problems</h3>
-    <!--<form action = "/orgo/renderSynthesis/resume/" method="post" class="form-horizontal">{% csrf_token %}-->
-        <input type="submit" value="Resume old" name="synthesis_resume" class="btn" form="settingsForm"/>
-    <!--</form>-->
-    <!--<form action = "/orgo/renderSynthesis/" method="post" class="form-horizontal">{% csrf_token %}-->
-        <input type="submit" value="Generate new" name="synthesis_new" class="btn" form="settingsForm"/>
-    <!--</form>-->
+        <input type="submit" value="Go" name="synthesis_resume" class="btn" form="settingsForm"/>
 
     <h4> Load Saved</h4>
     <!--Problem loader-->
@@ -119,6 +109,8 @@ Welcome, {{name}}
        
        
     <h3>Reaction Settings</h3>
+    
+    <span style="color:red">{{debug|safe}}</span>
     <!--Settings checkboxes-->
     <div style="position:relative; left:-72px">
         <form action = "/orgo/renderProblem/" method="post" class="form-horizontal" id="settingsForm">{% csrf_token %}
@@ -198,7 +190,6 @@ Welcome, {{name}}
     </div>
 
 </div>-->
-{{debug|safe}}
 <div id="popup">
     <h3> Change Password </h3>
     <form action = "/orgo/api/changePW/" method="post" class="form-horizontal">{% csrf_token %}

@@ -32,6 +32,8 @@ def removeDuplicatesAt(moleculeList, ind):
 def react(molecules, findPlace, reactAtPlace):
     if not isinstance(molecules, list):
         return react([molecules], findPlace, reactAtPlace)
+    for molecule in molecules:
+        molecule.oneEqvAdded = False
     while True:
         if len(molecules) > MAXLEN:
             #If the reaction gets too crazy, kill.
@@ -231,7 +233,53 @@ def hydrohalogenate(molecules, halogen):
     return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
 
 
-
+def hydrohalogenate1eq(molecules, halogen):
+    
+    if debug:
+        print "1-eqv. Hydrohalogenating"
+        print smiles(molecules)
+        print halogen
+        
+    def findPlace(molecule):
+        if hasattr(molecule, 'oneEqvAdded'):
+            if molecule.oneEqvAdded:
+                return None
+        else:
+            return None
+        if len(findAlkynes(molecule) + findAlkenes(molecule)) != 1:
+            return None 
+        a = findAlkyne(molecule) 
+        if a != None:
+            return (a, 3)
+        a = findAlkene(molecule)
+        if a != None:
+            return (a, 2)
+        return None
+        
+    def reactAtPlace(molecule, placeTuple):
+        #Check if you are reacting at an alkene or an alkyne.
+        if placeTuple == None:
+            return []
+        place, case = placeTuple
+        
+        newMolecules = []
+        mkvCarbons = markovnikov(place[0], place[1])
+        
+        for pairing in mkvCarbons:
+            if case == 3:
+                molecule.oneEqvAdded = True
+                newMolecules +=  tripleAdd(molecule, pairing[0], pairing[1], Atom(halogen), None, "cis") + tripleAdd(molecule, pairing[0], pairing[1], Atom(halogen), None, "trans")
+            if case == 2:
+                molecule.oneEqvAdded = True
+                newMolecules +=  allAdd(molecule, pairing[0], pairing[1], Atom(halogen), None)
+            
+        return newMolecules
+        
+    return react(molecules, findPlace, reactAtPlace)
+    
+    
+    
+    
 """Halogenation
 Candidate reactants: alkenes, alkynes
 X2 in CH2Cl2
@@ -271,6 +319,11 @@ def halogenate1eq(molecules, halogen):
     #Creates a trans alkene.
     #CHANGED: Made this compatible with both alkynes and alkenes.
     def findPlace(molecule):
+        if hasattr(molecule, 'oneEqvAdded'):
+            if molecule.oneEqvAdded:
+                return None
+        else:
+            return None
         if len(findAlkynes(molecule) + findAlkenes(molecule)) != 1:
             return None 
         a = findAlkyne(molecule) 
@@ -287,9 +340,12 @@ def halogenate1eq(molecules, halogen):
             return []
         place, case = placeTuple
         if case == 3:
+            molecule.oneEqvAdded = True
             return tripleAdd(molecule, place[0], place[1], Atom(halogen), Atom(halogen), 'trans')
         if case == 2:
+            molecule.oneEqvAdded = True
             return antiAdd(molecule, place[0], place[1], Atom(halogen), Atom(halogen))
+        return []
         
     return react(molecules, findPlace, reactAtPlace)
 
@@ -792,6 +848,28 @@ def hydroborate1(molecules):
         print "Hydroborating 1"
         print smiles(molecules)
         
+    def findOkAlkene(molecule):
+        #any alkene which already has a borane attached is invalid
+        for atom in molecule.atoms:
+            if not (atom.element == 'C'):
+                continue
+            r = None
+            for neighbor in atom.neighbors:
+                if neighbor.element == 'C' and atom.neighbors[neighbor] == 2:
+                    r = (atom, neighbor)
+            if r != None:
+                if not ("B" in [n.element for n in r[0].neighbors] or "B" in [n.element for n in r[1].neighbors]):
+                    return r
+        return None
+        
+    def findPlace(molecule):
+        x = findOkAlkene(molecule)
+        if x == None:
+            return findAlkyne(molecule)
+        else:
+            return x
+        
+    
     def reactAtPlace(molecule, place): #returns a list of molecules post-reaction at place
         newMolecules = []
         boron = Atom("B")
@@ -802,10 +880,10 @@ def hydroborate1(molecules):
         else: #Alkyne
         #NO. NOT CARBONYL-ADD.
             for pairing in mkvCarbons:
-                newMolecules += allTripleAdd(molecule, pairing[1], pairing[0], boron, None)
+                newMolecules += tripleAdd(molecule, pairing[1], pairing[0], boron, None, "cis")
         return newMolecules
     
-    return react(molecules, findAlkeneAndAlkyne, reactAtPlace)
+    return react(molecules, findPlace, reactAtPlace)
 
 #Subsequent NaOH and H2O2 step
 def hydroborate2(molecules):
@@ -820,7 +898,7 @@ def hydroborate2(molecules):
                 atom.element = "O"
         return molecule
     newMolecules = copy.deepcopy(molecules)
-    return [BtoO(molecule) for molecule in newMolecules]
+    return removeDuplicates([BtoO(molecule) for molecule in newMolecules])
 
 
 """

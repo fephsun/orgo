@@ -198,7 +198,7 @@ def renderOldNameReagent(request):
     profile = request.user.profile
     try:
         step = profile.currentNameReagentProblem
-        if step == None:
+        if step == None or step.done:
             return renderNameReagent(request)
     except:
         return renderNameReagent(request)
@@ -228,7 +228,11 @@ def renderNameReagent(request):
         step.save()
         request.session['problem'] = step
         autocomplete = reactionAutocomplete
-        tutorial = True
+        if 'tutorial' in request.session:
+            tutorial = False
+        else:
+            tutorial = True
+            request.session['tutorial'] = True
     else:
         #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
         try:
@@ -433,7 +437,7 @@ def renderOldSynthesis(request):
     profile = request.user.profile
     try:
         synthesis = profile.currentSynthesisProblem
-        if synthesis == None:
+        if synthesis == None or synthesis.solverCredited == True:
             return renderSynthesis(request)
     except:
         return renderSynthesis(request)
@@ -457,7 +461,10 @@ def loadSynthesisFromId(request):
         #This should never happen.
         return
     loadId = request.POST['Id']
-    synthesis = models.SynthesisProblemModel.objects.get(pk=loadId)
+    try:
+        synthesis = models.SynthesisProblemModel.objects.get(pk=loadId)
+    except:
+        return loggedInHome(request, debug="Invalid ID number.")
     sCopy = forkit.tools.fork(synthesis, deep=True)
     sCopy.retain = False
     sCopy.save()
@@ -470,22 +477,28 @@ def loadSynthesisFromId(request):
 def renderSynthesis(request):
     profile = request.user.profile
     #If the retain attribute is True, don't delete.
-    if profile.currentSynthesisProblem == None or not(profile.currentSynthesisProblem.retain):
-        #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
-        try:
-            for arrowModel in profile.currentSynthesisProblem.arrows.all():
-                arrowModel.delete()
-            for moleculeModel in profile.currentSynthesisProblem.molecules.all():
-                moleculeModel.delete()
-            for arrowModel in profile.currentSynthesisProblem.solution.arrows.all():
-                arrowModel.delete()
-            for moleculeModel in profile.currentSynthesisProblem.solution.molecules.all():
-                moleculeModel.delete()
-            profile.currentSynthesisProblem.solution.delete()
-            profile.currentSynthesisProblem.target.delete()
-            profile.currentSynthesisProblem.delete()
-        except:
-            pass
+    try:
+        profile.currentSynthesisProblem
+    except:
+        #Oops, accidentally deleted it.
+        pass
+    else:
+        if profile.currentSynthesisProblem == None or not(profile.currentSynthesisProblem.retain):
+            #Sometimes, the user doesn't even have a previous problem, so deleting doesn't always work.
+            try:
+                for arrowModel in profile.currentSynthesisProblem.arrows.all():
+                    arrowModel.delete()
+                for moleculeModel in profile.currentSynthesisProblem.molecules.all():
+                    moleculeModel.delete()
+                for arrowModel in profile.currentSynthesisProblem.solution.arrows.all():
+                    arrowModel.delete()
+                for moleculeModel in profile.currentSynthesisProblem.solution.molecules.all():
+                    moleculeModel.delete()
+                profile.currentSynthesisProblem.solution.delete()
+                profile.currentSynthesisProblem.target.delete()
+                profile.currentSynthesisProblem.delete()
+            except:
+                pass
     
     modes, autocomplete, tutorial = checkboxUpdate(request, profile)
     if modes == []:
@@ -964,12 +977,8 @@ def saveProblem(request):
 def renderProblem(request):
     if 'synthesis_resume' in request.POST:
         return renderOldSynthesis(request)
-    if 'synthesis_new' in request.POST:
-        return renderSynthesis(request)
     if 'namereagent_resume' in request.POST:
         return renderOldNameReagent(request)
-    if 'namereagent_new' in request.POST:
-        return renderNameReagent(request)
     else:
         return renderSynthesis(request)
     

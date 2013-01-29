@@ -149,16 +149,16 @@ def loggedInHome(request, debug = ""):
     #Load high scores.
     bestUsers = models.UserProfile.objects.order_by('-correctSynths', 'user__username')[:10]
     synthHighScore = ""
-    for i in xrange(10):
+    for i in xrange(min(10, len(bestUsers))):
         prof = bestUsers[i]
         if prof==profile:
             synthHighScore += "<b>"
-        synthHighScore += "<tr><td>"+i+"</td><td>"+prof.user.username+"</td><td>"+prof.correctSynths+"</td></tr>"
+        synthHighScore += "<tr><td>"+str(i+1)+"</td><td>"+prof.user.username+"</td><td>"+str(prof.correctSynths)+"</td></tr>"
         if prof==profile:
             synthHighScore += "</b>"
     if request.user.profile not in bestUsers:
         userRank = models.UserProfile.objects.order_by('-correctSynths', 'user__username').index(profile)
-        synthHighScore += "<b><tr><td>"+userRank+"</td><td>"+request.user.username+"</td><td>"+profile.correctSynths+"</td></tr></b>"
+        synthHighScore += "<b><tr><td>"+str(userRank+1)+"</td><td>"+request.user.username+"</td><td>"+str(profile.correctSynths)+"</td></tr></b>"
 
     return render(request, 'loggedin.html', {'name': request.user.username, 
                                              'ChooseReagentsForm':models.ChooseReagentsForm(initial=initialValuesDict), 
@@ -936,7 +936,7 @@ def saveProblem(request):
     
     
     
-@csrf-exempt 
+@csrf_exempt 
 def renderProblem(request):
     if 'synthesis_resume' in request.POST:
         return renderOldSynthesis(request)

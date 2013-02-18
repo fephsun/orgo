@@ -197,159 +197,170 @@ def allTripleAdd(molecule, target1, target2, add1, add2, addtarget1 = None, addt
             pass
     return [molecule]
     
+def moleculeCompare(a, b, checkChiral = True):
+    global finishedDict
+    finishedDict = None
+    def insideCompare(a, b, compareDict = None, expanded = []):
+        global finishedDict
+        #Determines whether two molecules are isomorphic.  In the worst case
+        #(two molecules with the same atoms), this procedure does not run in
+        #polynomial time, so be careful.
+        for ele in ['C','N','O']:
+            if a.countElement(ele) != b.countElement(ele):
+                return False
+        #sa = smiles(a)
+        #sb = smiles(b)
 
-def moleculeCompare(a, b, compareDict = None, expanded = []):
-    #Determines whether two molecules are isomorphic.  In the worst case
-    #(two molecules with the same atoms), this procedure does not run in
-    #polynomial time, so be careful.
-    for ele in ['C','N','O']:
-        if a.countElement(ele) != b.countElement(ele):
+        #compareDict maps atoms in a to their hypothesized counterparts in b.
+
+        if len(expanded) == len(a.atoms):
+            #We've reached every atom.  Call it equal.
+            finishedDict = compareDict
+            return True
+
+        if compareDict == None:
+            for atom in b.atoms:
+                if atom.element == a.atoms[0].element:
+                    oldCompareDict = {a.atoms[0]:atom, None:None}
+                    newCompareDicts = neighborCompare(a.atoms[0], atom,
+                                    oldCompareDict)
+                    if newCompareDicts == None:
+                        continue
+                    for newCompareDict in newCompareDicts:
+                        if insideCompare(a, b, dict(newCompareDict.items()+
+                                        oldCompareDict.items()), [a.atoms[0]]):
+                            return True
             return False
-    #sa = smiles(a)
-    #sb = smiles(b)
 
-    #compareDict maps atoms in a to their hypothesized counterparts in b.
-
-    if len(expanded) == len(a.atoms):
-        #We've reached every atom.  Call it equal.
-        return True
-        pass
-
-    if compareDict == None:
-        for atom in b.atoms:
-            if atom.element == a.atoms[randThing].element:
-                oldCompareDict = {a.atoms[randThing]:atom, None:None}
-                newCompareDicts = neighborCompare(a.atoms[randThing], atom,
-                                oldCompareDict)
-                if newCompareDicts == None:
-                    continue
-                for newCompareDict in newCompareDicts:
-                    if moleculeCompare(a, b, dict(newCompareDict.items()+
-                                    oldCompareDict.items()), [a.atoms[randThing]]):
-                        return True
-        return False
-
-    for aAtom in compareDict:
-        if (aAtom in expanded) or aAtom == None:
-            #Already expanded this atom.  Don't do it again.
-            continue
-        newDictSectors = neighborCompare(aAtom, compareDict[aAtom], compareDict)
-        if newDictSectors == None:
+        for aAtom in compareDict:
+            if (aAtom in expanded) or aAtom == None:
+                #Already expanded this atom.  Don't do it again.
+                continue
+            newDictSectors = neighborCompare(aAtom, compareDict[aAtom], compareDict)
+            if newDictSectors == None:
+                return False
+            for newDictSector in newDictSectors:
+                if insideCompare(a, b, dict(compareDict.items() + newDictSector.items()),
+                                   expanded + [aAtom]):
+                    return True
             return False
-        for newDictSector in newDictSectors:
-            if moleculeCompare(a, b, dict(compareDict.items() + newDictSector.items()),
-                               expanded + [aAtom]):
-                return True
-        return False
-            
-def neighborCompare(a,b, compareDict):
-    #Helper function.  Given 2 atoms, returns all pairings of neighbors of a
-    #with neighbors of b such that each pair has the same element.
-    aN = []
-    bN = []
-    for aNeighbor in a.neighbors:
-        aN.append(aNeighbor.element)
-    for bNeighbor in b.neighbors:
-        bN.append(bNeighbor.element)
-    #If the elements don't match, obviously there are no pairings.
-    if sorted(aN) != sorted(bN):
-        return None
-    if hasattr(a, "chiralA") != hasattr(b, "chiralA"):
-        #One atom has chirality, where the other doesn't.  Obviously no pairings.
-        return None
-    if hasattr(a, "chiralA"):
-        chiralFlag = True
-    else:
-        chiralFlag = False
-    if hasattr(a, "CTotherC") != hasattr(b, "CTotherC"):
-        #One atom has a cis-trans center, where the other doesn't.  Obviously no pairings.
-        return None
-    if hasattr(a, "CTotherC"):
-        CTFlag = True
-    else:
-        CTFlag = False
-    #Generate all n! pairings, and prune as we go.
-    out = []
-    for aNeighborSet in itertools.permutations(a.neighbors):
-        temp = {None: None}
-        OKFlag = True
-        for i in xrange(len(aNeighborSet)):
-            if aNeighborSet[i].element != b.neighbors.keys()[i].element:
-                #Oops, the elements don't actually match.  Skip.
-                OKFlag = False
-                break
-            if a.neighbors[aNeighborSet[i]] != b.neighbors[b.neighbors.keys()[i]]:
-                #Oops, the bond orders are different.  Skip.
-                OKFlag = False
-                break
-            if aNeighborSet[i] in compareDict and \
-               b.neighbors.keys()[i] != compareDict[aNeighborSet[i]]:
-                #This pairing goes against what's already in compareDict.  Skip.
-                OKFlag = False
-                break
-            temp[aNeighborSet[i]] = b.neighbors.keys()[i]
-        if chiralFlag and OKFlag:
-#            if not(set(a.neighbors.keys()) <= set((a.chiralA, a.chiralB, a.chiralC, a.chiralD))):
-#                if debug:
-#                    print "Error thing"
-#                    for neighbor in a.neighbors.keys():
-#                        if neighbor != None:
-#                            print neighbor.element
-#                    print "------"
-#                    for ch in (a.chiralA, a.chiralB, a.chiralC, a.chiralD):
-#                        if ch != None:
-#                            print ch.element
-#                    print "------"
-#                    raise StandardError
-            #The following bit of code is still quite messy.  It tests whether the
-            #hypothesized pairing follows the correct chirality.
-            aCW = []
-            bCW = []
-            for neighbor in a.chiralCWlist(aNeighborSet[randThing]):
-                if neighbor == None:
-                    #Hydrogen.
-                    aCW.append("H")
-                else:
-                    aCW.append(neighbor.element)
-            for neighbor in b.chiralCWlist(b.neighbors.keys()[randThing]):
-                if neighbor == None:
-                    #Hydrogen.
-                    bCW.append("H")
-                else:
-                    bCW.append(neighbor.element)
-            OKFlag = False
-            for i in xrange(3):
-                #Find the correct alignment of neighbors of a to neighbors of b
-                if OKFlag:
-                    break
-                if aCW == shift(bCW, i):
-                    OKFlag = True
-                    #The elements are correct, but is the actual mapping consistant?
-                    for j in xrange(3):
-                        if a.chiralCWlist(aNeighborSet[randThing])[j] == None:
-                            continue
-                        if temp[a.chiralCWlist(aNeighborSet[randThing])[j]] ==\
-                            b.chiralCWlist(b.neighbors.keys()[randThing])[(j+i)%3]:
-                            pass
-                        else:
-                            OKFlag = False
-        if CTFlag and OKFlag:
-            #Makes sure that the hypothesized pairing follows the correct
-            #cis-trans relationship
-            if a.CTotherC in compareDict and a.CTotherC.CTa in compareDict and a.CTotherC.CTb in compareDict:                    
-                if ((b.CTa == temp[a.CTa]) !=
-                   (b.CTotherC.CTa == compareDict[a.CTotherC.CTa])) or\
-                   ((b.CTb == temp[a.CTb]) !=
-                    (b.CTotherC.CTb == compareDict[a.CTotherC.CTb])):
+                
+    def neighborCompare(a,b, compareDict):
+        #Helper function.  Given 2 atoms, returns all pairings of neighbors of a
+        #with neighbors of b such that each pair has the same element.
+        aN = []
+        bN = []
+        for aNeighbor in a.neighbors:
+            aN.append(aNeighbor.element)
+        for bNeighbor in b.neighbors:
+            bN.append(bNeighbor.element)
+        #If the elements don't match, obviously there are no pairings.
+        if sorted(aN) != sorted(bN):
+            return None
+        if hasattr(a, "chiralA") != hasattr(b, "chiralA"):
+            #One atom has chirality, where the other doesn't.  Obviously no pairings.
+            return None
+        if hasattr(a, "chiralA"):
+            chiralFlag = True
+        else:
+            chiralFlag = False
+        if hasattr(a, "CTotherC") != hasattr(b, "CTotherC"):
+            #One atom has a cis-trans center, where the other doesn't.  Obviously no pairings.
+            return None
+        if hasattr(a, "CTotherC"):
+            CTFlag = True
+        else:
+            CTFlag = False
+        #Generate all n! pairings, and prune as we go.
+        out = []
+        for aNeighborSet in itertools.permutations(a.neighbors):
+            temp = {None: None}
+            OKFlag = True
+            for i in xrange(len(aNeighborSet)):
+                if aNeighborSet[i].element != b.neighbors.keys()[i].element:
+                    #Oops, the elements don't actually match.  Skip.
                     OKFlag = False
-                #If any C has 2 hydrogens, the matching is automatically correct, as there is no stereochem.
-                if (a.CTa == None and a.CTb == None) or (a.CTotherC.CTa == None and a.CTotherC.CTb == None):
-                    OKFlag = True
+                    break
+                if a.neighbors[aNeighborSet[i]] != b.neighbors[b.neighbors.keys()[i]]:
+                    #Oops, the bond orders are different.  Skip.
+                    OKFlag = False
+                    break
+                if aNeighborSet[i] in compareDict and \
+                   b.neighbors.keys()[i] != compareDict[aNeighborSet[i]]:
+                    #This pairing goes against what's already in compareDict.  Skip.
+                    OKFlag = False
+                    break
+                temp[aNeighborSet[i]] = b.neighbors.keys()[i]
+            if chiralFlag and OKFlag and checkChiral:
+    #            if not(set(a.neighbors.keys()) <= set((a.chiralA, a.chiralB, a.chiralC, a.chiralD))):
+    #                if debug:
+    #                    print "Error thing"
+    #                    for neighbor in a.neighbors.keys():
+    #                        if neighbor != None:
+    #                            print neighbor.element
+    #                    print "------"
+    #                    for ch in (a.chiralA, a.chiralB, a.chiralC, a.chiralD):
+    #                        if ch != None:
+    #                            print ch.element
+    #                    print "------"
+    #                    raise StandardError
+                #The following bit of code is still quite messy.  It tests whether the
+                #hypothesized pairing follows the correct chirality.
+                aCW = []
+                bCW = []
+                for neighbor in a.chiralCWlist(aNeighborSet[randThing]):
+                    if neighbor == None:
+                        #Hydrogen.
+                        aCW.append("H")
+                    else:
+                        aCW.append(neighbor.element)
+                for neighbor in b.chiralCWlist(b.neighbors.keys()[randThing]):
+                    if neighbor == None:
+                        #Hydrogen.
+                        bCW.append("H")
+                    else:
+                        bCW.append(neighbor.element)
+                OKFlag = False
+                for i in xrange(3):
+                    #Find the correct alignment of neighbors of a to neighbors of b
+                    if OKFlag:
+                        break
+                    if aCW == shift(bCW, i):
+                        OKFlag = True
+                        #The elements are correct, but is the actual mapping consistant?
+                        for j in xrange(3):
+                            if a.chiralCWlist(aNeighborSet[randThing])[j] == None:
+                                continue
+                            if temp[a.chiralCWlist(aNeighborSet[randThing])[j]] ==\
+                                b.chiralCWlist(b.neighbors.keys()[randThing])[(j+i)%3]:
+                                pass
+                            else:
+                                OKFlag = False
+            if CTFlag and OKFlag:
+                #Makes sure that the hypothesized pairing follows the correct
+                #cis-trans relationship
+                if a.CTotherC in compareDict and a.CTotherC.CTa in compareDict and a.CTotherC.CTb in compareDict:                    
+                    if ((b.CTa == temp[a.CTa]) !=
+                       (b.CTotherC.CTa == compareDict[a.CTotherC.CTa])) or\
+                       ((b.CTb == temp[a.CTb]) !=
+                        (b.CTotherC.CTb == compareDict[a.CTotherC.CTb])):
+                        OKFlag = False
+                    #If any C has 2 hydrogens, the matching is automatically correct, as there is no stereochem.
+                    if (a.CTa == None and a.CTb == None) or (a.CTotherC.CTa == None and a.CTotherC.CTb == None):
+                        OKFlag = True
 
-        del(temp[None])
-        if (temp not in out) and OKFlag:
-            out.append(temp)
-    return out
+            del(temp[None])
+            if (temp not in out) and OKFlag:
+                out.append(temp)
+        return out
+        
+    if checkChiral:
+        return insideCompare(a, b)
+    else:
+        ans = insideCompare(a, b)
+        if (finishedDict == None) and ans:
+            raise StandardError
+        return ans, finishedDict
 
 def shift(l, n):
     return l[n:] + l[:n]

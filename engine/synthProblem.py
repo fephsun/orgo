@@ -5,7 +5,9 @@ import orgoStructure
 import reactions as reactionsModule
 import string
 import serverRender
+#serverRender = 0
 import copy
+import itertools
 
 
 #ReactionStep class
@@ -111,6 +113,7 @@ class ReactionStep:
         #The input was ill-formatted.
         return (False, self.productBox)
 
+
 #Called by checkIfEqualsTarget in MoleculeBoxModel in models
 #Called by checkStep in ReactionStep in synthProblem
 #Returns a boolean.
@@ -170,9 +173,31 @@ def parseReagentsString(inpstring):
                 outp[reagent] = True
 
     #hacky
+    #Check all strings for whether they are substrings of OTHER reagents.
+    #If so, check the count on the substring.
     #Make sure you don't count substrings if you're counting things they're part of.
-    if (string.count("h2") != 0):
-        if string.count("ch2cl2") + string.count("nanh2") + string.count("h2o") + string.count("h20") + string.count("h2so4") == sum([string.count(x.lower()) for x in REAGENTS[H2][1]]):
+    #We will preompute and load the precise set of things we need to check.
+    precompute = True
+    if precompute:
+        pass
+    else:
+        pass
+    
+    #Necessary data structure for this:
+    structure = (
+    (H2, "h2", ("ch2cl2", "nanh2", "h2o", "h2so4"))
+    )
+    
+    for value in structure:
+        val = value[0]
+        sub = value[1]
+        bigList = value[2]
+        if (string.count(sub) != 0):
+            if sum([string.count(big) for big in bigList]) == sum([string.count(x.lower()) for x in REAGENTS[val][1]]):
+                outp[val] = False
+    
+    """if (string.count("h2") != 0):
+        if string.count("ch2cl2") + string.count("nanh2") + string.count("h2o") + string.count("h2so4") == sum([string.count(x.lower()) for x in REAGENTS[H2][1]]):
             outp[H2] = False
     if (string.count("cl2") != 0):
         if string.count("ch2cl2") == sum([string.count(x.lower()) for x in REAGENTS[CL2][1]]):
@@ -197,7 +222,7 @@ def parseReagentsString(inpstring):
             outp[H2O] = False
     if (string.count("sodium amide") != 0):
         if (string.count("sodium amide") == sum([string.count(x.lower()) for x in REAGENTS[NA][1]])):
-            outp[NA] = False
+            outp[NA] = False"""
        
     return outp
     
@@ -445,7 +470,7 @@ NANH2=31
 EQV1=32
 HEAT=33
 LIGHT=34
-KOCCH33 = 35
+KOCCH33=35
 
 
 
@@ -513,9 +538,13 @@ REACTIONS = (
 )
 
 
+#SYNTHONLY = [
+#(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(alkyneDeprotonate(x), o)),('11 Alkynes','add')),
+#(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(x, alkyneDeprotonate(o))),('11 Alkynes','add'))
+#]
 SYNTHONLY = [
-(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(alkyneDeprotonate(x), o)),('11 Alkynes','add')),
-(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(x, alkyneDeprotonate(o))),('11 Alkynes','add'))
+(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(alkyneDeprotonate(x+o), x+o)),('11 Alkynes','add')),
+(((NANH2,), (NH3,)), (lambda x: lambda o: acetylideAdd(x+o, alkyneDeprotonate(x+o))),('11 Alkynes','add'))
 ]
 
 FORSYNTH = [reaction for reaction in REACTIONS if not ('illegal' in reaction[2])] + SYNTHONLY
@@ -546,41 +575,41 @@ AlkeneAlkyneMode = ('10A Alkenes: halide addition', '10B Alkenes: other', '11 Al
 #and to update the section flagged "hacky" in the methods above.
 #Also update the drop-down field in the frontend with the new typeable values.
 REAGENTS = {
-H2: ("H<sub>2</sub>",("H2", "Hydrogen")),
-PDC: ("Pd|C", ("PdC", "Pd/C", "Pd|C", "Pd C", "palladium")),
-ETOH: ("EtOH", ("EtOH", "Ethanol", "Ethyl alcohol", "C2H5OH")),
-HF: ("HF", ("HF", "Hydrogen fluoride", "Hydrofluoric acid")),
-HBR: ("HBr", ("HBr", "Hydrogen bromide", "Hydrobromic acid")),
-HCL: ("HCl", ("HCl", "Hydrogen chloride", "Hydrochloric acid")),
-HI: ("HI", ("HI", "Hydrogen iodide", "Hydroiodic acid")),
-CH2CL2: ("CH<sub>2</sub>Cl<sub>2</sub>", ("CH2Cl2", "Dichloromethane")),
-F2: ("F<sub>2</sub>", ("Fluorine", "F2")),
-BR2: ("Br<sub>2</sub>", ("Bromine", "Br2")),
-CL2: ("Cl<sub>2</sub>", ("Chlorine", "Cl2")),
-I2: ("I<sub>2</sub>", ("Iodine", "I2")),
-ROOR: ("ROOR", ("ROOR", "tBuOOtBu", "Peroxide", "Tert-butyl peroxide", "Di-tert-butyl peroxide")),
-RCO3H: ("RCO<sub>3</sub>H",("mCPBA", "PhCO3H", "RCO3H")),
-H2SO4: ("H<sub>2</sub>SO<sub>4</sub>", ("H2SO4", "Sulfuric acid")),
-H2O: ("H<sub>2</sub>O", ("H2O", "Water", "Dihydrogen monoxide", "HOH", "H20")),
-HGSO4: ("HgSO<sub>4</sub> accels.", ("HgSO4", "Hg2+", "Mercury sulfate")),
-BH3: ("BH<sub>3</sub>", ("BH3", "Borane")),
-THF: ("THF", ("THF", "Tetrahydrofuran")),
-NAOH: ("NaOH", ("NaOH", "Sodium hydroxide", "Hydroxide", "OH-")),
-H2O2: ("H<sub>2</sub>O<sub>2</sub>", ("H2O2", "Hydrogen peroxide")),
-OSO4: ("OsO<sub>4</sub>", ("oso4", "osmium tetroxide", "osmium oxide")),
-NMO: ("NMO", ("NMO", "NMMO", "N-Methylmorpholine N-oxide")),
-ACETONE: ("Acetone", ("Acetone", "Propanone", "(CH3)2CO")),
-O3: ("O<sub>3</sub>", ("Ozone", "O3")),
-ME2S: ("Me<sub>2</sub>S", ("Dimethyl sulfide", "Methylthiomethane", "Me2S")),
-ZN: ("Zn", ("Zn", "Zinc")),
-LINDLAR: ("cat. Lindlar", ("Lindlar",)),
-NA: ("Na", ("Sodium", "Na")),
-NH3: ("NH<sub>3 (L)</sub>", ("NH3", "Ammonia")),
-NANH2: ("NaNH<sub>2</sub>", ("Sodium amide", "Sodamide", "NaNH2", "Amide")),
-EQV1: ("1 equiv.", ("1", "eq", "one")),
-HEAT: ("Heat", ("heat", "delta", "hot", "warm")),
-LIGHT: ("Light", ("hv", "light", "hnu")),
-KOCCH33: ("KOC(CH<sub>3</sub>)<sub>3</sub>", ("tert-butoxide", "KOC(CH3)3", "OC(CH3)3", "potassium tert-butoxide", "KOtBu"))
+H2: ("H<sub>2</sub>",("H2", "Hydrogen"), ("H2",)),
+PDC: ("Pd|C", ("Pd/C", "PdC", "Pd|C", "Pd C", "Palladium on carbon catalyst"), ("Pd/C",)),
+ETOH: ("EtOH", ("EtOH", "Ethanol", "Ethyl alcohol", "C2H5OH"), ("EtOH",)),
+HF: ("HF", ("HF", "Hydrogen fluoride", "Hydrofluoric acid"), ("HF",)),
+HBR: ("HBr", ("HBr", "Hydrogen bromide", "Hydrobromic acid"), ("HBr",)),
+HCL: ("HCl", ("HCl", "Hydrogen chloride", "Hydrochloric acid"), ("HCl",)),
+HI: ("HI", ("HI", "Hydrogen iodide", "Hydroiodic acid"), ("HI",)),
+CH2CL2: ("CH<sub>2</sub>Cl<sub>2</sub>", ("CH2Cl2", "Dichloromethane"), ("CH2Cl2",)),
+F2: ("F<sub>2</sub>", ("Fluorine", "F2"), ("F2",)),
+BR2: ("Br<sub>2</sub>", ("Bromine", "Br2"), ("Br2",)),
+CL2: ("Cl<sub>2</sub>", ("Chlorine", "Cl2"), ("Cl2",)),
+I2: ("I<sub>2</sub>", ("Iodine", "I2"), ("I2",)),
+ROOR: ("ROOR", ("ROOR", "tBuOOtBu", "Peroxide"), ("ROOR","Peroxide")),
+RCO3H: ("RCO<sub>3</sub>H",("mCPBA", "PhCO3H", "RCO3H"), ("mCPBA","PhCO3H","RCO3H")),
+H2SO4: ("H<sub>2</sub>SO<sub>4</sub>", ("H2SO4", "Sulfuric acid"), ("H2SO4",)),
+H2O: ("H<sub>2</sub>O", ("H2O", "Water", "HOH"), ("H2O",)),
+HGSO4: ("HgSO<sub>4</sub> accels.", ("HgSO4", "Hg2+", "Mercury sulfate"), ("HgSO4",)),
+BH3: ("BH<sub>3</sub>", ("BH3", "Borane"), ("BH3",)),
+THF: ("THF", ("THF", "Tetrahydrofuran"), ("THF",)),
+NAOH: ("NaOH", ("NaOH", "Sodium hydroxide", "Hydroxide", "OH-"), ("NaOH",)),
+H2O2: ("H<sub>2</sub>O<sub>2</sub>", ("H2O2", "Hydrogen peroxide"), ("H2O2",)),
+OSO4: ("OsO<sub>4</sub>", ("OsO4", "Osmium tetroxide", "Osmium oxide"), ("OsO4",)),
+NMO: ("NMO", ("NMO", "NMMO", "N-Methylmorpholine N-oxide"), ("NMO",)),
+ACETONE: ("Acetone", ("Acetone", "Propanone", "(CH3)2CO"), ("Acetone",)),
+O3: ("O<sub>3</sub>", ("Ozone", "O3"), ("O3",)),
+ME2S: ("Me<sub>2</sub>S", ("Dimethyl sulfide", "Methylthiomethane", "Me2S"), ("Me2S",)),
+ZN: ("Zn", ("Zn", "Zinc"), ("Zn",)),
+LINDLAR: ("cat. Lindlar", ("Lindlar",), ("Lindlar",)),
+NA: ("Na", ("Sodium", "Na"), ("Na",)),
+NH3: ("NH<sub>3 (L)</sub>", ("NH3", "Ammonia"), ("NH3",)),
+NANH2: ("NaNH<sub>2</sub>", ("Amide", "Sodium amide", "NaNH2"), ("NaNH2",)),
+EQV1: ("1 equiv.", ("1", "one"), ("1 equiv.",)),
+HEAT: ("Heat", ("heat", "delta", "hot"), ("Heat",)),
+LIGHT: ("Light", ("hv", "light", "hnu"), ("Light",)),
+KOCCH33: ("Tert-butoxide", ("Tert-butoxide", "OC(CH3)3", "OtBu"), ("Tert-butoxide",))
 }
 
 
@@ -594,7 +623,85 @@ if __name__ == "__main__":
 
 
 
+def reagentAutocompleteMake():
+    historicalValue = '''['H2', 'Hydrogen', 'Pd/C', 'Palladium/Carbon catalyst', 'EtOH', 'Ethanol', 'Ethyl alcohol', 'C2H5OH', 'HF', 'Hydrogen fluoride', 'Hydrofluoric acid', 'HBr', 'Hydrogen bromide', 'Hydrobromic acid', 'HCl', 'Hydrogen chloride', 'Hydrochloric acid', 'HI', 'Hydrogen iodide', 'Hydroiodic acid', 'CH2Cl2', 'Dichloromethane', 'Fluorine', 'F2', 'Bromine', 'Br2', 'Chlorine', 'Cl2', 'Iodine', 'I2', 'ROOR', 'tBuOOtBu', 'Peroxide', 'Tert-butyl peroxide', 'Di-tert-butyl peroxide', 'mCPBA', 'PhCO3H', 'RCO3H', 'H2SO4', 'Sulfuric acid', 'H2O', 'Water', 'HOH', 'H20', 'HgSO4', 'Hg2+', 'Mercury sulfate', 'BH3', 'Borane', 'THF', 'Tetrahydrofuran', 'NaOH', 'Sodium hydroxide', 'Hydroxide', 'OH-', 'H2O2', 'Hydrogen peroxide', 'OsO4', 'Osmium tetroxide', 'Osmium oxide', 'NMO', 'NMMO', 'N-Methylmorpholine N-oxide', 'Acetone', 'Propanone', '(CH3)2CO', 'Ozone', 'O3', 'Dimethyl sulfide', 'Methylthiomethane', 'Me2S', 'Zn', 'Zinc', 'Lindlar catalyst', 'cat. Lindlar', 'Sodium', 'Na', 'NH3', 'Ammonia', 'Sodium amide', 'Sodamide', 'NaNH2', 'Amide', '1 equivalent', 'One equivalent', 'heat', 'hv', 'light', 'hnu', 'tert-butoxide', 'KOtBu', 'Potassium tert-butoxide', 'KOC(CH3)3']''' 
+    #return historicalValue
+    
+    output = []
+    
+    for reagent in REAGENTS.itervalues():
+        for typable in reagent[2]:
+            output += [typable]
+    
+    return output
+    
+def reactionAutocompleteMake():
 
+    ##Make this True every now and then for brief periods of time.
+    recompute = True
+    filename = "reactionAutocomplete.txt"
+    
+    ##reads precomputed constant thing from a file
+    if not recompute:
+
+        historicalValue = '''['H2SO4 H2O HgSO4 ','H2 PdC EtOH ','HBr CH2Cl2 ','HF CH2Cl2 ','HI CH2Cl2 ','HCl CH2Cl2 ','Bromine CH2Cl2 1eq ','Fluorine CH2Cl2 1eq ','Iodine CH2Cl2 1eq ','Chlorine CH2Cl2 1eq ','Bromine CH2Cl2 ','Fluorine CH2Cl2 ','Iodine CH2Cl2 ','Chlorine CH2Cl2 ','HBr ROOR heat ','mCPBA CH2Cl2 ','H2SO4 EtOH HgSO4 ','H2SO4 HgSO4 ','H2SO4 H2O ','H2SO4 EtOH ','H2SO4 ','Bromine H2O ','Bromine EtOH ','Bromine ','Iodine H2O ','Iodine EtOH ','Iodine ','Fluorine H2O ','Fluorine EtOH ','Fluorine ','Chlorine H2O ','Chlorine EtOH ','Chlorine ','BH3 THF NaOH H2O2 ','BH3 THF ','NaOH H2O2 ','OsO4 NMO Acetone ','Ozone CH2Cl2 Dimethyl sulfide ','Sodium NH3 ','Lindlar H2 ','Sodium amide NH3 ','tert-butoxide ', 'KOtBu ', 'I2 CH2Cl2 1eq ','Cl2 CH2Cl2 1eq ','Br2 CH2Cl2 ','F2 CH2Cl2 ','I2 CH2Cl2 ','Cl2 CH2Cl2 ','Br2 H2O ','Br2 EtOH ','Br2 ','I2 H2O ','I2 EtOH ','I2 ','F2 H2O ','F2 EtOH ','F2 ','Cl2 H2O ','Cl2 EtOH ','Cl2 ']'''
+
+        f = open(filename, 'r')
+        output = f.read()
+        f.close()
+        
+        return output
+    
+    ###Try to run the below computation every now and then, thereby replacing the output to historicalValue.
+    if recompute:
+        verbose = False
+        listOfReactionsByReagent = []
+        
+        for reaction in REACTIONS:
+            if verbose:
+                print "reaction="+str(reaction)
+                print "listOfReactionsByReagent"+str(listOfReactionsByReagent)
+            reagentsToAdd = []
+            reagents = reaction[0] #e.g. reagents = ((HBR,), (ROOR,), (HEAT, LIGHT))
+            #We want all possible n-length reagent permutations, so that people can type in any order.
+            n = len(reagents)
+            for indices in [range(n)]: #itertools.permutations(range(n), n): # #e.g. indices = (0,1,2)
+                if verbose:
+                    print "indices="+str(indices)
+                    print "reagentsToAdd="+str(reagentsToAdd)
+                listInProgress = [""]     #is a list of strings
+                for index in indices:   #e.g. index=1
+                    if verbose:
+                        print "index="+str(index)
+                        print "listInProgress="+str(listInProgress)
+                    tempListInProgress = listInProgress
+                    listInProgress = []
+                    for item in tempListInProgress: #item is a string
+                        if verbose:
+                            print "item="+str(item)
+                        for reagent in reagents[index]: #e.g. reagent=LIGHT
+                            if verbose:
+                                print "reagent="+str(reagent)
+                            for typable in REAGENTS[reagent][2]: #e.g. REAGENTS[LIGHT][2] = ("Light",)
+                                if verbose:
+                                    print "typable="+str(typable)
+                                if item == "":
+                                    listInProgress += [typable]
+                                else:
+                                    listInProgress += [(item + ", " + typable)]
+                reagentsToAdd += listInProgress
+            listOfReactionsByReagent += reagentsToAdd
+            
+        
+        output =  str(listOfReactionsByReagent)
+        
+        #write it to a file
+        f = open(filename, 'w')
+        f.write(output)
+        f.close()
+        
+        #return it so the website doesn't break
+        return output
 
 
 

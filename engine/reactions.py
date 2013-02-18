@@ -12,7 +12,7 @@ def removeDuplicates(moleculeList):
         return [moleculeList]
     if len(moleculeList) == 0:
         return []
-    return removeDuplicatesAt(tautomerize(copy.deepcopy(moleculeList)), 0)
+    return reduceChirality(removeDuplicatesAt(tautomerize(copy.deepcopy(moleculeList)), 0))
 
 
 def removeDuplicatesAt(moleculeList, ind):
@@ -26,7 +26,50 @@ def removeDuplicatesAt(moleculeList, ind):
 
     return removeDuplicatesAt(moleculeList, ind+1)
 
-
+#Looks for two molecules that are the same, except at a single chiral center.
+#Merges those two molecules by eliminating the chiral center.
+#Assumes that molecules are all different.        
+#MODIFIES THE INPUT molList
+def reduceChirality(molList):
+    if len(molList) == 1:
+        return molList
+    for a, b in itertools.combinations(molList, 2):
+        same, compareDict = moleculeCompare(a, b, checkChiral=False)
+        #In order for a center to be eliminated:
+        #1) It has the same chirality across a and b, while every other center has opposite.
+        #2) It has opposite chirality across a and b, while every other center has the same.
+        matchingCenter = None
+        matchCount = 0
+        nonMatchingCenter = None
+        nonMatchCount = 0
+        if same:
+            #a and b are linked in the same way.
+            for Acenter in compareDict.keys():
+                Bcenter = compareDict[Acenter]
+                if hasattr(Acenter, "chiralA") and hasattr(Bcenter, "chiralA"):
+                    #Let's see if the chiralities are different.  We already know that the linkages
+                    #around Acenter and Bcenter are the same.
+                    Batoms1 = [compareDict[atom] for atom in Acenter.chiralCWlist(Acenter.chiralA)]
+                    Batoms2 = Bcenter.chiralCWlist(compareDict[Acenter.chiralA])
+                    #Are Batoms1 and Batoms2 equivalent up to a cycling?
+                    if Batoms1 == Batoms2 or shift(Batoms1, 1) == Batoms2 or\
+                        shift(Batoms1, 2) == Batoms2:
+                        matchingCenter = Acenter
+                        matchCount += 1
+                    else:
+                        nonMatchingCenter = Acenter
+                        nonMatchCount += 1
+            if matchCount == 1:
+                #Remove the one matching center's chirality.
+                molList.remove(b)
+                matchingCenter.eliminateChiral()
+                return reduceChirality(molList)
+            elif nonMatchCount == 1:
+                #Remove the one non-matching center's chirality.
+                molList.remove(b)
+                nonMatchingCenter.eliminateChiral()
+                return reduceChirality(molList)
+        return molList
 
 
 def react(molecules, findPlace, reactAtPlace):
@@ -1297,6 +1340,31 @@ if __name__ == '__main__':
     c55 = Atom("C")
     cycPentMol.addAtom(c55, c53, 1)
     c53.newChiralCenter(c52, (c55, None, c54))
+    
+    #Makes C-C>Cl
+    #     /   \
+    #   C<C   C>Br c51
+    #      \C/
+    c150 = Atom("C")
+    c151 = Atom("C")
+    c152 = Atom("C")
+    c153 = Atom("C")
+    c154 = Atom("C")
+    cycPentMol2 = Molecule(c150)
+    cycPentMol2.addAtom(c151, c150, 1)
+    cycPentMol2.addAtom(c152, c151, 1)
+    cycPentMol2.addAtom(c153, c152, 1)
+    cycPentMol2.addAtom(c154, c153, 1)
+    cycPentMol2.addBond(c154, c150, 1)
+    cl150 = Atom("Cl")
+    cycPentMol2.addAtom(cl150, c150, 1)
+    c150.newChiralCenter(c154, (c151, cl150, None))
+    br150 = Atom("Br")
+    cycPentMol2.addAtom(br150, c151, 1)
+    c151.newChiralCenter(c150, (c152, br150, None))
+    c155 = Atom("C")
+    cycPentMol2.addAtom(c155, c153, 1)
+    c153.newChiralCenter(c152, (c155, None, c154))
 
     #Makes C-C#C-C
     c60 = Atom("C")
@@ -1378,4 +1446,4 @@ if __name__ == '__main__':
     c91.newCTCenter(c90, c92, None)
 
     
-    print moleculeCompare(mol4, mol4alt)
+    print reduceChirality([cycPentMol, cycPentMol2])
